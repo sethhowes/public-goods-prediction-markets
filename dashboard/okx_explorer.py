@@ -8,18 +8,20 @@ os.chdir(os.getcwd()+'\\dashboard')
 from utils import urllib_request
 
 #Import config
-from config import OKLINK_API_KEY
+from config import OKLINK_API_KEY, OKX_DEX_ROUTER_ADDRESS
 
-def get_tx_hashes(nb_tx=400000, limit=150, address='0xc97b81b8a38b9146010df85f1ac714afe1554343'):
+def get_tx_hashes(nb_tx=400000, limit=150, address='0xc97b81b8a38b9146010df85f1ac714afe1554343', use_proxies = False):
     tx_hashes = []
     offset = 0
     while offset + limit <= nb_tx:
         url = f"https://www.oklink.com/api/explorer/v1/okexchain/addresses/{address}/transactions/condition?t=1677350101344&offset={offset}&address={address}&tokenAddress={address}&limit={limit}&nonzeroValue=false&type=2"
-        hashes = urllib_request(url, {"x-apikey":  "LWIzMWUtNDU0Ny05Mjk5LWI2ZDA3Yjc2MzFhYmEyYzkwM2NjfDI3ODg0NTg0Njg0MDU2NTQ="})
+        hashes = urllib_request(url, {"x-apikey":  "LWIzMWUtNDU0Ny05Mjk5LWI2ZDA3Yjc2MzFhYmEyYzkwM2NjfDI3ODg0NTg0Njg0MDU2NTQ="}, use_proxies=use_proxies)
         hits = json.loads(hashes)['data']['hits']
         for tx in hits:
             tx_hashes.append('0x' + tx['hash'])
         offset += limit
+
+        print(len(tx_hashes))
     return tx_hashes
 
 #Get tx details -
@@ -72,4 +74,5 @@ def get_transaction_details_wrapper(transaction_hashes):
 
     return data
 
-#Get transaction for contract
+#Get all tx hashes for a contract
+tx_hashes = get_tx_hashes(nb_tx=400000, limit=150, address=OKX_DEX_ROUTER_ADDRESS)
