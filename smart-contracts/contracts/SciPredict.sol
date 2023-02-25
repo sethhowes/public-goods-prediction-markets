@@ -2,10 +2,31 @@
 pragma solidity ^0.8.9;
 
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
+import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
+import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
 
-contract SciPredict {
-    //Prediction instance struct
-    
+contract SciPredict is ChainlinkClient, ConfirmedOwner {
+
+    using Chainlink for Chainlink.Request;
+
+    constructor() ConfirmedOwner(msg.sender) {
+        setChainlinkToken(0x326C977E6efc84E512bB9C30f76E30c160eD06FB);
+        setChainlinkOracle(0xCC79157eb46F5624204f47AB42b3906cAA40eaB7);
+        jobId = "c1c5e92880894eb6b27d3cae19670aa3";
+        fee = (1 * LINK_DIVISIBILITY) / 10; // 0,1 * 10**18 (Varies by network and job)
+    }
+
+
+    bytes32 private jobId;
+    uint256 private fee;
+    uint private oraclePredictionId;
+
+    modifier onlyCreator(uint predictionId) {
+        require(msg.sender == predictionMarkets[predictionId].owner);
+        _;
+    }
+
+    //Prediction instance struct 
     struct predictionInstance {
         
         // Market creator input
@@ -18,15 +39,16 @@ contract SciPredict {
         string incentiveCurve; // expontential, linear, or none
         bool permissioned;  // permission flag 
         uint deadline; // timestamp to end market in seconds since the epoch
-        string category; // tags for market
-        // Participants
-
+        string[2] categoryApiEndpoint; // tags for market
+        //string apiEndpoint; // api for getting outcome
+        
         // Internal parameters
         uint id; // id of struct
         address owner; // market creator
 
         // Outcome variables
-        uint currentPrediction; // current prediction value
+        //uint currentPrediction; // current prediction value
+        uint outcome; // contains outcome upon completion
         uint[3] committedAmountBucket; // total commmitted amount per bucket 
     }
 
@@ -55,6 +77,33 @@ contract SciPredict {
     // 1687308468
     // "test"
 
+    function requestOutcomeData(string memory apiEndpoint) public returns (bytes32 requestId) {
+        Chainlink.Request memory req = buildChainlinkRequest(
+            jobId,
+            address(this),
+            this.fulfill.selector
+        );
+
+        req.add(
+            "get",
+            apiEndpoint
+        );
+
+        req.add(
+            "path",
+            "completed" // TODO change path depending upon api endpoint used
+        );
+        
+        return sendChainlinkRequest(req, fee);
+    }
+    
+    // Callback function upon fulfillment of request
+    function fulfill (
+        bytes32 _requestId,
+        uint _outcome
+    ) public recordChainlinkFulfillment(_requestId) {
+        predictionMarkets[oraclePredictionId].outcome = _outcome;
+    }
 
     // // Open a preliminary prediction
     function createPrediction(       
@@ -67,7 +116,8 @@ contract SciPredict {
         string memory incentiveCurve, // expontential, linear, or none
         bool permissioned,  // permission flag 
         uint deadline, // timestamp to end market in seconds since the epoch
-        string memory category // tags for market
+        string memory category, // tags for market
+        string memory apiEndpoint // api endpoint for oracle
         ) 
         payable public {
         
@@ -102,11 +152,13 @@ contract SciPredict {
             incentiveCurve, // expontential, linear, or none
             permissioned,  // permission flag 
             deadline, // timestamp to end market in seconds since the epoch
-            category, // tags for market
+            [category, apiEndpoint], // tags for market
+            //apiEndpoint, // api endpoint for outcome
             predictionCounter, // id of struct
             msg.sender, // owner
-            0, // current prediction value
-            committedAmount // total commmitted amount per bucket TODO: Make dynamic 0 array with length predictionBucket
+            //0, // current prediction value
+            0, // sets outcome to placeholder of 0
+            committedAmount // total commmitted amount per bucket
         );
 
         predictionCounter += 1;
@@ -155,15 +207,13 @@ contract SciPredict {
     function placeBet(uint predictionId, uint bucketIndex) public payable {
         // Whitelist check
         require(isWhitelisted(), "User not whitelisted");
-        require(block.timestamp < predictionMarkets[predictionId].deadline, "The deadline has not yet passed");
-        //Check transferred amounts - only native ETH
+        require(block.timestamp < predictionMarkets[predictionId].deadline, "The prediction has ended");
+        // Check transferred amounts - only native ETH
         require(msg.value > 0, "Amounts needs to surpass 0");
-        
+        // Add bet value to specified bucket
         predictionMarkets[predictionId].committedAmountBucket[bucketIndex] += msg.value;
-        
         // Update participant's bet
         betsMade[predictionId][msg.sender][bucketIndex] += msg.value;
-
     }
 
     function getCurrentPrediction(uint predictionId) public view returns(uint){
@@ -184,12 +234,29 @@ contract SciPredict {
         return weightedValue/totalCommittedFunds;
     }
 
+    // Gets the index for the correct outcome
+    function getCorrectBucketIndex(uint predictionId) internal returns(uint) {
+        uint outcome = predictionMarkets[predictionId].outcome;
+        for (uint i = 0; i < predictionMarkets[predictionId].predictionBucket.length; i++) {
+            if (predictionMarkets[predictionId].predictionBucket[i] == outcome) {
+                return i;
+            }
+        }
+    }
+
     // Allow a user to withdraw funds if they placed a correct bet
-    function claimFunds(uint predictionId, uint correctBucketIndex) public payable {
+    function claimFunds(uint predictionId) public payable {
+        // Funds must be claimed after prediction deadline
         require(block.timestamp >= predictionMarkets[predictionId].deadline, "The deadline has not yet passed");
+        // Get index of bucket with correct outcome
+        uint correctBucketIndex = getCorrectBucketIndex(predictionId);
+        // Get bet placed by user on correct outcome
         uint correctOutcomeBet = betsMade[predictionId][msg.sender][correctBucketIndex];
+        // Bet must be greater than 0
         require(correctOutcomeBet != 0, "You did not place a correct bet");
+        // Get total value of correct bets for bucket
         uint totalCorrectBet = predictionMarkets[predictionId].committedAmountBucket[correctBucketIndex];
+        // Get 
         uint[3] memory buckets = predictionMarkets[predictionId].committedAmountBucket;
         uint totalCommittedAmount = 0;
         for (uint i = 0; i < buckets.length; i++) {
@@ -199,9 +266,18 @@ contract SciPredict {
         payable(msg.sender).transfer(awardAmount);
     }
 
-    // // Close a market
-    // function closeMarket() {
+    // Close a market
+    function closeMarket(uint predictionId) public onlyCreator(predictionId) {
+        require(block.timestamp >= predictionMarkets[predictionId].deadline, "Deadline has not yet passed");
+        // Call the API endpoint to record outcome for prediction
+        requestOutcomeData(predictionMarkets[predictionId].categoryApiEndpoint[1]);
+        // Remove finished prediction from live predictions
+        updateLivePredictionIds();
+    }
 
-    // }
+    // Create new category
+    function createNewBuckets(uint[] memory newBuckets, uint predictionId) public onlyCreator(predictionId) {
+        predictionMarkets[predictionId].predictionBucket = newBuckets;
+    }
 
 }
