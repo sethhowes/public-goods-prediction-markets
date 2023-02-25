@@ -40,5 +40,24 @@ def get_transaction_details(transaction_hash, api_key = OKLINK_API_KEY, use_prox
 
     return tx_data
 
+#Get transaction details for list of tx hashes
+def get_transaction_details_wrapper(transaction_hashes):
+    """
+    Get transaction details for list of tx hashes
+    @params:
+        transaction_hashes - Required  : list of transaction hashes (list)
+    """
+    #Init empty datafarme
+    data = pd.DataFrame()
+
+    #Loop through all hashs
+    for tx_hash in transaction_hashes:
+        #Get tx data
+        tx_data = get_transaction_details(tx_hash)
+
+        #Append data
+        data = data.append(tx_data)
+
+    return data
 
 #Get transaction for contract
