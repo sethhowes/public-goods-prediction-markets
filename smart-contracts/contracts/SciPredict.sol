@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import "https://github.com/Uniswap/solidity-lib/blob/master/contracts/libraries/TransferHelper.sol";
+import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 
 contract SciPredict {
     //Prediction instance struct
+    
     struct predictionInstance {
+        
         // Market creator input
         string predictionQuestion; // question 
         string unit; // unit 
@@ -17,17 +19,23 @@ contract SciPredict {
         bool permissioned;  // permission flag 
         uint deadline; // timestamp to end market in seconds since the epoch
         string category; // tags for market
+        // Participants
 
         // Internal parameters
         uint id; // id of struct
+        address owner; // market creator
 
         // Outcome variables
         uint currentPrediction; // current prediction value
-        uint256[3] committedAmountBucket; // total commmitted amount per bucket 
+        uint[3] committedAmountBucket; // total commmitted amount per bucket 
     }
 
-    // Prediction Mapping
+    // Prediction Mapping 
+    // Map prediction id to metadata
     mapping(uint => predictionInstance) public predictionMarkets;
+    // map prediction id to bets
+    mapping(uint => mapping(address => mapping(uint => uint))) betsMade; // records participant bets
+
 
     // Number predictions
     uint predictionCounter = 0;
@@ -80,8 +88,8 @@ contract SciPredict {
             revert("Reward token specification unclear.");
         }
 
-        // TODO MAKE DYNAMIC
-        uint256[3] memory committedAmount = [uint256(0),uint256(0),uint256(0)]; // total commmitted amount per bucket
+        // Initialise dynamic array with zeros
+        uint[3] memory committedAmount;
 
         // Init market
         predictionMarkets[predictionCounter] = predictionInstance(
@@ -96,9 +104,11 @@ contract SciPredict {
             deadline, // timestamp to end market in seconds since the epoch
             category, // tags for market
             predictionCounter, // id of struct
+            msg.sender, // owner
             0, // current prediction value
             committedAmount // total commmitted amount per bucket TODO: Make dynamic 0 array with length predictionBucket
         );
+
         predictionCounter += 1;
     }
 
@@ -138,19 +148,22 @@ contract SciPredict {
 
 
    // Whitelist check - TO IMPLEMENT CREDENTIALS CURRENTLY DUMMY
-   function isWhitelisted() public returns(bool) {
+   function isWhitelisted() public view returns(bool) {
       return msg.sender == msg.sender;
    }
     // // Place a bet for a whitelisted user
     function placeBet(uint predictionId, uint bucketIndex) public payable {
         // Whitelist check
         require(isWhitelisted(), "User not whitelisted");
-
+        require(block.timestamp < predictionMarkets[predictionId].deadline, "The deadline has not yet passed");
         //Check transferred amounts - only native ETH
         require(msg.value > 0, "Amounts needs to surpass 0");
         
         predictionMarkets[predictionId].committedAmountBucket[bucketIndex] += msg.value;
         
+        // Update participant's bet
+        betsMade[predictionId][msg.sender][bucketIndex] += msg.value;
+
     }
 
     function getCurrentPrediction(uint predictionId) public view returns(uint){
@@ -171,10 +184,20 @@ contract SciPredict {
         return weightedValue/totalCommittedFunds;
     }
 
-    // // Distribute market funds to 
-    // function distributeFunds() internal {
-
-    // }
+    // Allow a user to withdraw funds if they placed a correct bet
+    function claimFunds(uint predictionId, uint correctBucketIndex) public payable {
+        require(block.timestamp >= predictionMarkets[predictionId].deadline, "The deadline has not yet passed");
+        uint correctOutcomeBet = betsMade[predictionId][msg.sender][correctBucketIndex];
+        require(correctOutcomeBet != 0, "You did not place a correct bet");
+        uint totalCorrectBet = predictionMarkets[predictionId].committedAmountBucket[correctBucketIndex];
+        uint[3] memory buckets = predictionMarkets[predictionId].committedAmountBucket;
+        uint totalCommittedAmount = 0;
+        for (uint i = 0; i < buckets.length; i++) {
+            totalCommittedAmount += buckets[i];
+        }
+        uint awardAmount = correctOutcomeBet / totalCorrectBet * totalCommittedAmount;
+        payable(msg.sender).transfer(awardAmount);
+    }
 
     // // Close a market
     // function closeMarket() {
