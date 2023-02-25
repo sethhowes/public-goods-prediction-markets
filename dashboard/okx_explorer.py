@@ -10,6 +10,11 @@ from utils import urllib_request
 #Import config
 from config import OKLINK_API_KEY
 
+def getTxHashes(limit=20000):
+    url = "https://www.oklink.com/api/explorer/v1/okexchain/addresses/0xc97b81b8a38b9146010df85f1ac714afe1554343/transactions/condition?t=1677350101344&offset=0&address=0xc97b81b8a38b9146010df85f1ac714afe1554343&tokenAddress=0xc97b81b8a38b9146010df85f1ac714afe1554343&limit={}&nonzeroValue=false&type=2".format(limit)
+    hashes = urllib_request(url, {"x-apikey": "LWIzMWUtNDU0Ny05Mjk5LWI2ZDA3Yjc2MzFhYmEyYzkwM2NjfDI3ODg0NTg0Njg0MDU2NTQ="})
+    print(hashes)
+
 #Get tx details -
 url = "https://www.oklink.com/api/explorer/v1/okexchain/transactions/0xF7823E8E07D214CDB1A9C5FCC32161798663DCEB6DD90512829D30E9DD12031A?t=1677347357302"
 
