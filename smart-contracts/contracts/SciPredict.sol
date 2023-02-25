@@ -6,6 +6,7 @@ import "https://github.com/Uniswap/solidity-lib/blob/master/contracts/libraries/
 contract SciPredict {
     //Prediction instance struct
     struct predictionInstance {
+        
         // Market creator input
         string predictionQuestion; // question 
         string unit; // unit 
@@ -18,12 +19,17 @@ contract SciPredict {
         uint deadline; // timestamp to end market in seconds since the epoch
         string category; // tags for market
 
+        // Participants
+        mapping(address => mapping(uint => uint)) betsMade; // records participant bets
+        address[] participants; // records list of participants
+
         // Internal parameters
         uint id; // id of struct
+        address owner; // market creator
 
         // Outcome variables
         uint currentPrediction; // current prediction value
-        uint256[3] committedAmountBucket; // total commmitted amount per bucket 
+        uint[] committedAmountBucket; // total commmitted amount per bucket 
     }
 
     // Prediction Mapping
@@ -80,8 +86,12 @@ contract SciPredict {
             revert("Reward token specification unclear.");
         }
 
-        // TODO MAKE DYNAMIC
-        uint256[3] memory committedAmount = [uint256(0),uint256(0),uint256(0)]; // total commmitted amount per bucket
+        // Initialise dynamic array with zeros
+        uint[] memory committedAmount;
+        for (i = 0; i++; i =< predictionBucket.length) {
+            committedAmount.push(0);
+        }
+
 
         // Init market
         predictionMarkets[predictionCounter] = predictionInstance(
@@ -99,6 +109,7 @@ contract SciPredict {
             0, // current prediction value
             committedAmount // total commmitted amount per bucket TODO: Make dynamic 0 array with length predictionBucket
         );
+
         predictionCounter += 1;
     }
 
@@ -151,6 +162,9 @@ contract SciPredict {
         
         predictionMarkets[predictionId].committedAmountBucket[bucketIndex] += msg.value;
         
+        // Update participant's bet
+        predictionMarkets[predictionId][msg.sender][bucketIndex] += msg.value;
+
     }
 
     function getCurrentPrediction(uint predictionId) public view returns(uint){
@@ -171,10 +185,14 @@ contract SciPredict {
         return weightedValue/totalCommittedFunds;
     }
 
-    // // Distribute market funds to 
-    // function distributeFunds() internal {
-
-    // }
+    // Allow a user to withdraw funds if they placed a correct bet
+    function withdrawFunds(uint predictionId, uint correctBucketIndex) payable {
+        uint correctOutcomeBet = predictionMarkets[predictionId][msg.owner][correctBucketIndex]
+        require(correctOutcomeBet != 0, "You did not place a correct bet")
+        uint totalCorrectBet = predictionMarkets[predictionId].committedAmountBucket[correctBucketIndex];
+        uint awardAmount = correctOutcomeBet / totalCorrectBet * committedAmount;
+        payable(msg.sender).transfer(awardAmount);
+    }
 
     // // Close a market
     // function closeMarket() {
