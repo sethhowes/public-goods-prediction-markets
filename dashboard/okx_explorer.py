@@ -97,9 +97,6 @@ def get_transaction_details_wrapper(transaction_hashes, temp_save = True, use_pr
 tx_hashes = get_tx_hashes(nb_tx=400000, limit=150, address=OKX_DEX_ROUTER_ADDRESS)
 
 #Load hashes
-tx_hashes = pd.read_pickle(r'C:\Users\lucas\Downloads\tx_hashes_all.pkl')
-len(tx_hashes)
-tx_hash = '0xB22336F36CE8C5751189489CF0E614530CA5A7AAD6AA9AF0DFABE29F2751E736'
-os.chdir(r'C:\Users\lucas\OneDrive\Hackathons\ETHDenver 2023\public-goods-prediction-markets\dashboard')
+# tx_hash = '0xB22336F36CE8C5751189489CF0E614530CA5A7AAD6AA9AF0DFABE29F2751E736'
 
-get_transaction_details_wrapper(tx_hashes, temp_save = True)
+# get_transaction_details_wrapper(tx_hashes, temp_save = True)

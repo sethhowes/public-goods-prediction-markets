@@ -30,7 +30,6 @@ def start_selenium_driver(chrome_driver_path = CHROME_DRIVER_PATH):
 
     return driver   
 
-
 #Generates password
 def generate_password(password_length=10):
     """
@@ -95,4 +94,7 @@ def get_new_rolling_proxies_key(sign_up_url = PROXIES_SIGN_UP_URL):
     api_key = driver.find_element("class name",'col-lg-12').text
     api_key = api_key.split('\n')[0].split(': ')[1]
 
+    #Close driver
+    driver.quit()
+    
     return api_key
