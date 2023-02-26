@@ -6,9 +6,10 @@ import json
 
 os.chdir(os.getcwd()+'\\dashboard')
 from utils import urllib_request
+from rolling_proxies import get_new_rolling_proxies_key
 
 #Import config
-from config import OKLINK_API_KEY, OKX_DEX_ROUTER_ADDRESS
+from config import OKLINK_API_KEY, OKX_DEX_ROUTER_ADDRESS, PROXIES
 
 def get_tx_hashes(nb_tx=400000, limit=150, address='0xc97b81b8a38b9146010df85f1ac714afe1554343', use_proxies = False):
     tx_hashes = []
@@ -25,7 +26,7 @@ def get_tx_hashes(nb_tx=400000, limit=150, address='0xc97b81b8a38b9146010df85f1a
     return tx_hashes
 
 #Get transaction details from Oklink
-def get_transaction_details(transaction_hash, api_key = OKLINK_API_KEY, use_proxies = False):
+def get_transaction_details(transaction_hash, api_key = OKLINK_API_KEY, proxies = PROXIES, use_proxies = False):
     """
     Get transaction details from Oklink
     @params:
@@ -38,7 +39,7 @@ def get_transaction_details(transaction_hash, api_key = OKLINK_API_KEY, use_prox
     additional_headers = {"x-apikey": api_key}
     
     #Send request
-    tx_data = urllib_request(url, additional_headers, use_proxies = use_proxies)
+    tx_data = urllib_request(url, additional_headers, proxies=proxies, use_proxies = use_proxies)
     
     #Unwrap byte object
     tx_data = json.loads(tx_data)
@@ -51,7 +52,7 @@ def get_transaction_details(transaction_hash, api_key = OKLINK_API_KEY, use_prox
     return tx_data
 
 #Get transaction details for list of tx hashes
-def get_transaction_details_wrapper(transaction_hashes, temp_save = True):
+def get_transaction_details_wrapper(transaction_hashes, temp_save = True, use_proxies=True):
     """
     Get transaction details for list of tx hashes
     @params:
@@ -60,10 +61,25 @@ def get_transaction_details_wrapper(transaction_hashes, temp_save = True):
     #Init empty datafarme
     data = pd.DataFrame()
 
+    #Get proxy api key
+    if use_proxies:
+        proxies_api_key = get_new_rolling_proxies_key()
+        proxies = {'url': f"http://api.proxiesapi.com/?auth_key={proxies_api_key}&url="}
+
     #Loop through all hashs
     for tx_hash in transaction_hashes:
         #Get tx data
-        tx_data = get_transaction_details(tx_hash)
+        while True:
+            try:
+                tx_data = get_transaction_details(tx_hash, proxies = proxies, use_proxies = use_proxies)
+                break
+            except:
+                time.sleep(2)
+
+                #Refresh proxy api key
+                if use_proxies:
+                    proxies_api_key = get_new_rolling_proxies_key()
+                    proxies = {'url': f"http://api.proxiesapi.com/?auth_key={proxies_api_key}&url="}
 
         #Append data
         data = data.append(tx_data)
@@ -75,7 +91,6 @@ def get_transaction_details_wrapper(transaction_hashes, temp_save = True):
             print('Saving dataframe')
             data.to_csv('temp_save_dex_data.csv')
 
-
     return data
 
 #Get all tx hashes for a contract
@@ -84,6 +99,7 @@ tx_hashes = get_tx_hashes(nb_tx=400000, limit=150, address=OKX_DEX_ROUTER_ADDRES
 #Load hashes
 tx_hashes = pd.read_pickle(r'C:\Users\lucas\Downloads\tx_hashes_all.pkl')
 len(tx_hashes)
+tx_hash = '0xB22336F36CE8C5751189489CF0E614530CA5A7AAD6AA9AF0DFABE29F2751E736'
 os.chdir(r'C:\Users\lucas\OneDrive\Hackathons\ETHDenver 2023\public-goods-prediction-markets\dashboard')
 
 get_transaction_details_wrapper(tx_hashes, temp_save = True)
