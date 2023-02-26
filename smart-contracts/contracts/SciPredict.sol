@@ -4,9 +4,11 @@ pragma solidity ^0.8.9;
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract SciPredict is ChainlinkClient, ConfirmedOwner {
 
+    using SafeMath for uint;
     using Chainlink for Chainlink.Request;
 
     constructor() ConfirmedOwner(msg.sender) {
@@ -56,7 +58,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     // Map prediction id to metadata
     mapping(uint => predictionInstance) public predictionMarkets;
     // map prediction id to bets
-    mapping(uint => mapping(address => mapping(uint => uint))) betsMade; // records participant bets
+    mapping(uint => mapping(address => mapping(uint => uint))) betsMade;
 
 
     // Number predictions
@@ -210,10 +212,19 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         require(block.timestamp < predictionMarkets[predictionId].deadline, "The prediction has ended");
         // Check transferred amounts - only native ETH
         require(msg.value > 0, "Amounts needs to surpass 0");
-        // Add bet value to specified bucket
+        uint totalCommitted;
+        for (uint i = 0; i < predictionMarkets[predictionId].committedAmountBucket.length; i++) {
+            // Checks if bucket index is different to the selected bucket
+            if (i != bucketIndex) {
+                totalCommitted += predictionMarkets[predictionId].committedAmountBucket[i];
+            }
+        }
+        uint selectedBucketCommitted = predictionMarkets[predictionId].committedAmountBucket[bucketIndex];
+        uint scaledBet = (msg.value * totalCommitted).div(selectedBucketCommitted);
+        // Adds scaled bet to user
+        betsMade[predictionId][msg.sender][bucketIndex] += scaledBet;
+        // Updates amount committed to this bucket
         predictionMarkets[predictionId].committedAmountBucket[bucketIndex] += msg.value;
-        // Update participant's bet
-        betsMade[predictionId][msg.sender][bucketIndex] += msg.value;
     }
 
     function getCurrentPrediction(uint predictionId) public view returns(uint){
