@@ -1,0 +1,4 @@
+# ignore ALL files in ANY directory named temp
+_pycache_/
+
+*.csv

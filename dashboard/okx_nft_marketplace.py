@@ -39,7 +39,7 @@ def get_nft_transactions(cursor = '', use_proxies = False):
     return {'data': nft_data, 'next_cursor': next_cursor, 'next_flag': next_flag}
 
 #Get all nft transaction on the OKX marketplace
-def get_all_nft_transactions(max_length_dataframe = 100, temp_save = True):
+def get_all_nft_transactions(max_length_dataframe = '', temp_save = True):
     """
     Get all nft transaction on the OKX marketplace
     @params:

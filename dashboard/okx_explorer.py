@@ -24,10 +24,6 @@ def get_tx_hashes(nb_tx=400000, limit=150, address='0xc97b81b8a38b9146010df85f1a
         print(len(tx_hashes))
     return tx_hashes
 
-#Get tx details -
-url = "https://www.oklink.com/api/explorer/v1/okexchain/transactions/0xF7823E8E07D214CDB1A9C5FCC32161798663DCEB6DD90512829D30E9DD12031A?t=1677347357302"
-
-transaction_hash = '0xF7823E8E07D214CDB1A9C5FCC32161798663DCEB6DD90512829D30E9DD12031A'
 #Get transaction details from Oklink
 def get_transaction_details(transaction_hash, api_key = OKLINK_API_KEY, use_proxies = False):
     """
@@ -55,7 +51,7 @@ def get_transaction_details(transaction_hash, api_key = OKLINK_API_KEY, use_prox
     return tx_data
 
 #Get transaction details for list of tx hashes
-def get_transaction_details_wrapper(transaction_hashes):
+def get_transaction_details_wrapper(transaction_hashes, temp_save = True):
     """
     Get transaction details for list of tx hashes
     @params:
@@ -72,7 +68,22 @@ def get_transaction_details_wrapper(transaction_hashes):
         #Append data
         data = data.append(tx_data)
 
+        print(f"{len(data)} from {len(transaction_hashes)}")
+
+        #Temp save
+        if temp_save and len(data) % 500 == 0:
+            print('Saving dataframe')
+            data.to_csv('temp_save_dex_data.csv')
+
+
     return data
 
 #Get all tx hashes for a contract
 tx_hashes = get_tx_hashes(nb_tx=400000, limit=150, address=OKX_DEX_ROUTER_ADDRESS)
+
+#Load hashes
+tx_hashes = pd.read_pickle(r'C:\Users\lucas\Downloads\tx_hashes_all.pkl')
+len(tx_hashes)
+os.chdir(r'C:\Users\lucas\OneDrive\Hackathons\ETHDenver 2023\public-goods-prediction-markets\dashboard')
+
+get_transaction_details_wrapper(tx_hashes, temp_save = True)
