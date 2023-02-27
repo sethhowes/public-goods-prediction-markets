@@ -34,7 +34,6 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         // Market creator input
         string predictionQuestion; // question 
         string unit; // unit 
-        uint unitIncrement; // increment for adding prediction bucket - 1 / unitIncrement so 10 would be 0.1
         uint[] predictionBucket; // buckets for prediction
         uint rewardAmount; // reward amount - to be transferred from
         address rewardToken; // reward token address - if null address then native ETH is issued
@@ -51,7 +50,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         // Outcome variables
         //uint currentPrediction; // current prediction value
         uint outcome; // contains outcome upon completion
-        uint[3] committedAmountBucket; // total commmitted amount per bucket 
+        uint[] committedAmountBucket; // total commmitted amount per bucket 
     }
 
     // Prediction Mapping 
@@ -99,7 +98,6 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     function createPrediction(       
         string memory predictionQuestion, // question 
         string memory unit, // unit 
-        uint unitIncrement, // increment for adding prediction bucket
         uint[] memory predictionBucket, // buckets for prediction
         uint rewardAmount, // reward amount - to be transferred from
         address rewardToken, // reward token address - if null address then native ETH is issued
@@ -107,10 +105,16 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         bool permissioned,  // permission flag 
         uint deadline, // timestamp to end market in seconds since the epoch
         string memory category, // tags for market
-        string memory apiEndpoint // api endpoint for oracle
+        string memory apiEndpoint, // api endpoint for oracle
+        uint[] memory committedAmount
         ) 
         payable public {
         
+        // Check if each member of the committed amount bucket array is zero
+        for (uint i = 0; i < committedAmount.length; i++) {
+            require(committedAmount[i] == 0, "Each member of the array must be zero");
+        }
+
         //Calculate rewards and check if paid
         // Native ETH case
         if (msg.value != 0 && rewardToken == nullAddress){
@@ -128,14 +132,10 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
             revert("Reward token specification unclear.");
         }
 
-        // Initialise dynamic array with zeros
-        uint[3] memory committedAmount;
-
         // Init market
         predictionMarkets[predictionCounter] = predictionInstance(
             predictionQuestion, // question 
             unit, // unit 
-            unitIncrement, // increment for adding prediction bucket
             predictionBucket, // buckets for prediction
             rewardAmount, // reward amount - to be transferred from
             rewardToken, // reward token address - if null address then native ETH is issued
@@ -254,7 +254,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         // Get total value of correct bets for bucket
         uint totalCorrectBet = predictionMarkets[predictionId].committedAmountBucket[correctBucketIndex];
         // Get 
-        uint[3] memory buckets = predictionMarkets[predictionId].committedAmountBucket;
+        uint[] memory buckets = predictionMarkets[predictionId].committedAmountBucket;
         uint totalCommittedAmount = 0;
         for (uint i = 0; i < buckets.length; i++) {
             totalCommittedAmount += buckets[i];
