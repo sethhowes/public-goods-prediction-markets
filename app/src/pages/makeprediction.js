@@ -20,6 +20,7 @@ import {createPrediction } from "util/db";
 import { Button } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import router from "next/router";
+import {useAuth} from "util/auth";
 
 const useStyles = makeStyles((theme) => ({
   gradientText: {
@@ -32,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 function DashboardPage(props) {
   const [formAlert, setFormAlert] = useState(null);
-
+  const auth = useAuth()
   const classes = useStyles();
   const [predictionTitle, setPredictionTitle] = useState('Prediction')
   const [predictionDescription, setPredictionDescription] = useState('Description 1')
@@ -66,7 +67,8 @@ function DashboardPage(props) {
       predictionPermissioned,
       predictionEndDate,
       predictionCategory,
-      predictionApiEndpoint}) 
+      predictionApiEndpoint,
+      user: auth.user.uid}) 
 
       handleFormAlert({
         type: "success",

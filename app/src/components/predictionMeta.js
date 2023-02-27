@@ -16,8 +16,12 @@ function predictionMeta(props) {
   const [values, setValues] = useState([]); // <-- state for storing entered values
   const [description, setDescription] = useState([]); // 
   const [name, setName] = useState([]); // 
-  const [selectedEndDate, setSelectedEndDate] = useState(null);
-
+  const setPredictionRewardAmount= props.setPredictionRewardAmount
+  const setPredictionTokenAddress= props.setPredictionTokenAddress
+  const setPredictionRewardCurve= props.setPredictionRewardCurve
+  const setPredictionPermissioned= props.setPredictionPermissioned
+  const setPredictionEndDate= props.setPredictionEndDate
+  const setPredictionApiEndpoint= props.setPredictionApiEndpoint
 
   const { handleSubmit, register, errors, reset } = useForm();
 
@@ -29,9 +33,6 @@ function predictionMeta(props) {
   };
 
 
-  const handleEndDateChange = (date) => {
-    setSelectedEndDate(date);
-  };
 
  
 
@@ -56,7 +57,7 @@ function predictionMeta(props) {
     name="date"
     disableFuture={true}
     value={selectedEndDate}
-    onChange={handleEndDateChange}
+    onChange={e => setPredictionEndDate(e.target.value)}
     inputRef={register({
       required: "Please select a date",
     })}
@@ -67,7 +68,8 @@ function predictionMeta(props) {
 
   <TextField
               type="text"
-              label="Committed Funds"
+              label="Reward Amount"
+              onChange={e => setPredictionRewardAmount(e.target.value)}
               name="value"
               id="value"
             />
@@ -77,7 +79,12 @@ function predictionMeta(props) {
     {/* Permissioned Checkmark */}
     {/* Category API End Point */}
     {/* API End Point */}
-
+   {/*  setPredictionRewardAmount= {setPredictionRewardAmount}
+          setPredictionTokenAddress= {setPredictionTokenAddress}
+          setPredictionRewardCurve= {setPredictionRewardCurve}
+          setPredictionPermissioned= {setPredictionPermissioned}
+          setPredictionEndDate= {setPredictionEndDate}
+          setPredictionApiEndpoint= {setPredictionApiEndpoint} */}
 
 
           <Grid item={true} xs={12}>
