@@ -31,7 +31,7 @@ def get_color_name(rgb):
             closest_color = color
     return closest_color
 
-nft_data = pd.read_csv('temp_save_nft_data.csv', low_memory=False).iloc[:100]
+nft_data = pd.read_csv('temp_save_nft_data.csv', low_memory=False)
 nft_data = nft_data.drop_duplicates(subset=nft_data.columns.difference(['usdPrice', 'Unnamed: 0']))
 
 
