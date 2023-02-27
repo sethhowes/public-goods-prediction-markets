@@ -41,7 +41,7 @@ function DashboardPage(props) {
   const [predictionIncrement, setPredictionIncrement] = useState(1)
   const [predictionBuckets, setPredictionBuckets] = useState(['Outcome 1', 'Outcome 2'])
   const [predictionRewardAmount, setPredictionRewardAmount] = useState(1)
-  const [predictionEndDate, setPredictionEndDate] = useState('End Date')
+  const [predictionEndDate, setPredictionEndDate] = useState()
   const [predictionCategory, setPredictionCategory] = useState('finance')
   const [predictionApiEndpoint, setPredictionApiEndpoint] = useState('API Endpoint')
   const [predictionRewardCurve, setPredictionRewardCurve] = useState('Reward Curve')
@@ -161,6 +161,8 @@ function DashboardPage(props) {
           setPredictionPermissioned= {setPredictionPermissioned}
           setPredictionEndDate= {setPredictionEndDate}
           setPredictionApiEndpoint= {setPredictionApiEndpoint}
+          predictionEndDate = {predictionEndDate}
+
         />
                 <Button disabled={!predictionEndDate}
         onClick={handleSubmit} component="a" variant="contained" sx={{

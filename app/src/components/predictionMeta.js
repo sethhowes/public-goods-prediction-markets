@@ -22,6 +22,7 @@ function predictionMeta(props) {
   const setPredictionPermissioned= props.setPredictionPermissioned
   const setPredictionEndDate= props.setPredictionEndDate
   const setPredictionApiEndpoint= props.setPredictionApiEndpoint
+  const [selectedEndDate, setSelectedEndDate] = useState(null);
 
   const { handleSubmit, register, errors, reset } = useForm();
 
@@ -32,7 +33,11 @@ function predictionMeta(props) {
    
   };
 
+  const handleEndDateChange = (date) => {
+    setSelectedEndDate(date);
+    setPredictionEndDate(date)
 
+  };
 
  
 
@@ -55,9 +60,9 @@ function predictionMeta(props) {
 <DatePicker
     label="End Date"
     name="date"
-    disableFuture={true}
-    value={selectedEndDate}
-    onChange={e => setPredictionEndDate(e.target.value)}
+    disableFuture={false}
+    value={props.predictionEndDate}
+    onChange={handleEndDateChange}
     inputRef={register({
       required: "Please select a date",
     })}
@@ -88,15 +93,7 @@ function predictionMeta(props) {
 
 
           <Grid item={true} xs={12}>
-          <Button disabled={!selectedEndDate}
-        onClick="" component="a" variant="contained" sx={{
-          backgroundImage: 'linear-gradient(85.9deg, #1EBEA5 -14.21%, #00B5C4 18.25%, #00A8E6 52.49%, #0096FD 81.67%, #157AFB 111.44%)',
-          color: 'white',
-          mt: 2,
-        }} >
-    
-
-{pending && <CircularProgress size={28} />}            </Button>
+          
             
             
           </Grid>
