@@ -156,21 +156,30 @@ for index, row in filtered_nft_data.iterrows():
 with open('./analysed_data.pkl', 'wb') as fp:
   pickle.dump(analysed_data, fp)
 
-def get_favorite_color(nft_links):
+def get_favorite_color(nft_links, url_to_ref):
     colors = []
     R = 0
     G = 0
     B = 0
     for nft_link in nft_links:
-        response = requests.get(nft_link)
-        img = Image.open(BytesIO(response.content))
+        if nft_link in url_to_ref.keys():
+            img = Image.open(url_to_ref[nft_link])
+        else:
+            response = requests.get(nft_link)
+            img = Image.open(BytesIO(response.content))
+            if url_to_ref:
+                url_to_ref[nft_link] = f"./img/img_{len(url_to_ref.keys())-1}.png"
+                img.save(f"./img/img_{len(url_to_ref.keys())-1}.png")
+            else:
+                url_to_ref[nft_link] = "./img/img_0.png"
+                img.save("./img/img_0.png")
         if img.mode == 'RGB':
             colors.extend(list(img.getdata()))
             R += sum([x[0] for x in colors]) / len(colors)
             G += sum([x[1] for x in colors]) / len(colors)
             B += sum([x[2] for x in colors]) / len(colors)
 
-    return get_color_name((R/len(nft_links), G/len(nft_links), B/len(nft_links)))
+    return get_color_name((R/len(nft_links), G/len(nft_links), B/len(nft_links))), url_to_ref
 
 def get_actor_pnl(operations):
     pnl = 0
@@ -211,11 +220,20 @@ def add_per_user_per_collection_volume(operations):
                 volume_per_collection += order['price']
         operations[collection]['collection_volume'] = volume_per_collection
 
+try:
+    with open('./url_to_ref.pkl', 'rb') as fp:
+        url_to_ref = pickle.load(fp)
+except:
+    url_to_ref = {}
+
 for i, actor in enumerate(actors):
     print(i)
-    analysed_data[actor]['favorite_color'] = get_favorite_color((analysed_data[actor]['nft_links']))
+    analysed_data[actor]['favorite_color'], url_to_ref = get_favorite_color(analysed_data[actor]['nft_links'], url_to_ref)
     add_per_user_per_collection_volume(analysed_data[actor]['operations'])
     analysed_data[actor]['pnl'] = get_actor_pnl(analysed_data[actor]['operations'])
+
+with open('./url_to_ref.pkl', 'wb') as fp:
+  pickle.dump(url_to_ref, fp)
 
 with open('./final_analysed_data.pkl', 'wb') as fp:
   pickle.dump(analysed_data, fp)
