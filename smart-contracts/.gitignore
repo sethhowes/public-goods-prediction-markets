@@ -1,3 +1,9 @@
+# ignore ALL files in ANY directory named temp
+__pycache__/
+*.pyc
+*.csv
+*DESKTOP-F3FE26K.py
+*-lucas.py
 node_modules
 typechain-types
 artifacts

@@ -1,4 +1,5 @@
 # ignore ALL files in ANY directory named temp
+<<<<<<< HEAD
 _pycache_/
 
 *.csv
@@ -32,4 +33,14 @@ yarn-error.log*
 
 .vercel
 
+=======
+__pycache__/
+*.pyc
+*.csv
+*DESKTOP-F3FE26K.py
+*-lucas.py
+node_modules
+typechain-types
+artifacts
+>>>>>>> 9bfd2106cd9ec2665697d491caba16517065085b
 .env

@@ -27,7 +27,7 @@ def urllib_request(url, additional_headers={}, proxies=PROXIES, use_proxies = Fa
         if use_proxies:
             #Check if proxy url via a service is provided
             if 'url' in proxies.keys():
-                proxy_url = proxies['url'] + url
+                proxy_url = proxies['url'] + url + "&use_headers=true"
                 req = urllib.request.Request(proxy_url, method="GET", headers=headers_urllib)
             
             #Check if native proxies are supplied
