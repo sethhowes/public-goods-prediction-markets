@@ -20,6 +20,7 @@ function predictionData(props) {
   const setPredictionIncrement = props.setPredictionIncrements
   const setPredictionBuckets = props.setPredictionBuckets
   const setPredictionCategory = props.setPredictionCategory
+  const setPredictionApiEndpoint = props.setPredictionApiEndpoint
 
   const { handleSubmit, register, errors, reset } = useForm();
 
@@ -97,8 +98,10 @@ function predictionData(props) {
               id="value"
             />
             {/* Button to add the entered value as a chip */}
-            <Button variant="outlined" onClick={handleAddValue} sx={{ ml:  4, height: '100%' }}>
-              Add Option
+            <Button variant="secondary" onClick={handleAddValue} sx={{ ml:  4, height: '100%', backgroundImage: 'linear-gradient(85.9deg, #1EBEA5 -14.21%, #00B5C4 18.25%, #00A8E6 52.49%, #0096FD 81.67%, #157AFB 111.44%)',
+          color: 'white',
+          mt: 0}}>
+              Add Prediction Bucket
             </Button>
            
           </Grid>
@@ -117,9 +120,18 @@ function predictionData(props) {
             ))}
           </Grid>
           <Grid item={true} xs={12}>
-            {/* Input field for adding a new value */}
-         
-            {/* Button to add the entered value as a chip */}
+              <TextField
+                type="text"
+                label="API Endpoint"
+                name="endpoint"
+                error={errors.name ? true : false}
+                helperText={errors.name && errors.name.message}
+                fullWidth={true}
+                onChange={e => setPredictionApiEndpoint(e.target.value)}
+                inputRef={register({
+                  required: "Please enter your validation endpoint",
+                })}
+              />
            
           </Grid>
         

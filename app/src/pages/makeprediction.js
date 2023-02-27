@@ -135,6 +135,8 @@ function DashboardPage(props) {
           setPredictionBuckets = {setPredictionBuckets}
           setPredictionCategory = {setPredictionCategory}
           setPredictionDescription = {setPredictionDescription}
+          setPredictionApiEndpoint= {setPredictionApiEndpoint}
+
         />
          </Box>
               </CardContent>
@@ -160,7 +162,6 @@ function DashboardPage(props) {
           setPredictionRewardCurve= {setPredictionRewardCurve}
           setPredictionPermissioned= {setPredictionPermissioned}
           setPredictionEndDate= {setPredictionEndDate}
-          setPredictionApiEndpoint= {setPredictionApiEndpoint}
           predictionEndDate = {predictionEndDate}
 
         />
