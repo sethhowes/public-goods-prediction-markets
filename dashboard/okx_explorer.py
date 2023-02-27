@@ -132,7 +132,4 @@ def get_transaction_details_wrapper(transaction_hashes, temp_save = True, use_pr
 #Get all tx hashes for a contract
 tx_hashes = get_tx_hashes()
 
-#Load hashes
-# tx_hash = '0xB22336F36CE8C5751189489CF0E614530CA5A7AAD6AA9AF0DFABE29F2751E736'
-
-# get_transaction_details_wrapper(tx_hashes, temp_save = True)
+get_transaction_details_wrapper(tx_hashes, temp_save = True)
