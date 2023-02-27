@@ -9,6 +9,9 @@ import { Chip } from "@mui/material";
 import { DatePicker } from "@mui/lab";
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 function predictionMeta(props) {
   const [pending, setPending] = useState(false);
@@ -23,6 +26,7 @@ function predictionMeta(props) {
   const setPredictionEndDate= props.setPredictionEndDate
   const setPredictionApiEndpoint= props.setPredictionApiEndpoint
   const [selectedEndDate, setSelectedEndDate] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(""); // <-- state for storing selected category
 
   const { handleSubmit, register, errors, reset } = useForm();
 
@@ -38,7 +42,17 @@ function predictionMeta(props) {
     setPredictionEndDate(date)
 
   };
+  const handleCategoryChange = (event) => {
+    setSelectedCategory(event.target.value);
+  }
 
+  const categories = [
+    "climate",
+    "risk",
+    "finance",
+    "ETHDenver"
+
+  ]; 
  
 
   return (
@@ -63,6 +77,8 @@ function predictionMeta(props) {
     disableFuture={false}
     value={props.predictionEndDate}
     onChange={handleEndDateChange}
+    fullWidth={true}
+
     inputRef={register({
       required: "Please select a date",
     })}
@@ -77,9 +93,31 @@ function predictionMeta(props) {
               onChange={e => setPredictionRewardAmount(e.target.value)}
               name="value"
               id="value"
+              fullWidth={true}
+
             />
 
   </Grid>
+  <Grid item xs={12}>
+              <Select
+                labelId="category-select-label"
+                id="category-select"
+                value={selectedCategory}
+                fullWidth={true}
+
+                onChange={handleCategoryChange}
+                displayEmpty
+              >
+                <MenuItem value="" disabled>
+                  Select category
+                </MenuItem>
+                {categories.map((category, index) => (
+                  <MenuItem key={index} value={category}>
+                    {category}
+                  </MenuItem>
+                ))}
+              </Select>
+            </Grid>
 
  
    {/*  setPredictionRewardAmount= {setPredictionRewardAmount}

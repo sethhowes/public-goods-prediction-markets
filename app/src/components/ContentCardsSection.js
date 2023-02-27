@@ -16,19 +16,19 @@ function ContentCardsSection(props) {
       image: "https://st3.depositphotos.com/5934840/33936/v/1600/depositphotos_339368658-stock-illustration-global-warming-alert-with-melting.jpg",
       title: "Climate Change",
       body: "How will climate change affect the world?",
-      url: "",
+      url: "/viewall",
     },
     {
-      image: "https://source.unsplash.com/BkmdKnuAZtw/800x600",
+      image: "https://elements-cover-images-0.imgix.net/30f7935b-624c-4aeb-898e-a25da4695613?auto=compress%2Cformat&fit=max&w=632&s=274f2de687701c9fb3b166616d22a4ed",
       title: "Existential Risk",
       body: "Awareness of the risks we face as a civilization.",
-      url: "https://st.depositphotos.com/33945136/61079/v/600/depositphotos_610794834-stock-illustration-campsite-modern-design-vector-illustration.jpg",
+      url: "/viewall",
     },
     {
-      image: "https://source.unsplash.com/HXJkqHexaak/800x600",
+      image: "https://elements-cover-images-0.imgix.net/1990abe9-6d8a-460b-abc0-573961bfce19?auto=compress%2Cformat&fit=max&w=632&s=8923e0ca10919d58b73d4e2735ecf014",
       title: "Finance",
       body: "Understand the future of money and the economy.",
-      url: "",
+      url: "/viewall",
     }
     
   ];

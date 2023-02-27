@@ -36,7 +36,7 @@ function HeroSection(props) {
               />
  */}</Box>
  <Box sx={{mt: 4}}>
-              <Link href={props.buttonPath} passHref={true}>
+              <Link href="/viewall" passHref={true}>
                 <Button
                   variant="contained"
                   size="large"

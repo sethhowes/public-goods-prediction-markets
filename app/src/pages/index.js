@@ -30,7 +30,7 @@ function IndexPage(props) {
     useStyles = {useStyles}
   />
   <StatsSection
-    bgColor="default"
+    bgCgit olor="default"
     size="medium"
     bgImage=""
     bgImageOpacity={1}
