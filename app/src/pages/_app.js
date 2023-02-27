@@ -10,18 +10,18 @@ function MyApp({ Component, serverEmotionCache, pageProps }) {
       <ThemeProvider serverEmotionCache={serverEmotionCache}>
         <AuthProvider>
         <Navbar2
-    color="default"
+    color="primary"
     logo="logo.svg"
     logoInverted="logo.svg"
 
   />
           <Component {...pageProps} />
           <Footer
-        bgColor="default"
+        bgColor="primary"
         size="medium"
         bgImage=""
         bgImageOpacity={1}
-        copyright={`© ${new Date().getFullYear()} Company`}
+        copyright={`© ${new Date().getFullYear()} The League of Oxford Buidlers`}
         logo="logo.svg"
         logoInverted="logo.svg"
         sticky={false}

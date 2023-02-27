@@ -13,29 +13,24 @@ import SectionHeader from "components/SectionHeader";
 function ContentCardsSection(props) {
   const items = [
     {
-      image: "https://source.unsplash.com/aHrxrT1q2h0/800x600",
-      title: "Faucibus turpis in",
-      body: "Purus semper eget duis at tellus at urna condimentum mattis. Non blandit massa enim nec.",
-      url: "/post/golden-gate",
+      image: "https://st3.depositphotos.com/5934840/33936/v/1600/depositphotos_339368658-stock-illustration-global-warming-alert-with-melting.jpg",
+      title: "Climate Change",
+      body: "How will climate change affect the world?",
+      url: "",
     },
     {
       image: "https://source.unsplash.com/BkmdKnuAZtw/800x600",
-      title: "Faucibus turpis in",
-      body: "Purus semper eget duis at tellus at urna condimentum mattis. Non blandit massa enim nec.",
-      url: "/post/beach",
+      title: "Existential Risk",
+      body: "Awareness of the risks we face as a civilization.",
+      url: "https://st.depositphotos.com/33945136/61079/v/600/depositphotos_610794834-stock-illustration-campsite-modern-design-vector-illustration.jpg",
     },
     {
       image: "https://source.unsplash.com/HXJkqHexaak/800x600",
-      title: "Faucibus turpis in",
-      body: "Purus semper eget duis at tellus at urna condimentum mattis. Non blandit massa enim nec.",
-      url: "/post/road",
-    },
-    {
-      image: "https://source.unsplash.com/eOcyhe5-9sQ/800x600",
-      title: "Faucibus turpis in",
-      body: "Purus semper eget duis at tellus at urna condimentum mattis. Non blandit massa enim nec.",
-      url: "/post/ballons",
-    },
+      title: "Finance",
+      body: "Understand the future of money and the economy.",
+      url: "",
+    }
+    
   ];
 
   return (

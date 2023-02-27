@@ -20,7 +20,7 @@ const themeConfig = {
       mode: "light",
       primary: {
         // Use hue from colors or hex
-        main: colors.blue["700"],
+        main: '#FFFFFF'
         // Uncomment to specify light/dark
         // shades instead of automatically
         // calculating from above value.
@@ -28,7 +28,7 @@ const themeConfig = {
         //dark: "#115293",
       },
       secondary: {
-        main: '#1EBEA5',
+        main: '#00B5C4',
       },
       background: {
         // Background for <body>
@@ -47,10 +47,10 @@ const themeConfig = {
       mode: "dark",
       primary: {
         // Lighter shade so it stands out on dark
-        main: colors.blue["300"],
+        main: '#272727'
       },
       secondary: {
-        main: "#1EBEA5",
+        main: "#FFF",
       },
       background: {
         default: colors.grey["900"],
@@ -119,7 +119,15 @@ const themeConfig = {
         },
       },
       // Customize Link component
-      MuiAppBar: {
+      /* MuiAppBar: {
+        styleOverrides: {
+          root: {
+            backgroundColor: "#fff",
+            color: "#000",
+          },
+        },
+      }, */
+     HeroSection: {
         styleOverrides: {
           root: {
             backgroundColor: "#fff",
