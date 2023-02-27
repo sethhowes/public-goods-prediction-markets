@@ -66,18 +66,6 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     uint[] livePredictions;
 
     address nullAddress = 0x0000000000000000000000000000000000000000;
-    // TO DELTED
-    // TEST:
-    // "What"
-    // 0
-    // 10
-    // [0,1,2]
-    // 0
-    // 0x0000000000000000000000000000000000000000
-    // "exponential"
-    // true
-    // 1687308468
-    // "test"
 
     function requestOutcomeData(string memory apiEndpoint) public returns (bytes32 requestId) {
         Chainlink.Request memory req = buildChainlinkRequest(
@@ -166,15 +154,10 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         predictionCounter += 1;
     }
 
-    // // Approve a preliminary market
-    // function approvePrediction() {
-
-    // }
-    // View prediction
+    // View number of predictions made
     function totalPredictions() public view returns(uint) {
         return predictionCounter;
     }
-
 
     // View prediction
     function viewPrediction(uint predictionId) public view returns(predictionInstance memory) {
@@ -212,18 +195,12 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         require(block.timestamp < predictionMarkets[predictionId].deadline, "The prediction has ended");
         // Check transferred amounts - only native ETH
         require(msg.value > 0, "Amounts needs to surpass 0");
-        uint totalCommitted;
-        for (uint i = 0; i < predictionMarkets[predictionId].committedAmountBucket.length; i++) {
-            // Checks if bucket index is different to the selected bucket
-            if (i != bucketIndex) {
-                totalCommitted += predictionMarkets[predictionId].committedAmountBucket[i];
-            }
-        }
+        uint totalCommitted = getTotalCommitted(predictionId);
         uint selectedBucketCommitted = predictionMarkets[predictionId].committedAmountBucket[bucketIndex];
         uint scaledBet = (msg.value * totalCommitted).div(selectedBucketCommitted);
-        // Adds scaled bet to user
+        // Add scaled bet to user
         betsMade[predictionId][msg.sender][bucketIndex] += scaledBet;
-        // Updates amount committed to this bucket
+        // Update amount committed to this bucket
         predictionMarkets[predictionId].committedAmountBucket[bucketIndex] += msg.value;
     }
 
@@ -253,6 +230,15 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
                 return i;
             }
         }
+    }
+
+    // Get total amount committed for a given prediction
+    function getTotalCommitted(uint predictionId) public view returns (uint) {
+        uint totalCommitted = 0;
+        for (uint i = 0; i < predictionMarkets[predictionId].committedAmountBucket.length; i++) {
+            totalCommitted += predictionMarkets[predictionId].committedAmountBucket[i];
+        }
+        return totalCommitted;
     }
 
     // Allow a user to withdraw funds if they placed a correct bet
