@@ -26,6 +26,8 @@ import TabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
 import TabContext from '@mui/lab/TabContext'
 import Avatar from '@mui/material/Avatar'
+import { requireAuth } from "util/auth";
+
 const useStyles = makeStyles((theme) => ({
   priceChip: {
     backgroundColor: '#4caf50', 
@@ -232,7 +234,7 @@ const useStyles = makeStyles((theme) => ({
                                   }}
                             components={{ Toolbar: GridToolbar }} 
                             autoHeight // enable auto-height to ensure all rows are visible
-                            sx={{ p: 0, mb: 4 }}
+                            sx={{ p: 0, mb: 4, '& .MuiButton-root': { color: 'secondary.main' } }}
                             />
             
             
@@ -257,7 +259,7 @@ const useStyles = makeStyles((theme) => ({
                                   }}
                             components={{ Toolbar: GridToolbar }} 
                             autoHeight // enable auto-height to ensure all rows are visible
-                            sx={{ p: 0, mb: 4 }}
+                            sx={{ p: 0, mb: 4, '& .MuiButton-root': { color: 'secondary.main' } }}
                             />
             
             
@@ -282,7 +284,7 @@ const useStyles = makeStyles((theme) => ({
                                   }}
                             components={{ Toolbar: GridToolbar }} 
                             autoHeight // enable auto-height to ensure all rows are visible
-                            sx={{ p: 0, mb: 4 }}
+                            sx={{ p: 0, mb: 4, '& .MuiButton-root': { color: 'secondary.main' } }}
                             />
             
             
@@ -317,7 +319,7 @@ const useStyles = makeStyles((theme) => ({
   );
 }
 
-export default DashboardPage;
+export default requireAuth(DashboardPage);
 
 
 

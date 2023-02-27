@@ -20,6 +20,8 @@ import CardStatsHorizontal from "components/CardStatistics";
 import PeopleIcon from '@mui/icons-material/People';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { makeStyles } from "@mui/styles";
+import { requireAuth } from "util/auth";
+
 const useStyles = makeStyles((theme) => ({
   gradientText: {
     backgroundClip: "text",
@@ -203,4 +205,4 @@ function DashboardPage(props) {
   );
 }
 
-export default DashboardPage;
+export default requireAuth(DashboardPage);

@@ -26,6 +26,8 @@ import TabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
 import TabContext from '@mui/lab/TabContext'
 import Avatar from '@mui/material/Avatar'
+import { requireAuth } from "util/auth";
+
 const useStyles = makeStyles((theme) => ({
   priceChip: {
     backgroundColor: '#4caf50', 
@@ -106,15 +108,15 @@ const useStyles = makeStyles((theme) => ({
     {
       flex: 0.4,
       minWidth: 100,
-      field: 'prediction',
-      headerName: 'Prediction',
+      field: 'address',
+      headerName: 'Address',
       renderCell: ({ row }) =>  <Typography sx={{ fontWeight: 'bold'}} className={classes.gradientText} variant='body2'>{row.prediction}</Typography>
     },
     {
       flex: 0.2,
       minWidth: 100,
-      field: 'category',
-      headerName: 'Category',
+      field: 'label',
+      headerName: 'Label',
       renderCell: ({ row }) =>  <Typography variant='body2'>{row.category}</Typography>
     },
     {
@@ -172,7 +174,7 @@ const useStyles = makeStyles((theme) => ({
           
               <CardContent sx={{ padding: 3 }}>
                 <Box>
-                <Typography variant="h5"  sx={{ fontWeight: "bold", mb: 4}} className={classes.gradientText} align="left">View Predictions</Typography>
+                <Typography variant="h5"  sx={{ fontWeight: "bold", mb: 4}} className={classes.gradientText} align="left">Our Predictors</Typography>
 
                 <div style={{ width: "100%" }}>
  
@@ -190,9 +192,7 @@ const useStyles = makeStyles((theme) => ({
           }}
         >
            <Tab value='all' sx={{ p: 0 }} label={<RenderTabAvatar category='All' />} />
-          <Tab value='climate' sx={{ p: 0 }} label={<RenderTabAvatar category='Climate' />} />
-          <Tab value='risks' sx={{ p: 0 }} label={<RenderTabAvatar category='Risks' />} />
-          <Tab value='finance' sx={{ p: 0 }} label={<RenderTabAvatar category='Finance' />} />
+          
 
           
         
@@ -212,81 +212,8 @@ const useStyles = makeStyles((theme) => ({
 
 
        </TabPanel>
-       <TabPanel sx={{ p: 0, mt: 5, mb: 10 }} value='climate'>
-                                  
-                                  <DataGrid 
-                                  columns={columns}
-                                  rows={rows}
-                                  initialState={{
-                                    filter: {
-                                      filterModel: {
-                                        items: [
-                                          {
-                                            columnField: 'category',
-                                            value: "Climate",
-                                            operatorValue: 'contains',
-                                          },
-                                        ],
-                                      },
-                                    },
-                                  }}
-                            components={{ Toolbar: GridToolbar }} 
-                            autoHeight // enable auto-height to ensure all rows are visible
-                            sx={{ p: 0, mb: 4 }}
-                            />
-            
-            
-                   </TabPanel>
-                   <TabPanel sx={{ p: 0, mt: 5, mb: 10 }} value='risks'>
-                                  
-                                  <DataGrid 
-                                  columns={columns}
-                                  rows={rows}
-                                  initialState={{
-                                    filter: {
-                                      filterModel: {
-                                        items: [
-                                          {
-                                            columnField: 'category',
-                                            value: "Risks",
-                                            operatorValue: 'contains',
-                                          },
-                                        ],
-                                      },
-                                    },
-                                  }}
-                            components={{ Toolbar: GridToolbar }} 
-                            autoHeight // enable auto-height to ensure all rows are visible
-                            sx={{ p: 0, mb: 4 }}
-                            />
-            
-            
-                   </TabPanel>
-                   <TabPanel sx={{ p: 0, mt: 5, mb: 10 }} value='finance'>
-                                  
-                                  <DataGrid 
-                                  columns={columns}
-                                  rows={rows}
-                                  initialState={{
-                                    filter: {
-                                      filterModel: {
-                                        items: [
-                                          {
-                                            columnField: 'category',
-                                            value: "Finance",
-                                            operatorValue: 'contains',
-                                          },
-                                        ],
-                                      },
-                                    },
-                                  }}
-                            components={{ Toolbar: GridToolbar }} 
-                            autoHeight // enable auto-height to ensure all rows are visible
-                            sx={{ p: 0, mb: 4 }}
-                            />
-            
-            
-                   </TabPanel>
+       
+                 
 
 
 
@@ -317,7 +244,7 @@ const useStyles = makeStyles((theme) => ({
   );
 }
 
-export default DashboardPage;
+export default requireAuth(DashboardPage);
 
 
 

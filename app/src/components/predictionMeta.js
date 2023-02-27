@@ -87,7 +87,7 @@ function predictionMeta(props) {
           color: 'white',
           mt: 2,
         }} >
-     {!pending && <span>Add Prediction</span>}
+    
 
 {pending && <CircularProgress size={28} />}            </Button>
             

@@ -53,42 +53,42 @@ export function updateUser(uid, data) {
   return updateDoc(doc(db, "users", uid), data);
 }
 
-/**** ITEMS ****/
+/**** Transactions ****/
 /* Example query functions (modify to your needs) */
 
-// Subscribe to item data
-export function useItem(id) {
+// Subscribe to transaction data
+export function useTransaction(id) {
   return useQuery(
-    ["item", { id }],
-    createQuery(() => doc(db, "items", id)),
+    ["transaction", { id }],
+    createQuery(() => doc(db, "transactions", id)),
     { enabled: !!id }
   );
 }
 
-// Fetch item data once
+// Fetch transaction data once
 export function useItemOnce(id) {
   return useQuery(
-    ["item", { id }],
+    ["transaction", { id }],
     // When fetching once there is no need to use `createQuery` to setup a subscription
     // Just fetch normally using `getDoc` so that we return a promise
-    () => getDoc(doc(db, "items", id)).then(format),
+    () => getDoc(doc(db, "transactions", id)).then(format),
     { enabled: !!id }
   );
 }
 
-// Fetch item data once (non-hook)
+// Fetch transaction data once (non-hook)
 // Useful if you need to fetch data from outside of a component
 export function getItem(id) {
-  return getDoc(doc(db, "items", id)).then(format);
+  return getDoc(doc(db, "transaction", id)).then(format);
 }
 
-// Subscribe to all items by owner
-export function useItemsByOwner(owner) {
+// Subscribe to all transaction by owner
+export function useTransactionsByOwner(owner) {
   return useQuery(
-    ["items", { owner }],
+    ["transactions", { owner }],
     createQuery(() =>
       query(
-        collection(db, "items"),
+        collection(db, "transactions"),
         where("owner", "==", owner),
         orderBy("createdAt", "desc")
       )
@@ -97,22 +97,84 @@ export function useItemsByOwner(owner) {
   );
 }
 
-// Create a new item
-export function createItem(data) {
-  return addDoc(collection(db, "items"), {
+// Create a new transaction
+export function createTranscation(data) {
+  return addDoc(collection(db, "transactions"), {
     ...data,
     createdAt: serverTimestamp(),
   });
 }
 
-// Update an item
-export function updateItem(id, data) {
-  return updateDoc(doc(db, "items", id), data);
+// Update a transaction
+export function updateTransaction(id, data) {
+  return updateDoc(doc(db, "transactions", id), data);
 }
 
-// Delete an item
-export function deleteItem(id) {
-  return deleteDoc(doc(db, "items", id));
+// Delete a transaction
+export function deleteTransaction(id) {
+  return deleteDoc(doc(db, "transactions", id));
+}
+
+/**** Predictions ****/
+/* Example query functions (modify to your needs) */
+
+// Create a prediction
+export function usePrediction(id) {
+  return useQuery(
+    ["prediction", { id }],
+    createQuery(() => doc(db, "prediction", id)),
+    { enabled: !!id }
+  );
+}
+
+// Fetch prediction data once
+export function usePredictionOnce(id) {
+  return useQuery(
+    ["prediction", { id }],
+    // When fetching once there is no need to use `createQuery` to setup a subscription
+    // Just fetch normally using `getDoc` so that we return a promise
+    () => getDoc(doc(db, "predictions", id)).then(format),
+    { enabled: !!id }
+  );
+}
+
+// Fetch prediction data once (non-hook)
+// Useful if you need to fetch data from outside of a component
+export function getPrediction(id) {
+  return getDoc(doc(db, "predictions", id)).then(format);
+}
+
+// Subscribe to all predictions by owner
+export function usePredictionsByOwner(owner) {
+  return useQuery(
+    ["predictions", { owner }],
+    createQuery(() =>
+      query(
+        collection(db, "predictions"),
+        where("owner", "==", owner),
+        orderBy("createdAt", "desc")
+      )
+    ),
+    { enabled: !!owner }
+  );
+}
+
+// Create a new prediction
+export function createPrediction(data) {
+  return addDoc(collection(db, "predictions"), {
+    ...data,
+    createdAt: serverTimestamp(),
+  });
+}
+
+// Update a prediction
+export function updatePrediction(id, data) {
+  return updateDoc(doc(db, "predictions", id), data);
+}
+
+// Delete a prediction
+export function deletePrediction(id) {
+  return deleteDoc(doc(db, "predictions", id));
 }
 
 /**** HELPERS ****/
