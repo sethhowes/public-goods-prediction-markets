@@ -58,25 +58,8 @@ export default function ColorTabs(props) {
         <Typography>Tab Two Content</Typography>
       </TabPanel>
       <TabPanel value={value} index={2}>
-        <Box>
-        <Typography>
-        <Box display="flex" alignItems="center">
-              <AccountBalanceWalletIcon />
-
-              <Typography sx={{ fontWeight: 'bold', marginLeft: 2 }}>
-    <strong style={{ fontWeight: 'bold', padding: 3, ML: 5}}>My Commited Capital:</strong>
-  </Typography>
-  <Typography sx={{ fontWeight: 'bold', marginLeft: 2 }} className={classes.gradientText}>
-    3 ETH 
-  </Typography>
-   (100%)
-</Box>
-        </Typography>
-        </Box>
-        <Box sx={{MT:10}}>
-        <Button> Close Market </Button>
-        </Box>
-      
+        
+        
       </TabPanel>
     </Box>
   );

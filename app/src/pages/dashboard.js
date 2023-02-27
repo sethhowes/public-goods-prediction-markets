@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Meta from "components/Meta";
 import DashboardSection2 from "components/DashboardSection2";
 import Footer from "components/Footer";
@@ -35,20 +35,31 @@ const useStyles = makeStyles((theme) => ({
 
 
 function DashboardPage(props) {
-  const url = window.location.href;
+// url parsing  
+const url = window.location.href;
 const parts = url.split("?");
-const predictionID = parts[parts.length - 1];
+const [predictionID, setPredictionID] = useState('EaeobLyUTZ3XO2lpRjDp')
+
+//setPredictionID(parts[parts.length - 1]);
 
   const classes = useStyles();
+
+
   const {
     data: prediction,
     status: predictionStatus,
     error: predictionError,
   } = usePredictionOnce(predictionID);
-  console.log(prediction?.id)
   const predictionDetails = usePredictionOnce(predictionID)
+
+// page information
   const predictionTitle = prediction?.predictionTitle
-  const options = ["Option A", "Option B", "Option C"];
+  const options = prediction?.predictionBuckets
+  const predictionCount = 47
+  const predictionRewardAmount = 100
+  const predictionBucketPrices = [0.91, 0.07, 0.09]
+
+//graph data
   const data = [
     {
       name: '2018',
@@ -150,7 +161,7 @@ const predictionID = parts[parts.length - 1];
     <strong style={{ fontWeight: 'bold', padding: 3, ML: 5}}>Commited Capital:</strong>
   </Typography>
   <Typography sx={{ fontWeight: 'bold', marginLeft: 2 }} className={classes.gradientText}>
-    3 ETH
+    {predictionRewardAmount} ETH
   </Typography>
 </Box>
               </CardContent>
@@ -167,7 +178,7 @@ const predictionID = parts[parts.length - 1];
     <strong style={{ fontWeight: 'bold', padding: 3, ML: 5}}>Predictions:</strong>
   </Typography>
   <Typography sx={{ fontWeight: 'bold', marginLeft: 2 }} className={classes.gradientText}>
-    47
+    {predictionCount}
   </Typography>
 </Box>
               
@@ -179,7 +190,7 @@ const predictionID = parts[parts.length - 1];
             <Card>
               <CardContent sx={{ padding: 3 }}>
                 <Box>
-                <VotingComponent useStyles = {useStyles} options={options} />
+                <VotingComponent useStyles = {useStyles} options={options} predictionBucketPrices={predictionBucketPrices} />
               
                 </Box>
               </CardContent>

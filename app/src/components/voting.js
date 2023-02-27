@@ -1,32 +1,26 @@
 import React, { useState } from "react";
 import Button from "@mui/material/Button";
 
-const VotingComponent = ({ useStyles, options }) => {
+const VotingComponent = ({ useStyles, options, predictionBucketPrices }) => {
   const classes = useStyles();
-
   const [selectedOption, setSelectedOption] = useState(null);
   const [quantity, setQuantity] = useState(1);
- const getPrice = (option) => {
-    // Your code to get the price for the option here...
-    // This function assumes that the prices are stored in an object
-    // where the keys are the option names and the values are the prices.
-    const prices = {
-      "Option A": 0.91,
-      "Option B": 0.07,
-      "Option C": 0.02,
-    };
-    return prices[option];
+  const getPrice = (index) => {
+    const prices = predictionBucketPrices
+    return prices[index];
   };
 
-  const subtotal = selectedOption ? getPrice(selectedOption) * quantity : 0;
-
-  const handleOptionSelect = (option) => {
-    setSelectedOption(option);
+  
+  const subtotal = getPrice(selectedOption) * quantity;
+  const [showPayoff, setShowPayoff] = useState(); // 
+  const handleOptionSelect = (index) => {
+    setSelectedOption(index);
+    setShowPayoff(true)
   };
+  const showValue = (selectedOption + 1)
   const handleQuantityChange = (event) => {
     setQuantity(Number(event.target.value));
   };
-
   const handlePrediction = () => {
     console.log("Making prediction for option:", selectedOption);
     // Your code to make prediction here...
@@ -35,15 +29,15 @@ const VotingComponent = ({ useStyles, options }) => {
   return (
     <div>
       <div style={{ display: "flex", flexDirection: "column" }}>
-        {options.map((option) => (
+        {options?.map((option, index) => (
           <button
             key={option}
-            onClick={() => handleOptionSelect(option)}
+            onClick={() => handleOptionSelect(index)}
             style={{
               backgroundColor: "#f8f8f8",
               borderRadius: "5px",
-              color: selectedOption === option ? "#688ff6" : "black",
-              border: selectedOption === option ? "2px solid #688ff6" : "none",
+              color: selectedOption === index ? "#688ff6" : "black",
+              border: selectedOption === index ? "2px solid #688ff6" : "none",
               padding: "10px",
               margin: "5px",
               marginTop: "2px",
@@ -52,7 +46,7 @@ const VotingComponent = ({ useStyles, options }) => {
 
             }}
           >
-            {option} - ${getPrice(option)}
+    {option} - ${getPrice(index)}
           </button>
         ))}
       </div>
@@ -76,11 +70,16 @@ const VotingComponent = ({ useStyles, options }) => {
 Predict        </Button>
       </div>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: "20px" }}>
+      {showPayoff && (
         <div>
+        
           Subtotal: ${(subtotal).toFixed(2)}
+        
         </div>
+         )}
         </div>
-        {selectedOption && (
+
+        {showPayoff && (
 
 <div style={{ fontWeight: "bold", textAlign: "center", marginTop: "20px" }} className={classes.gradientText}>
 Expected Payoff: ${((quantity*1) - subtotal).toFixed(2)}
