@@ -1,8 +1,8 @@
 #Import packages
-import time
-import os
-import pandas as pd
 import json
+import os
+import time
+import pandas as pd
 
 os.chdir(os.getcwd()+'\\dashboard')
 from utils import urllib_request
@@ -11,18 +11,54 @@ from rolling_proxies import get_new_rolling_proxies_key
 #Import config
 from config import OKLINK_API_KEY, OKX_DEX_ROUTER_ADDRESS, PROXIES
 
-def get_tx_hashes(nb_tx=400000, limit=150, address='0xc97b81b8a38b9146010df85f1ac714afe1554343', use_proxies = False):
-    tx_hashes = []
-    offset = 0
-    while offset + limit <= nb_tx:
-        url = f"https://www.oklink.com/api/explorer/v1/okexchain/addresses/{address}/transactions/condition?t=1677350101344&offset={offset}&address={address}&tokenAddress={address}&limit={limit}&nonzeroValue=false&type=2"
-        hashes = urllib_request(url, {"x-apikey":  "LWIzMWUtNDU0Ny05Mjk5LWI2ZDA3Yjc2MzFhYmEyYzkwM2NjfDI3ODg0NTg0Njg0MDU2NTQ="}, use_proxies=use_proxies)
-        hits = json.loads(hashes)['data']['hits']
-        for tx in hits:
-            tx_hashes.append('0x' + tx['hash'])
-        offset += limit
+def get_tx_hashes(limit=100, api_key = OKLINK_API_KEY, address=OKX_DEX_ROUTER_ADDRESS, start=1661061600, skip=1800):
+    """
+    Get transaction hashes from Oklink
+    @params:
+        limit       - Required  : number of transactions per api call (int)
+        api_key     - Required  : Oklink api key (str)
+        address     - Required  : address of the contract to monitor (str)
+        start       - Required  : timestamp of the first request (int)
+        skip        - Required  : step for the rolling api calls (int)
+    """
+    # Initializing the variables
+    tx_hashes = [] # Init empty tx hashes list
+    offset = 0 # Init offset for api calls
 
-        print(len(tx_hashes))
+    # Build rolling api calls
+    while start + skip <= time.time(): # make requests from starting point until now
+        end = start + skip # timestamp of the last request for the current call
+        
+        # Iterate over the 10000 possible transactions in the range start-stop
+        for _ in range(100):
+            # Create request 
+            url = f"https://www.oklink.com/api/explorer/v1/okexchain/addresses/\
+                {address}/transactions/condition?t=1677358990583&offset={offset}\
+                &address={address}&tokenAddress={address}&limit={limit}\
+                &nonzeroValue=false&type=2&start={start}&end={end}&msgType=0"
+            additional_headers = {"x-apikey": api_key}
+            
+            # Send request
+            hashes = urllib_request(url, additional_headers)
+
+            # Extract transactions data
+            hits = json.loads(hashes)['data']['hits']
+
+            # Save on api calls if less than 10000 transactions in start-stop
+            if len(hits) == 0:
+              break
+            
+            # Build tx hashes list
+            for tx in hits:
+                tx_hashes.append('0x' + tx['hash'])
+
+            # Increase offset
+            offset += limit
+
+        # Prepare for next round of api calls
+        offset = 0
+        start += skip
+
     return tx_hashes
 
 #Get transaction details from Oklink
@@ -94,9 +130,6 @@ def get_transaction_details_wrapper(transaction_hashes, temp_save = True, use_pr
     return data
 
 #Get all tx hashes for a contract
-tx_hashes = get_tx_hashes(nb_tx=400000, limit=150, address=OKX_DEX_ROUTER_ADDRESS)
+tx_hashes = get_tx_hashes()
 
-#Load hashes
-# tx_hash = '0xB22336F36CE8C5751189489CF0E614530CA5A7AAD6AA9AF0DFABE29F2751E736'
-
-# get_transaction_details_wrapper(tx_hashes, temp_save = True)
+get_transaction_details_wrapper(tx_hashes, temp_save = True)
