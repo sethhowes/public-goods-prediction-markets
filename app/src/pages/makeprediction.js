@@ -18,6 +18,9 @@ import { requireAuth } from "util/auth";
 import {useState} from "react";
 import {createPrediction } from "util/db";
 import { Button } from "@mui/material";
+import Alert from "@mui/material/Alert";
+import router from "next/router";
+
 const useStyles = makeStyles((theme) => ({
   gradientText: {
     backgroundClip: "text",
@@ -28,8 +31,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 function DashboardPage(props) {
+  const [formAlert, setFormAlert] = useState(null);
+
   const classes = useStyles();
   const [predictionTitle, setPredictionTitle] = useState('Prediction')
+  const [predictionDescription, setPredictionDescription] = useState('Description 1')
   const [predictionUnit, setPredictionUnit] = useState('Unit')
   const [predictionIncrement, setPredictionIncrement] = useState(1)
   const [predictionBuckets, setPredictionBuckets] = useState(['Outcome 1', 'Outcome 2'])
@@ -44,10 +50,13 @@ function DashboardPage(props) {
   const [predictionOutcomeProbability, setPredictionOutcomeProbability] = useState('Outcome Probability')
   const [predictionOutcomeReward, setPredictionOutcomeReward] = useState('Outcome Reward')
   const [predictionOutcomeRewardAmount, setPredictionOutcomeRewardAmount] = useState('Outcome Reward Amount')
-
+  const handleFormAlert = (data) => {
+    setFormAlert(data);
+  };
   const handleSubmit = () => {
      createPrediction({
       predictionTitle,
+      predictionDescription,
       predictionUnit,
       predictionIncrement,
       predictionBuckets,
@@ -58,10 +67,18 @@ function DashboardPage(props) {
       predictionEndDate,
       predictionCategory,
       predictionApiEndpoint}) 
+
+      handleFormAlert({
+        type: "success",
+        message: "Prediction created successfully!",
+      });
+      router.replace("/dashboard");
+
     }
   
 
   return (
+    
    /*  title, // Prediction title
     unit, // Unit string
     1, // Increment unit
@@ -82,6 +99,13 @@ function DashboardPage(props) {
       bgImage={props.bgImage}
       bgImageOpacity={props.bgImageOpacity}
     >
+    
+    {formAlert && (
+        <Alert severity={formAlert.type} sx={{ mb: 3 }}>
+          {formAlert.message}
+        </Alert>
+      )}
+
       <Container>
         <SectionHeader
           title={props.title}
@@ -108,6 +132,7 @@ function DashboardPage(props) {
           setPredictionIncrement = {setPredictionIncrement}
           setPredictionBuckets = {setPredictionBuckets}
           setPredictionCategory = {setPredictionCategory}
+          setPredictionDescription = {setPredictionDescription}
         />
          </Box>
               </CardContent>

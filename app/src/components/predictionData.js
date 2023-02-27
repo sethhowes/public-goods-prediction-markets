@@ -14,7 +14,12 @@ function predictionData(props) {
   const [values, setValues] = useState([]); // <-- state for storing entered values
   const [description, setDescription] = useState([]); // 
   const [name, setName] = useState([]); // 
-
+  const setPredictionTitle = props.setPredictionTitle
+  const setPredictionUnit = props.setPredictionUnit
+  const setPredictionDescription = props.setPredictionDescription
+  const setPredictionIncrement = props.setPredictionIncrements
+  const setPredictionBuckets = props.setPredictionBuckets
+  const setPredictionCategory = props.setPredictionCategory
 
   const { handleSubmit, register, errors, reset } = useForm();
 
@@ -50,8 +55,9 @@ function predictionData(props) {
                 error={errors.name ? true : false}
                 helperText={errors.name && errors.name.message}
                 fullWidth={true}
+                onChange={e => setPredictionTitle(e.target.value)}
                 inputRef={register({
-                  required: "Please enter your name",
+                  required: "Please enter your prediction title",
                 })}
               />
             </Grid>
@@ -68,6 +74,7 @@ function predictionData(props) {
               error={errors.message ? true : false}
               helperText={errors.message && errors.message.message}
               fullWidth={true}
+              onChange={e => setPredictionDescription(e.target.value)}
               inputRef={register({
                 required: "Please enter a message",
               })}
@@ -79,6 +86,8 @@ function predictionData(props) {
               label="Unit"
               name="unit"
               id="unit"
+              onChange={e => setPredictionUnit(e.target.value)}
+
             />
             {/* Input field for adding a new value */}
             <TextField
