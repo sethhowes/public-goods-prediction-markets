@@ -21,7 +21,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { makeStyles } from "@mui/styles";
 import { requireAuth } from "util/auth";
-
+import { usePredictionOnce } from "util/db";
 const useStyles = makeStyles((theme) => ({
   gradientText: {
     backgroundClip: "text",
@@ -31,9 +31,23 @@ const useStyles = makeStyles((theme) => ({
     WebkitTextFillColor: "transparent",
   },
 }));
+
+
+
 function DashboardPage(props) {
+  const url = window.location.href;
+const parts = url.split("?");
+const predictionID = parts[parts.length - 1];
+
   const classes = useStyles();
-  const predictionTitle = "What will be the average global temperature in 2042?";
+  const {
+    data: prediction,
+    status: predictionStatus,
+    error: predictionError,
+  } = usePredictionOnce(predictionID);
+  console.log(prediction?.id)
+  const predictionDetails = usePredictionOnce(predictionID)
+  const predictionTitle = prediction?.predictionTitle
   const options = ["Option A", "Option B", "Option C"];
   const data = [
     {

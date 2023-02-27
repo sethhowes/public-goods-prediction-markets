@@ -66,7 +66,7 @@ export function useTransaction(id) {
 }
 
 // Fetch transaction data once
-export function useItemOnce(id) {
+export function useTransactionOnce(id) {
   return useQuery(
     ["transaction", { id }],
     // When fetching once there is no need to use `createQuery` to setup a subscription
@@ -78,7 +78,7 @@ export function useItemOnce(id) {
 
 // Fetch transaction data once (non-hook)
 // Useful if you need to fetch data from outside of a component
-export function getItem(id) {
+export function getTransaction(id) {
   return getDoc(doc(db, "transaction", id)).then(format);
 }
 
