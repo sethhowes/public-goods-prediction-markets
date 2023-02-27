@@ -208,16 +208,7 @@ const [predictionID, setPredictionID] = useState('EaeobLyUTZ3XO2lpRjDp')
               </CardContent>
             </Card>
           </Grid>
-          <Grid item={true} xs={12} md={12}>
-            <Card>
-              <CardContent sx={{ padding: 3 }}>
-                <Box>
-                  
-              
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
+          
         </Grid>
       </Container>
     </Section>

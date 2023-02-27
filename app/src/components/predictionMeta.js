@@ -74,6 +74,7 @@ function predictionMeta(props) {
 <DatePicker
     label="End Date"
     name="date"
+    color="secondary"
     disableFuture={false}
     value={props.predictionEndDate}
     onChange={handleEndDateChange}
@@ -89,6 +90,8 @@ function predictionMeta(props) {
 
   <TextField
               type="text"
+              color="secondary"
+
               label="Reward Amount"
               onChange={e => setPredictionRewardAmount(e.target.value)}
               name="value"
@@ -102,6 +105,8 @@ function predictionMeta(props) {
               <Select
                 labelId="category-select-label"
                 id="category-select"
+                color="secondary"
+
                 value={selectedCategory}
                 fullWidth={true}
 

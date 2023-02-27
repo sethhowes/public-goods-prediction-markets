@@ -23,7 +23,8 @@ function predictionData(props) {
   const setPredictionApiEndpoint = props.setPredictionApiEndpoint
   setPredictionBuckets(values)
   const { handleSubmit, register, errors, reset } = useForm();
-
+ 
+  
   const onSubmit = (data) => {
     // Show pending indicator
     setPending(true);
@@ -52,6 +53,7 @@ function predictionData(props) {
               <TextField
                 type="text"
                 label="Prediction Title"
+                color="secondary"
                 name="prediction"
                 error={errors.name ? true : false}
                 helperText={errors.name && errors.name.message}
@@ -70,6 +72,8 @@ function predictionData(props) {
               type="text"
               label="Prediction Description"
               name="message"
+              color="secondary"
+
               multiline={true}
               rows={5}
               error={errors.message ? true : false}
@@ -85,6 +89,8 @@ function predictionData(props) {
           <TextField sx = {{mr:4}}
               type="unit"
               label="Unit"
+              color="secondary"
+
               name="unit"
               id="unit"
               onChange={e => setPredictionUnit(e.target.value)}
@@ -94,6 +100,8 @@ function predictionData(props) {
             <TextField
               type="text"
               label="Prediction Options"
+              color="secondary"
+
               name="value"
               id="value"
             />
@@ -122,6 +130,8 @@ function predictionData(props) {
           <Grid item={true} xs={12}>
               <TextField
                 type="text"
+                color="secondary"
+
                 label="API Endpoint"
                 name="endpoint"
                 error={errors.name ? true : false}
