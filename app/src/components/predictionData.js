@@ -17,11 +17,11 @@ function predictionData(props) {
   const setPredictionTitle = props.setPredictionTitle
   const setPredictionUnit = props.setPredictionUnit
   const setPredictionDescription = props.setPredictionDescription
-  const setPredictionIncrement = props.setPredictionIncrements
+ // const setPredictionIncrement = props.setPredictionIncrements
   const setPredictionBuckets = props.setPredictionBuckets
   const setPredictionCategory = props.setPredictionCategory
   const setPredictionApiEndpoint = props.setPredictionApiEndpoint
-
+  setPredictionBuckets(values)
   const { handleSubmit, register, errors, reset } = useForm();
 
   const onSubmit = (data) => {

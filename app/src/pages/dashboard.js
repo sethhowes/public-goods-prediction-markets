@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 function DashboardPage(props) {
   const classes = useStyles();
-
+  const predictionTitle = "What will be the average global temperature in 2042?";
   const options = ["Option A", "Option B", "Option C"];
   const data = [
     {
@@ -91,7 +91,7 @@ function DashboardPage(props) {
           <Card>
               <CardContent sx={{  }}>
                 <Box>
-                <Typography variant="h5"  sx={{ fontWeight: "bold", mb: 4}} className={classes.gradientText} align="left">What will be the average global temperature in 2042?</Typography>
+                <Typography variant="h5"  sx={{ fontWeight: "bold", mb: 4}} className={classes.gradientText} align="left">{predictionTitle}</Typography>
 
                 
                       <ComposedChart

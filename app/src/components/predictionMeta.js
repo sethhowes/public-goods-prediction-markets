@@ -78,17 +78,14 @@ function predictionMeta(props) {
               name="value"
               id="value"
             />
+
   </Grid>
 
-  {/* Dropdown selector */}
-    {/* Permissioned Checkmark */}
-    {/* Category API End Point */}
-    {/* API End Point */}
+ 
    {/*  setPredictionRewardAmount= {setPredictionRewardAmount}
           setPredictionTokenAddress= {setPredictionTokenAddress}
           setPredictionRewardCurve= {setPredictionRewardCurve}
           setPredictionPermissioned= {setPredictionPermissioned}
-          setPredictionEndDate= {setPredictionEndDate}
           setPredictionApiEndpoint= {setPredictionApiEndpoint} */}
 
 
