@@ -71,6 +71,7 @@ function AuthForm(props) {
         {["signup", "signin", "forgotpass"].includes(props.type) && (
           <Grid item={true} xs={12}>
             <TextField
+              color="secondary"
               type="email"
               label="Email"
               name="email"
@@ -89,6 +90,8 @@ function AuthForm(props) {
           <Grid item={true} xs={12}>
             <TextField
               type="password"
+              color="secondary"
+
               label="Password"
               name="pass"
               error={errors.pass ? true : false}
@@ -105,6 +108,8 @@ function AuthForm(props) {
           <Grid item={true} xs={12}>
             <TextField
               type="password"
+              color="secondary"
+
               label="Confirm Password"
               name="confirmPass"
               error={errors.confirmPass ? true : false}
@@ -127,7 +132,11 @@ function AuthForm(props) {
         <Grid item={true} xs={12}>
           <Button
             variant="contained"
-            color="primary"
+            sx={{
+              backgroundImage: 'linear-gradient(85.9deg, #1EBEA5 -14.21%, #00B5C4 18.25%, #00A8E6 52.49%, #0096FD 81.67%, #157AFB 111.44%)',
+              color: 'white',
+              ml: 0,
+            }}
             size="large"
             type="submit"
             disabled={pending}

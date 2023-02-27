@@ -109,7 +109,7 @@ function predictionData(props) {
             <Button variant="secondary" onClick={handleAddValue} sx={{ ml:  4, height: '100%', backgroundImage: 'linear-gradient(85.9deg, #1EBEA5 -14.21%, #00B5C4 18.25%, #00A8E6 52.49%, #0096FD 81.67%, #157AFB 111.44%)',
           color: 'white',
           mt: 0}}>
-              Add Prediction Bucket
+              Add
             </Button>
            
           </Grid>
