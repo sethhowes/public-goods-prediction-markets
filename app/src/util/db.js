@@ -57,38 +57,38 @@ export function updateUser(uid, data) {
 /* Example query functions (modify to your needs) */
 
 // Subscribe to transaction data
-export function useTransaction(id) {
+export function useVote(id) {
   return useQuery(
-    ["transaction", { id }],
-    createQuery(() => doc(db, "transactions", id)),
+    ["vote", { id }],
+    createQuery(() => doc(db, "votes", id)),
     { enabled: !!id }
   );
 }
 
 // Fetch transaction data once
-export function useTransactionOnce(id) {
+export function useVoteOnce(id) {
   return useQuery(
-    ["transaction", { id }],
+    ["vote", { id }],
     // When fetching once there is no need to use `createQuery` to setup a subscription
     // Just fetch normally using `getDoc` so that we return a promise
-    () => getDoc(doc(db, "transactions", id)).then(format),
+    () => getDoc(doc(db, "votes", id)).then(format),
     { enabled: !!id }
   );
 }
 
 // Fetch transaction data once (non-hook)
 // Useful if you need to fetch data from outside of a component
-export function getTransaction(id) {
-  return getDoc(doc(db, "transaction", id)).then(format);
+export function getVote(id) {
+  return getDoc(doc(db, "vote", id)).then(format);
 }
 
 // Subscribe to all transaction by owner
-export function useTransactionsByOwner(owner) {
+export function useVotesByOwner(owner) {
   return useQuery(
-    ["transactions", { owner }],
+    ["votes", { owner }],
     createQuery(() =>
       query(
-        collection(db, "transactions"),
+        collection(db, "votes"),
         where("owner", "==", owner),
         orderBy("createdAt", "desc")
       )
@@ -98,21 +98,21 @@ export function useTransactionsByOwner(owner) {
 }
 
 // Create a new transaction
-export function createTranscation(data) {
-  return addDoc(collection(db, "transactions"), {
+export function createVote(data) {
+  return addDoc(collection(db, "votes"), {
     ...data,
     createdAt: serverTimestamp(),
   });
 }
 
 // Update a transaction
-export function updateTransaction(id, data) {
-  return updateDoc(doc(db, "transactions", id), data);
+export function updateVote(id, data) {
+  return updateDoc(doc(db, "votes", id), data);
 }
 
 // Delete a transaction
-export function deleteTransaction(id) {
-  return deleteDoc(doc(db, "transactions", id));
+export function deleteVotes(id) {
+  return deleteDoc(doc(db, "votes", id));
 }
 
 /**** Predictions ****/

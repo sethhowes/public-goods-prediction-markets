@@ -1,7 +1,13 @@
 import React, { useState } from "react";
 import Button from "@mui/material/Button";
+import Alert from "@mui/material/Alert";
+import {createVote } from "util/db";
+import {useAuth} from "util/auth";
 
 const VotingComponent = ({ useStyles, options, predictionBucketPrices }) => {
+  const [formAlert, setFormAlert] = useState(null);
+  const auth = useAuth()
+
   const classes = useStyles();
   const [selectedOption, setSelectedOption] = useState(null);
   const [quantity, setQuantity] = useState(1);
@@ -10,8 +16,12 @@ const VotingComponent = ({ useStyles, options, predictionBucketPrices }) => {
     return prices[index];
   };
 
-  
+  const handleFormAlert = (data) => {
+    setFormAlert(data);
+  };
+
   const subtotal = getPrice(selectedOption) * quantity;
+  const price = getPrice(selectedOption)
   const [showPayoff, setShowPayoff] = useState(); // 
   const handleOptionSelect = (index) => {
     setSelectedOption(index);
@@ -22,12 +32,23 @@ const VotingComponent = ({ useStyles, options, predictionBucketPrices }) => {
     setQuantity(Number(event.target.value));
   };
   const handlePrediction = () => {
-    console.log("Making prediction for option:", selectedOption);
+    handleFormAlert({
+      type: "success",
+      message: `Prediction created successfully`
+    });
+  createVote({selectedOption, quantity, price, subtotal, user: auth.user.uid})
     // Your code to make prediction here...
   };
 
   return (
+  
     <div>
+        {formAlert && (
+      <Alert severity={formAlert.type} sx={{ mb: 3 }}>
+        {formAlert.message}
+      </Alert>
+    )}
+
       <div style={{ display: "flex", flexDirection: "column" }}>
         {options?.map((option, index) => (
           <button
@@ -56,7 +77,7 @@ const VotingComponent = ({ useStyles, options, predictionBucketPrices }) => {
           <input type="number" value={quantity} onChange={handleQuantityChange} style={{ width: "60px" }} />
         </label>
         <Button
-          disabled={!selectedOption}
+          disabled={!showPayoff}
           onClick={handlePrediction}
           component="a"
           variant="contained"
