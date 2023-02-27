@@ -94,15 +94,13 @@ function Footer(props) {
           ]}
         >
           <Typography>
-            <Link href="" passHref={true}>
+            <Link href="/dashboard" passHref={true}>
               <MuiLink>Predict</MuiLink>
             </Link>
-            <Link href="" passHref={true}>
+            <Link href="/makeprediction" passHref={true}>
               <MuiLink>Learn</MuiLink>
             </Link>
-            <Link href="" passHref={true}>
-              <MuiLink>Docs</MuiLink>
-            </Link>
+            
            
           </Typography>
         </Box>
@@ -146,12 +144,7 @@ function Footer(props) {
           ]}
         >
           {props.copyright}
-          <Link href="/legal/terms-of-service" passHref={true}>
-            <MuiLink>Terms</MuiLink>
-          </Link>
-          <Link href="/legal/privacy-policy" passHref={true}>
-            <MuiLink>Privacy</MuiLink>
-          </Link>
+         
         </Box>
       </Container>
     </Section>

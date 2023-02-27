@@ -5,7 +5,11 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import EnhancedTable from 'components/Table'
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import Button from "@mui/material/Button";
+import Button from '@mui/material/Button';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableRow from '@mui/material/TableRow';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -38,6 +42,7 @@ export default function ColorTabs(props) {
   };
 
   return (
+
     <Box sx={{ width: '100%' }}>
       <Tabs
         value={value}
@@ -52,13 +57,32 @@ export default function ColorTabs(props) {
     
       </Tabs>
       <TabPanel value={value} index={0}>
-        <EnhancedTable />
+      <Typography variant="h6" gutterBottom>Prediction History</Typography>
+      <Box sx={{ mt: -8 }}>
+  <EnhancedTable />
+</Box>
       </TabPanel>
       <TabPanel value={value} index={1}>
         <Typography>Tab Two Content</Typography>
       </TabPanel>
       <TabPanel value={value} index={2}>
-        
+    <Typography variant="h6" gutterBottom>Adminstrate Market</Typography>
+    <Table>
+      <TableBody>
+      <TableRow>
+          <TableCell>My Committed Capital</TableCell>
+          <TableCell align="right">
+            3 ETH
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell>Close Market</TableCell>
+          <TableCell align="right">
+            <Button variant="contained">Close Market</Button>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
         
       </TabPanel>
     </Box>
