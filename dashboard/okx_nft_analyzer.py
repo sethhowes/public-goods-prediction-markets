@@ -6,10 +6,6 @@ from PIL import Image
 from io import BytesIO
 
 
-def sort_list(list1, list2):
-    zipped_pairs = zip(list2, list1)
-    z = [x for _, x in sorted(zipped_pairs, reverse=True)]
-    return z
 
 def unique(sequence):
     seen = set()
@@ -37,7 +33,7 @@ def get_color_name(rgb):
 
 nft_data = pd.read_csv('temp_save_nft_data.csv', low_memory=False)
 nft_data = nft_data.drop_duplicates(subset=nft_data.columns.difference(['usdPrice', 'Unnamed: 0']))
-analysed_data = {}
+
 
 analysis_columns = [
     'from',
@@ -61,89 +57,101 @@ buyers = list(filtered_nft_data['to'].unique())
 
 actors = list(set(sellers + buyers))
 
-for i, actor in enumerate(actors):
+def initialize_data(actors):
+    analysed_data = {}
+    for actor in actors:
+        analysed_data[actor] = {
+            'hashes': [],
+            'nb_txs': 0,
+            'nft_links': [],
+            'last_operations': [],
+            'operations': {},
+            'volume': 0,
+            'favorite_color': '',
+            'pnl': 0
+        }
+    return analysed_data    
 
-    print(i)
+analysed_data = initialize_data(actors)
 
-    hashes = []
-    timestamps = []
-    nft_links = []
-    volume = 0
-    operations = {}
+for index, row in filtered_nft_data.iterrows():
+    hash_id = row['txId']
+    timestamp = int(row['createOn'])
+    buyer = row['to']
+    seller = row['from']
+    collection_name = row['collectionName']
+    tokenId = row['tokenId']
+    nft_name = row['nftName']
+    value = float(row['usdPrice'])
+    platform = row['platformName']
+    contract = row['contractAddress']
+    nft_url = row['nftPicUrl']
 
-    for index, row in filtered_nft_data.iterrows():
-        if (row['from'] == actor) or (row['to'] == actor):
+    analysed_data[buyer]['hashes'].append(hash_id)
+    analysed_data[buyer]['nb_txs'] += 1
+    analysed_data[buyer]['nft_links'].append(nft_url)
+    analysed_data[buyer]['last_operations'].insert(0, hash_id)
+    analysed_data[buyer]['volume'] += value
 
-            hashes.append(row['txId'])
-            timestamps.append(int(row['createOn']))
-            nft_links.append(row['nftPicUrl'])
-            volume += float(row['usdPrice'])
+    analysed_data[seller]['hashes'].append(hash_id)
+    analysed_data[seller]['nb_txs'] += 1
+    analysed_data[seller]['nft_links'].append(nft_url)
+    analysed_data[seller]['last_operations'].insert(0, hash_id)
+    analysed_data[seller]['volume']  += value
 
-            if (row['from'] == actor):
-                if (row['collectionName'] + '/' + row['contractAddress'] in operations.keys()):
-                    if row['nftName']+row['tokenId'] in operations[row['collectionName'] + '/' + row['contractAddress']].keys():
-                        operations[row['collectionName'] + '/' + row['contractAddress']][row['nftName']+row['tokenId']].append({
-                            'hash': row['txId'],
-                            'side': 'sell',
-                            'price': float(row['usdPrice']),
-                            'platformName': row['platformName'],
-                            'timestamp': int(row['createOn'])
-                        })
-                    else:
-                        operations[row['collectionName'] + '/' + row['contractAddress']][row['nftName']+row['tokenId']] = [{
-                                'hash': row['txId'],
-                                'side': 'sell',
-                                'price': float(row['usdPrice']),
-                                'platformName': row['platformName'],
-                                'timestamp': int(row['createOn'])
-                            }]
-                else:
-                    operations[row['collectionName'] + '/' + row['contractAddress']] = {}
-                    operations[row['collectionName'] + '/' + row['contractAddress']][row['nftName']+row['tokenId']] = [{
-                                'hash': row['txId'],
-                                'side': 'sell',
-                                'price': float(row['usdPrice']),
-                                'platformName': row['platformName'],
-                                'timestamp': int(row['createOn'])
-                            }]
-                        
-            else:
-                if (row['collectionName'] + '/' + row['contractAddress'] in operations.keys()):
-                    if row['nftName']+row['tokenId'] in operations[row['collectionName'] + '/' + row['contractAddress']].keys():
-                        operations[row['collectionName'] + '/' + row['contractAddress']][row['nftName']+row['tokenId']].append({
-                            'hash': row['txId'],
+    if (collection_name + '/' + contract in analysed_data[buyer]['operations'].keys()):
+        if (nft_name+tokenId in analysed_data[buyer]['operations'][collection_name + '/' + contract].keys()):
+            analysed_data[buyer]['operations'][collection_name + '/' + contract][nft_name+tokenId].append({
+                            'hash': hash_id,
                             'side': 'buy',
-                            'price': float(row['usdPrice']),
-                            'platformName': row['platformName'],
-                            'timestamp': int(row['createOn'])
+                            'price': value,
+                            'platformName': platform,
+                            'timestamp': timestamp
                         })
-                    else:
-                        operations[row['collectionName'] + '/' + row['contractAddress']][row['nftName']+row['tokenId']] = [{
-                                'hash': row['txId'],
-                                'side': 'buy',
-                                'price': float(row['usdPrice']),
-                                'platformName': row['platformName'],
-                                'timestamp': int(row['createOn'])
-                            }]
-                else:
-                    operations[row['collectionName'] + '/' + row['contractAddress']] = {}
-                    operations[row['collectionName'] + '/' + row['contractAddress']][row['nftName']+row['tokenId']] = [{
-                                'hash': row['txId'],
-                                'side': 'buy',
-                                'price': float(row['usdPrice']),
-                                'platformName': row['platformName'],
-                                'timestamp': int(row['createOn'])
-                            }]
-
-    analysed_data[actor] = {
-        'hashes': list(set(hashes)),
-        'nb_txs': len(hashes),
-        'nft_links': list(set(nft_links)),
-        'last_operations': unique(sort_list(hashes, timestamps)),
-        'operations': operations,
-        'volume': volume,
-    }
-
+        else:
+            analysed_data[buyer]['operations'][collection_name + '/' + contract][nft_name+tokenId] = [{
+                'hash': hash_id,
+                'side': 'buy',
+                'price': value,
+                'platformName': platform,
+                'timestamp': timestamp
+            }]
+    else:
+        analysed_data[buyer]['operations'][collection_name + '/' + contract] = {}
+        analysed_data[buyer]['operations'][collection_name + '/' + contract][nft_name+tokenId] = [{
+                'hash': hash_id,
+                'side': 'buy',
+                'price': value,
+                'platformName': platform,
+                'timestamp': timestamp
+            }]
+        
+    if (collection_name + '/' + contract in analysed_data[seller]['operations'].keys()):
+        if (nft_name+tokenId in analysed_data[seller]['operations'][collection_name + '/' + contract].keys()):
+            analysed_data[seller]['operations'][collection_name + '/' + contract][nft_name+tokenId].append({
+                            'hash': hash_id,
+                            'side': 'sell',
+                            'price': value,
+                            'platformName': platform,
+                            'timestamp': timestamp
+                        })
+        else:
+            analysed_data[seller]['operations'][collection_name + '/' + contract][nft_name+tokenId] = [{
+                'hash': hash_id,
+                'side': 'sell',
+                'price': value,
+                'platformName': platform,
+                'timestamp': timestamp
+            }]
+    else:
+        analysed_data[seller]['operations'][collection_name + '/' + contract] = {}
+        analysed_data[seller]['operations'][collection_name + '/' + contract][nft_name+tokenId] = [{
+                'hash': hash_id,
+                'side': 'sell',
+                'price': value,
+                'platformName': platform,
+                'timestamp': timestamp
+            }]
 
 with open('./analysed_data.pkl', 'wb') as fp:
   pickle.dump(analysed_data, fp)
