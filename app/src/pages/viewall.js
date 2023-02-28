@@ -169,12 +169,78 @@ const useStyles = makeStyles((theme) => ({
 
         
         <Grid container={true} spacing={4}>
+        <Grid item={true} xs={12} md={3}>
+        <Card>
+                  <CardContent sx={{ padding: 3 }}>
+                  <Typography>Welcome to your SciPredict dashboard.</Typography>
+                  </CardContent>
+          </Card>
+          </Grid>
+        <Grid item={true} xs={12} md={3}>
+        <Card>
+          
+                        <CardContent sx={{ padding: 3 }}>
+                        <Container>
+             <Grid container={true} justifyContent="center" >
+            <Grid item={true} mt={3} mb={2} xs={12} sm={3}>
+            <Typography  ml={-2} variant="overline">Predictions</Typography>
+
+              <Box sx={{ textAlign: "center" }}>
+
+                <Typography sx={{ fontWeight: "bold"}} className={classes.gradientText} variant="h4">42</Typography>
+
+              </Box>
+            </Grid>
+           </Grid>
+           </Container>
+              </CardContent>
+          </Card>
+          </Grid>
+          <Grid item={true} xs={12} md={3}>
+                <Card>
+                      <CardContent sx={{ padding: 3 }}>
+                      <Container>
+                    <Grid container={true} justifyContent="center" >
+                    <Grid item={true} mt={3} mb={2} xs={12} sm={3}>
+                    <Typography  ml={0} variant="overline">Votes</Typography>
+
+                      <Box sx={{ textAlign: "center" }}>
+
+                        <Typography  sx={{ fontWeight: "bold"}} className={classes.gradientText} variant="h4">51</Typography>
+
+                      </Box>
+                    </Grid>
+                  </Grid>
+                  </Container>
+                      </CardContent>
+                  </Card>
+          </Grid>
+          <Grid item={true} xs={12} md={3}>
+          <Card>
+                      <CardContent sx={{ padding: 3 }}>
+                      <Container>
+                    <Grid container={true} justifyContent="center" >
+                    <Grid item={true} mt={3} mb={2} xs={12} sm={3}>
+                    <Typography  ml={0} variant="overline">Staked</Typography>
+
+                      <Box sx={{ textAlign: "center" }}>
+
+                        <Typography  sx={{ fontWeight: "bold"}} className={classes.gradientText} variant="h4">1</Typography>
+
+                      </Box>
+                    </Grid>
+                  </Grid>
+                  </Container>
+                      </CardContent>
+                  </Card>
+          </Grid>
+          
           <Grid item={true} xs={12} md={12}>
           <Card>
           
               <CardContent sx={{ padding: 3 }}>
                 <Box>
-                <Typography variant="h5"  sx={{ fontWeight: "bold", mb: 4}} className={classes.gradientText} align="left">View Predictions</Typography>
+                <Typography  sx={{ fontWeight: "bold"}} mb={5} className={classes.gradientText} variant="h5" align="left">View All Predictions</Typography>
 
                 <div style={{ width: "100%" }}>
  

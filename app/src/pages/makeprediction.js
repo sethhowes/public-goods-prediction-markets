@@ -74,7 +74,7 @@ function DashboardPage(props) {
         type: "success",
         message: "Prediction created successfully!",
       });
-      router.replace("/dashboard");
+      router.replace("/viewall");
 
     }
   

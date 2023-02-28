@@ -124,12 +124,6 @@ function predictionMeta(props) {
               </Select>
             </Grid>
 
- 
-   {/*  setPredictionRewardAmount= {setPredictionRewardAmount}
-          setPredictionTokenAddress= {setPredictionTokenAddress}
-          setPredictionRewardCurve= {setPredictionRewardCurve}
-          setPredictionPermissioned= {setPredictionPermissioned}
-          setPredictionApiEndpoint= {setPredictionApiEndpoint} */}
 
 
           <Grid item={true} xs={12}>

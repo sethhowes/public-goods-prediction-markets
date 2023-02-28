@@ -10,7 +10,7 @@ const VotingComponent = ({ useStyles, options, predictionBucketPrices }) => {
 
   const classes = useStyles();
   const [selectedOption, setSelectedOption] = useState(null);
-  const [quantity, setQuantity] = useState(1);
+  const [stake, setStake] = useState(1);
   const getPrice = (index) => {
     const prices = predictionBucketPrices
     return prices[index];
@@ -20,7 +20,7 @@ const VotingComponent = ({ useStyles, options, predictionBucketPrices }) => {
     setFormAlert(data);
   };
 // 10 ^ 18
-  const subtotal = getPrice(selectedOption) * quantity;
+  const subtotal = getPrice(selectedOption) * stake;
   const price = getPrice(selectedOption)
   const [showPayoff, setShowPayoff] = useState(); // 
   const handleOptionSelect = (index) => {
@@ -36,7 +36,7 @@ const VotingComponent = ({ useStyles, options, predictionBucketPrices }) => {
       type: "success",
       message: `Prediction created successfully`
     });
-  createVote({selectedOption, quantity, price, subtotal, user: auth.user.uid})
+  createVote({selectedOption, stake, user: auth.user.uid})
     // Your code to make prediction here...
   };
 
@@ -74,7 +74,7 @@ const VotingComponent = ({ useStyles, options, predictionBucketPrices }) => {
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "20px" }}>
       <label>
         Stake:   
-          <input type="number" value={quantity} onChange={handleQuantityChange} style={{ width: "60px" }} />
+          <input type="number" value={stake} onChange={handleQuantityChange} style={{ width: "60px" }} />
         </label>
         <Button
           disabled={!showPayoff}
@@ -103,7 +103,7 @@ Predict        </Button>
         {showPayoff && (
 
 <div style={{ fontWeight: "bold", textAlign: "center", marginTop: "20px" }} className={classes.gradientText}>
-Expected Payoff: ${((quantity*1) - subtotal).toFixed(2)}
+Expected Payoff: ${((stake*1) - subtotal).toFixed(2)}
         </div>)}
       </div>
   );

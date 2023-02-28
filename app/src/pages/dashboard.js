@@ -157,13 +157,13 @@ const [predictionID, setPredictionID] = useState('EaeobLyUTZ3XO2lpRjDp')
               <Box display="flex" alignItems="center">
               <AccountBalanceWalletIcon />
 
-              <Typography sx={{ fontWeight: 'bold', marginLeft: 2 }}>
-    <strong style={{ fontWeight: 'bold', padding: 3, ML: 5}}>Commited Capital:</strong>
-  </Typography>
-  <Typography sx={{ fontWeight: 'bold', marginLeft: 2 }} className={classes.gradientText}>
-    {predictionRewardAmount} ETH
-  </Typography>
-</Box>
+                <Typography sx={{ fontWeight: 'bold', marginLeft: 2 }}>
+                    <strong style={{ fontWeight: 'bold', padding: 3, ML: 5}}>Commited Capital:</strong>
+                  </Typography>
+                  <Typography sx={{ fontWeight: 'bold', marginLeft: 2 }} className={classes.gradientText}>
+                    {predictionRewardAmount} ETH
+                  </Typography>
+                </Box>
               </CardContent>
             </Card>
             </Grid>
@@ -174,14 +174,14 @@ const [predictionID, setPredictionID] = useState('EaeobLyUTZ3XO2lpRjDp')
                 <Box display="flex" alignItems="center">
               <PeopleIcon />
 
-              <Typography sx={{ fontWeight: 'bold', marginLeft: 2 }}>
-    <strong style={{ fontWeight: 'bold', padding: 3, ML: 5}}>Predictions:</strong>
-  </Typography>
-  <Typography sx={{ fontWeight: 'bold', marginLeft: 2 }} className={classes.gradientText}>
-    {predictionCount}
-  </Typography>
-</Box>
-              
+                <Typography sx={{ fontWeight: 'bold', marginLeft: 2 }}>
+                  <strong style={{ fontWeight: 'bold', padding: 3, ML: 5}}>Predictions:</strong>
+                </Typography>
+                <Typography sx={{ fontWeight: 'bold', marginLeft: 2 }} className={classes.gradientText}>
+                  {predictionCount}
+                </Typography>
+              </Box>
+                            
                 </Box>
               </CardContent>
             </Card>
