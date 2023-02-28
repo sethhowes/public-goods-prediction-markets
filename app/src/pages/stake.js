@@ -172,9 +172,7 @@ const useStyles = makeStyles((theme) => ({
         <Grid item={true} xs={12} md={3}>
         <Card>
                   <CardContent sx={{ padding: 3 }}>
-                  <Typography sx={{ fontWeight: 'bold'}} className={classes.gradientText} variant='h5'>Dashboard</Typography>
-                  <Typography>Welcome to your information center about your predictions, staking and more.</Typography>
-                  <br/>
+                  <Typography>Welcome to your SciPredict dashboard.</Typography>
                   </CardContent>
           </Card>
           </Grid>
@@ -185,12 +183,12 @@ const useStyles = makeStyles((theme) => ({
                         <Container>
              <Grid container={true} justifyContent="center" >
             <Grid item={true} mt={3} mb={2} xs={12} sm={3}>
-          
+            <Typography  ml={-2} variant="overline">Predictions</Typography>
 
               <Box sx={{ textAlign: "center" }}>
 
                 <Typography sx={{ fontWeight: "bold"}} className={classes.gradientText} variant="h4">42</Typography>
-                <Typography  ml={-2} variant="overline">Predictions</Typography>
+
               </Box>
             </Grid>
            </Grid>
