@@ -49,7 +49,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         // Outcome variables
         //uint currentPrediction; // current prediction value
         uint outcome; // contains outcome upon completion
-        uint[3] committedAmountBucket; // total commmitted amount per bucket 
+        uint[] committedAmountBucket; // total commmitted amount per bucket 
     }
 
     // Prediction Mapping 
@@ -105,10 +105,16 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         bool permissioned,  // permission flag 
         uint deadline, // timestamp to end market in seconds since the epoch
         string memory category, // tags for market
-        string memory apiEndpoint // api endpoint for oracle
+        string memory apiEndpoint, // api endpoint for oracle
+        uint[] memory zeroCommittedAmount // empty array for bucket initialisation
         ) 
         payable public {
         
+        // Check whether buckets are empty
+        for (uint i = 0; i < zeroCommittedAmount.length; i++) {
+            require(zeroCommittedAmount[i] == 0, "You must supply an empty array");
+        }
+
         //Calculate rewards and check if paid
         // Native ETH case
         if (msg.value != 0 && rewardToken == nullAddress){
@@ -125,10 +131,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         } else{
             revert("Reward token specification unclear.");
         }
-
-        // Initialise dynamic array with zeros
-        uint[3] memory committedAmount;
-
+        
         // Init market
         predictionMarkets[predictionCounter] = predictionInstance(
             predictionQuestion, // question 
@@ -141,12 +144,11 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
             permissioned,  // permission flag 
             deadline, // timestamp to end market in seconds since the epoch
             [category, apiEndpoint], // tags for market
-            //apiEndpoint, // api endpoint for outcome
             predictionCounter, // id of struct
             msg.sender, // owner
             //0, // current prediction value
             0, // sets outcome to placeholder of 0
-            committedAmount // total commmitted amount per bucket
+            zeroCommittedAmount // total commmitted amount per bucket
         );
 
         predictionCounter += 1;
@@ -262,7 +264,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         // Get total value of correct bets for bucket
         uint totalCorrectBet = predictionMarkets[predictionId].committedAmountBucket[correctBucketIndex];
         // Get 
-        uint[3] memory buckets = predictionMarkets[predictionId].committedAmountBucket;
+        uint[] memory buckets = predictionMarkets[predictionId].committedAmountBucket;
         uint totalCommittedAmount = 0;
         for (uint i = 0; i < buckets.length; i++) {
             totalCommittedAmount += buckets[i];
