@@ -7,8 +7,11 @@ import pandas as pd
 from PIL import Image
 from io import BytesIO
 
-raw_data = 'temp_save_nft_data.csv'
-nft_data = pd.read_csv('temp_save_nft_data.csv', low_memory=False)
+from config import NFT_MARKETPLACE_RAW_DATA
+
+raw_data = NFT_MARKETPLACE_RAW_DATA
+
+nft_data = pd.read_csv(raw_data, low_memory=False)
 nft_data = nft_data.drop_duplicates(subset=nft_data.columns.difference(['usdPrice', 'Unnamed: 0']))
 
 # Load mapping if stored locally
