@@ -6,7 +6,7 @@ import pandas as pd
 from PIL import Image
 from io import BytesIO
 
-
+from config import NFT_MARKETPLACE_RAW_DATA
 
 
 
@@ -86,7 +86,7 @@ def get_favorite_color(nft_links, url_to_ref):
     R = 0
     G = 0
     B = 0
-    # As a few Exceptions may occur, retur (0,0,0) by default
+    # As a few Exceptions may occur, return (0,0,0) by default
     try:
         # Iterate over NFT links
         for nft_link in nft_links:
@@ -199,8 +199,9 @@ def get_actor_pnl(operations):
                     pnl += sell - buy            
     return pnl
 
-def analyse_NFT_maketplace ():
-    nft_data = pd.read_csv('temp_save_nft_data.csv', low_memory=False)
+def analyse_NFT_maketplace (filename):
+    # Load the dataset for NFT DATA
+    nft_data = pd.read_csv(filename, low_memory=False)
     nft_data = nft_data.drop_duplicates(subset=nft_data.columns.difference(['usdPrice', 'Unnamed: 0']))
 
     # Defining relevant DF fields for NFT analysis
@@ -221,13 +222,15 @@ def analyse_NFT_maketplace ():
 
     filtered_nft_data = nft_data[analysis_columns].loc[nft_data['count'] == 1].drop(columns=['count']).drop_duplicates()
 
+    # Define a list of people having at least one tx
     sellers = list(filtered_nft_data['from'].unique())
     buyers = list(filtered_nft_data['to'].unique())
-
     actors = list(set(sellers + buyers))
 
+    # Init the dictionnary to store the data
     analysed_data = initialize_data(actors)
 
+    # Fill in the dictionnary with the relevant data
     for _, row in filtered_nft_data.iterrows():
         hash_id = row['txId']
         timestamp = int(row['createOn'])
@@ -253,6 +256,7 @@ def analyse_NFT_maketplace ():
         analysed_data[seller]['last_operations'].insert(0, hash_id)
         analysed_data[seller]['volume']  += value
 
+        # Init a list if first transaction for a given NFT in collection or append otherwise
         if (collection_name + '/' + contract in analysed_data[buyer]['operations'].keys()):
             if (nft_name+tokenId in analysed_data[buyer]['operations'][collection_name + '/' + contract].keys()):
                 analysed_data[buyer]['operations'][collection_name + '/' + contract][nft_name+tokenId].append({
@@ -307,6 +311,7 @@ def analyse_NFT_maketplace ():
                     'timestamp': timestamp
                 }]
 
+    # Save the files for further analysis
     with open('./analysed_data.pkl', 'wb') as fp:
         pickle.dump(analysed_data, fp)
     try:
@@ -315,16 +320,19 @@ def analyse_NFT_maketplace ():
     except:
         url_to_ref = {}
 
+    # Complete the data with favorite color, PNL per user per collection, PNL
     for i, actor in enumerate(actors):
-        print(i)
+        print(i, '/', len(actors))
         analysed_data[actor]['favorite_color'], url_to_ref = get_favorite_color(analysed_data[actor]['nft_links'], url_to_ref)
         add_per_user_per_collection_volume(analysed_data[actor]['operations'])
         analysed_data[actor]['pnl'] = get_actor_pnl(analysed_data[actor]['operations'])
 
+    # Save the final data
     with open('./url_to_ref.pkl', 'wb') as fp:
         pickle.dump(url_to_ref, fp)
 
     with open('./final_analysed_data.pkl', 'wb') as fp:
         pickle.dump(analysed_data, fp)
 
-analyse_NFT_maketplace()
+# Analyse the NFT marketplace
+analyse_NFT_maketplace(NFT_MARKETPLACE_RAW_DATA)

@@ -47,14 +47,14 @@ const themeConfig = {
       mode: "dark",
       primary: {
         // Lighter shade so it stands out on dark
-        main: '#272727'
+        main: '#242429'
       },
       secondary: {
         main: "#FFF",
       },
       background: {
-        default: colors.grey["900"],
-        paper: colors.grey["800"],
+        default: '#1C1B1E',
+        paper: '#242429',
       },
     },
   },

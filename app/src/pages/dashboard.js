@@ -41,19 +41,32 @@ function DashboardPage(props) {
   const [predictionMarketDetails, setPredictionMarketDetails] = useState(null);
   useEffect(() => {
     async function fetchData() {
-      const result = await get_prediction_market_details();
-      setPredictionMarketDetails(result);
-    }
+      try {
+        const result = await get_prediction_market_details();
+        console.log(result)
+        setPredictionMarketDetails(result);
+      } catch (error) {
+        console.error(error);
+        console.log('no network');
+      }
+      finally {
+        console.log('fetchData() completed');
+      }
+    } 
+    
     fetchData();
-    console.log(predictionMarketDetails)
+    console.log(predictionMarketDetails);
+    console.log(predictionMarketDetails?.unit);
   }, []);
-
+ 
 // url parsing  
 const url = window.location.href;
 const parts = url.split("?");
 const [predictionID, setPredictionID] = useState('EaeobLyUTZ3XO2lpRjDp')
 
-
+useEffect(() => {
+  console.log(predictionMarketDetails);
+}, [predictionMarketDetails]);
 //setPredictionID(parts[parts.length - 1]);
 
   const classes = useStyles();
@@ -64,10 +77,11 @@ const [predictionID, setPredictionID] = useState('EaeobLyUTZ3XO2lpRjDp')
     status: predictionStatus,
     error: predictionError,
   } = usePredictionOnce(predictionID);
+  console.log(predictionMarketDetails?.prediction_title)
   const predictionDetails = usePredictionOnce(predictionID)
 
 // page information
-  const predictionTitle = prediction?.predictionTitle
+  const predictionTitle = predictionMarketDetails?.prediction_title
   const options = prediction?.predictionBuckets
   const predictionCount = 47
   const predictionRewardAmount = 100

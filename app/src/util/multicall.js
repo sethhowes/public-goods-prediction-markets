@@ -1,24 +1,24 @@
 //Import packages
 import {  Multicall} from 'ethereum-multicall';
-import {ethers} from 'ethers';
+import Web3 from 'web3';
 
 // Define network addresses for multicall for mantle and scroll networks
 const MANTLE_NETWORK_MULTICALL_CONTRACT_ADDRESS = '0x';
 const SCROLL_NETWORK_MULTICALL_CONTRACT_ADDRESS = '0x';
+const rpc_url = 'https://goerli.gateway.tenderly.co/3Ugz1n4IRjoidr766XDDxX';
 
 //Returns multicall object
-function get_multi_call_provider(rpc_url){
+async function get_multi_call_provider(rpc_url){
    //Set provider to Tenderly :)
-   const provider = new ethers.providers.JsonRpcProvider(rpc_url);
+   const web3 = new Web3(rpc_url);
  
    // Get chain id
-   const chain_id = provider.getNetwork().chainId;
-   console.log(chain_id);
+   const chain_id = await web3.eth.getChainId();
  
    //Mantle network
    if (chain_id == 5001){
      var multicall = new Multicall({
-       ethersProvider: provider,
+       web3Instance: web3,
        tryAggregate: true,
        multicallCustomContractAddress: MANTLE_NETWORK_MULTICALL_CONTRACT_ADDRESS,
      });
@@ -26,14 +26,14 @@ function get_multi_call_provider(rpc_url){
      // Scroll network
    } else if (chain_id == 534353){
      var multicall = new Multicall({
-       ethersProvider: provider,
+       web3Instance: web3,
        tryAggregate: true,
        multicallCustomContractAddress: SCROLL_NETWORK_MULTICALL_CONTRACT_ADDRESS,
      });
    } else{
      // Create a new Multicall instance
      var multicall = new Multicall({
-       ethersProvider: provider,
+       web3Instance: web3,
        tryAggregate: true,
      });
    }
@@ -43,7 +43,7 @@ function get_multi_call_provider(rpc_url){
 // Returns prediction market details
 export async function get_prediction_market_details(rpc_url, contract_address, abi, prediction_id) {
   // Get multicall object
-  var multicall = get_multi_call_provider(rpc_url);
+  var multicall = await get_multi_call_provider(rpc_url);
   
   // Define the calls
   const contractCallContext = [
@@ -63,9 +63,7 @@ export async function get_prediction_market_details(rpc_url, contract_address, a
   ];
 
   // Execute all calls in a single multicall
-  
   const results = await multicall.call(contractCallContext);
-  
   
   // Unpack all individual results
   var all_res = results.results.contract.callsReturnContext;
@@ -103,7 +101,7 @@ export async function get_prediction_market_details(rpc_url, contract_address, a
 // Get quote
 async function get_quote(rpc_url, contract_address, abi, prediction_id, proposed_bet, bucket_index) {
   // Get multicall object
-  var multicall = get_multi_call_provider(rpc_url);
+  var multicall = await get_multi_call_provider(rpc_url);
   // Define the calls
   const contractCallContext = [
       {
@@ -134,7 +132,6 @@ async function get_quote(rpc_url, contract_address, abi, prediction_id, proposed
   return req_variables;
 }
 // Define the contract variables
-const rpc_url = 'https://goerli.gateway.tenderly.co/3Ugz1n4IRjoidr766XDDxX';
 var contract_address = '0x7de742F8baB59c668266D5a541fcd39f7D8DD598';
 var abi = [
       {

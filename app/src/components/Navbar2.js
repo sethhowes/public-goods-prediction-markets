@@ -83,7 +83,12 @@ function Navbar2(props) {
                 </Button>
               </Link>
              
-              <Button component="a" variant="contained" color="primary" onClick={handleConnectWallet}>
+              <Button component="a" variant="contained" color="primary" onClick={handleConnectWallet} sx={{
+                        backgroundImage:
+                          "linear-gradient(85.9deg, #1EBEA5 -14.21%, #00B5C4 18.25%, #00A8E6 52.49%, #0096FD 81.67%, #157AFB 111.44%)",
+                        color: "white",
+                        ml: 1,
+                      }}>
                 {walletAddress?.length > 0
                   ? "Connected: " +
                     String(walletAddress).substring(0, 6) +
