@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import AppBar from "@mui/material/AppBar";
 import Container from "@mui/material/Container";
 import Toolbar from "@mui/material/Toolbar";
@@ -20,12 +20,19 @@ import ListItemText from "@mui/material/ListItemText";
 import Section from "components/Section";
 import { useAuth } from "util/auth";
 import { useTheme } from "@mui/styles";
+import { connectWallet } from "util/connectWallet";
 
 function Navbar2(props) {
   const theme = useTheme();
   const auth = useAuth();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [menuState, setMenuState] = useState(null);
+  const [walletAddress, setWalletAddress] = useState("");
+
+  const handleConnectWallet = async () => {
+    const { address } = await connectWallet();
+    setWalletAddress(address);
+  }
 
   // Use inverted logo if specified
   // and we are in dark mode
@@ -67,14 +74,22 @@ function Navbar2(props) {
               </Link>
               <Link href="/makeprediction" passHref={true}>
                 <Button component="a" color="inherit">
-                  Learn                </Button>
+                  Learn{" "}
+                </Button>
               </Link>
               <Link href="/viewall" passHref={true}>
                 <Button component="a" color="inherit">
-                  All                </Button>
+                  All{" "}
+                </Button>
               </Link>
-              
-              
+              <Button component="a" variant="contained" color="primary" onClick={handleConnectWallet}>
+                {walletAddress?.length > 0
+                  ? "Connected: " +
+                    String(walletAddress).substring(0, 6) +
+                    "..." +
+                    String(walletAddress).substring(38)
+                  : "Connect Wallet"}
+              </Button>
             </Box>
             <IconButton
               onClick={() => setDrawerOpen(true)}
@@ -97,8 +112,9 @@ function Navbar2(props) {
                       component="a"
                       variant="contained"
                       sx={{
-                        backgroundImage: 'linear-gradient(85.9deg, #1EBEA5 -14.21%, #00B5C4 18.25%, #00A8E6 52.49%, #0096FD 81.67%, #157AFB 111.44%)',
-                        color: 'white',
+                        backgroundImage:
+                          "linear-gradient(85.9deg, #1EBEA5 -14.21%, #00B5C4 18.25%, #00A8E6 52.49%, #0096FD 81.67%, #157AFB 111.44%)",
+                        color: "white",
                         ml: 1,
                       }}
                     >

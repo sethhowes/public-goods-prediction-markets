@@ -4,11 +4,9 @@ pragma solidity ^0.8.9;
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract SciPredict is ChainlinkClient, ConfirmedOwner {
 
-    using SafeMath for uint;
     using Chainlink for Chainlink.Request;
 
     constructor() ConfirmedOwner(msg.sender) {
@@ -195,18 +193,28 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         require(block.timestamp < predictionMarkets[predictionId].deadline, "The prediction has ended");
         // Check transferred amounts - only native ETH
         require(msg.value > 0, "Amounts needs to surpass 0");
-        uint totalCommitted = getTotalCommitted(predictionId);
-        uint selectedBucketCommitted = predictionMarkets[predictionId].committedAmountBucket[bucketIndex];
-        uint scaledBet = (msg.value * totalCommitted).div(selectedBucketCommitted);
+        uint totalCommitted = getTotalCommitted(predictionId) + msg.value;
+        uint selectedBucketCommitted = predictionMarkets[predictionId].committedAmountBucket[bucketIndex] + msg.value;
+        uint scaledBet = (msg.value * totalCommitted) / selectedBucketCommitted;
         // Add scaled bet to user
         betsMade[predictionId][msg.sender][bucketIndex] += scaledBet;
         // Update amount committed to this bucket
         predictionMarkets[predictionId].committedAmountBucket[bucketIndex] += msg.value;
+        // Emit bet event
+        emit Bet(msg.sender, predictionId, scaledBet, msg.value);
     }
 
-    function getCurrentPrediction(uint predictionId) public view returns(uint){
-        // TODO: Figure out units
-        //       Use safemath library
+    function getCurrentQuote(uint predictionId, uint bucketIndex, uint proposedBet) public view returns(uint) {
+        uint totalCommitted = getTotalCommitted(predictionId) + proposedBet;
+        uint selectedBucketCommitted = predictionMarkets[predictionId].committedAmountBucket[bucketIndex] + proposedBet;
+        uint currentQuote = selectedBucketCommitted / totalCommitted;
+        return currentQuote;
+    }
+    
+    // Event to be emitted when user places bet
+    event Bet(address indexed _user, uint predictionId, uint scaledBet, uint betAmount);
+
+    function getCurrentPrediction(uint predictionId) public view returns(uint) {
 
         // Get market instance
         predictionInstance memory prediction = predictionMarkets[predictionId];
@@ -270,6 +278,10 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         requestOutcomeData(predictionMarkets[predictionId].categoryApiEndpoint[1]);
         // Remove finished prediction from live predictions
         updateLivePredictionIds();
+    }
+
+    function viewUserPrediction(uint predictionId) public view {
+
     }
 
     // Create new category
