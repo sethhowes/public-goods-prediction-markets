@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import {abi as contractABI} from "../../../smart-contracts/artifacts/contracts/SciPredict.sol/SciPredict.json";
+// import {abi as contractABI} from "../../../smart-contracts/artifacts/contracts/SciPredict.sol/SciPredict.json";
 
 const contractAddress = "0x9add861CE2D633c4E4Bfa7D2ef5e0904f7E9b5cc";
 
