@@ -17,3 +17,8 @@ OKX_DEX_ROUTER_ADDRESS = '0xc97b81b8a38b9146010df85f1ac714afe1554343'
 ###################
 PROXIES_SIGN_UP_URL = 'https://app.proxiesapi.com/login/signup.php'
 CHROME_DRIVER_PATH = r'C:\Users\lucas\selenium_driver\chromedriver.exe'
+
+###################
+#NFT MARKETPLACE RAW DATA
+###################
+NFT_MARKETPLACE_RAW_DATA = 'temp_save_nft_data.csv'
