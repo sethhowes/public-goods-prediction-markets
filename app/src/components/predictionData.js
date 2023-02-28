@@ -123,7 +123,7 @@ function predictionData(props) {
                 onDelete={() => {
                   setValues(values.filter((v) => v !== value));
                 }}
-                sx={{ mr: 1, mb: 1 }}
+                sx={{ mr: 1, mb: 0 }}
               />
             ))}
           </Grid>

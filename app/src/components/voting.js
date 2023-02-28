@@ -19,7 +19,7 @@ const VotingComponent = ({ useStyles, options, predictionBucketPrices }) => {
   const handleFormAlert = (data) => {
     setFormAlert(data);
   };
-
+// 10 ^ 18
   const subtotal = getPrice(selectedOption) * quantity;
   const price = getPrice(selectedOption)
   const [showPayoff, setShowPayoff] = useState(); // 
@@ -67,13 +67,13 @@ const VotingComponent = ({ useStyles, options, predictionBucketPrices }) => {
 
             }}
           >
-    {option} - ${getPrice(index)}
+    {option} 
           </button>
         ))}
       </div>
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "20px" }}>
       <label>
-          Quantity:
+        Stake:   
           <input type="number" value={quantity} onChange={handleQuantityChange} style={{ width: "60px" }} />
         </label>
         <Button
