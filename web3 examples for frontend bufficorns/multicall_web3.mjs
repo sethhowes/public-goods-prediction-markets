@@ -1,6 +1,6 @@
 //Import packages
 import {  Multicall} from 'ethereum-multicall';
-import {ethers} from 'ethers';
+import Web3 from 'web3';
 
 // Define network addresses for multicall for mantle and scroll networks
 const MANTLE_NETWORK_MULTICALL_CONTRACT_ADDRESS = '0x';
@@ -9,17 +9,15 @@ const SCROLL_NETWORK_MULTICALL_CONTRACT_ADDRESS = '0x';
 //Returns multicall object
 async function get_multi_call_provider(rpc_url){
    //Set provider to Tenderly :)
-   const provider = new ethers.providers.JsonRpcProvider(rpc_url);
+   const web3 = new Web3(rpc_url);
  
    // Get chain id
-   const network = await provider.getNetwork();
-   const chain_id = network.chainId;;
-   console.log(chain_id);
+   const chain_id = await web3.eth.getChainId();
  
    //Mantle network
    if (chain_id == 5001){
      var multicall = new Multicall({
-       ethersProvider: provider,
+       web3Instance: web3,
        tryAggregate: true,
        multicallCustomContractAddress: MANTLE_NETWORK_MULTICALL_CONTRACT_ADDRESS,
      });
@@ -27,14 +25,14 @@ async function get_multi_call_provider(rpc_url){
      // Scroll network
    } else if (chain_id == 534353){
      var multicall = new Multicall({
-       ethersProvider: provider,
+       web3Instance: web3,
        tryAggregate: true,
        multicallCustomContractAddress: SCROLL_NETWORK_MULTICALL_CONTRACT_ADDRESS,
      });
    } else{
      // Create a new Multicall instance
      var multicall = new Multicall({
-       ethersProvider: provider,
+       web3Instance: web3,
        tryAggregate: true,
      });
    }
@@ -44,7 +42,7 @@ async function get_multi_call_provider(rpc_url){
 // Returns prediction market details
 async function get_prediction_market_details(rpc_url, contract_address, abi, prediction_id) {
   // Get multicall object
-  var multicall = get_multi_call_provider(rpc_url);
+  var multicall = await get_multi_call_provider(rpc_url);
   
   // Define the calls
   const contractCallContext = [
@@ -102,7 +100,7 @@ async function get_prediction_market_details(rpc_url, contract_address, abi, pre
 // Get quote
 async function get_quote(rpc_url, contract_address, abi, prediction_id, proposed_bet, bucket_index) {
   // Get multicall object
-  var multicall = get_multi_call_provider(rpc_url);
+  var multicall = await get_multi_call_provider(rpc_url);
   // Define the calls
   const contractCallContext = [
       {
