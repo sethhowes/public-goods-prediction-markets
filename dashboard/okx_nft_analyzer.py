@@ -200,6 +200,13 @@ def get_actor_pnl(operations):
     return pnl
 
 def analyse_NFT_maketplace (filename):
+    """
+    transform NFT raw data to NFT structured data
+    @params:
+        filename             - Required  : file storing the NFT raw data (str)
+    """
+
+
     # Load the dataset for NFT DATA
     nft_data = pd.read_csv(filename, low_memory=False)
     nft_data = nft_data.drop_duplicates(subset=nft_data.columns.difference(['usdPrice', 'Unnamed: 0']))
