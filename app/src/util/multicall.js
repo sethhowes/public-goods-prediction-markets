@@ -5,7 +5,6 @@ import Web3 from 'web3';
 // Define network addresses for multicall for mantle and scroll networks
 const MANTLE_NETWORK_MULTICALL_CONTRACT_ADDRESS = '0x';
 const SCROLL_NETWORK_MULTICALL_CONTRACT_ADDRESS = '0x';
-const rpc_url = 'https://goerli.gateway.tenderly.co/3Ugz1n4IRjoidr766XDDxX';
 
 //Returns multicall object
 async function get_multi_call_provider(rpc_url){
@@ -132,6 +131,7 @@ async function get_quote(rpc_url, contract_address, abi, prediction_id, proposed
   return req_variables;
 }
 // Define the contract variables
+const rpc_url = 'https://goerli.gateway.tenderly.co/3Ugz1n4IRjoidr766XDDxX';
 var contract_address = '0x7de742F8baB59c668266D5a541fcd39f7D8DD598';
 var abi = [
       {

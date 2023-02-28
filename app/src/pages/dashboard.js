@@ -23,6 +23,7 @@ import { makeStyles } from "@mui/styles";
 import { requireAuth } from "util/auth";
 import { usePredictionOnce } from "util/db";
 import {get_prediction_market_details} from 'util/multicall.js'
+import Web3 from 'web3';
 
 const useStyles = makeStyles((theme) => ({
   gradientText: {
@@ -38,53 +39,586 @@ const useStyles = makeStyles((theme) => ({
 
 
 function DashboardPage(props) {
-  const [predictionMarketDetails, setPredictionMarketDetails] = useState(null);
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const result = await get_prediction_market_details();
-        console.log(result)
-        setPredictionMarketDetails(result);
-      } catch (error) {
-        console.error(error);
-        console.log('no network');
-      }
-      finally {
-        console.log('fetchData() completed');
-      }
-    } 
-    
-    fetchData();
-    console.log(predictionMarketDetails);
-    console.log(predictionMarketDetails?.unit);
-  }, []);
- 
-// url parsing  
+  // url parsing  
+
+  const web3 = new Web3();
+
 const url = window.location.href;
 const parts = url.split("?");
-const [predictionID, setPredictionID] = useState('EaeobLyUTZ3XO2lpRjDp')
+let prediction_id = 0
+prediction_id = parts[parts.length - 1]
 
+const rpc_url = 'https://goerli.gateway.tenderly.co/3Ugz1n4IRjoidr766XDDxX';
+const contract_address = '0x7de742F8baB59c668266D5a541fcd39f7D8DD598';
+const abi = [
+  {
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "id",
+        "type": "bytes32"
+      }
+    ],
+    "name": "ChainlinkCancelled",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "id",
+        "type": "bytes32"
+      }
+    ],
+    "name": "ChainlinkFulfilled",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "id",
+        "type": "bytes32"
+      }
+    ],
+    "name": "ChainlinkRequested",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferRequested",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "acceptOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "predictionId",
+        "type": "uint256"
+      }
+    ],
+    "name": "claimFunds",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "predictionId",
+        "type": "uint256"
+      }
+    ],
+    "name": "closeMarket",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "newBuckets",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "predictionId",
+        "type": "uint256"
+      }
+    ],
+    "name": "createNewBuckets",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "predictionQuestion",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "unit",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "predictionBucket",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "rewardAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "rewardToken",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "incentiveCurve",
+        "type": "string"
+      },
+      {
+        "internalType": "bool",
+        "name": "permissioned",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "category",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "apiEndpoint",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "committedAmount",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "createPrediction",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "_requestId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_outcome",
+        "type": "uint256"
+      }
+    ],
+    "name": "fulfill",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "predictionId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getCurrentPrediction",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getLivePredictionIds",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "predictionId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getTotalCommitted",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "isWhitelisted",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "predictionId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "bucketIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "placeBet",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "predictionMarkets",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "predictionQuestion",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "unit",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "rewardAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "rewardToken",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "incentiveCurve",
+        "type": "string"
+      },
+      {
+        "internalType": "bool",
+        "name": "permissioned",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "outcome",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "apiEndpoint",
+        "type": "string"
+      }
+    ],
+    "name": "requestOutcomeData",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "requestId",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalPredictions",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "updateLivePredictionIds",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "predictionId",
+        "type": "uint256"
+      }
+    ],
+    "name": "viewPrediction",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "predictionQuestion",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "unit",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "predictionBucket",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "rewardAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "rewardToken",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "incentiveCurve",
+            "type": "string"
+          },
+          {
+            "internalType": "bool",
+            "name": "permissioned",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "deadline",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string[2]",
+            "name": "categoryApiEndpoint",
+            "type": "string[2]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "outcome",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "committedAmountBucket",
+            "type": "uint256[]"
+          }
+        ],
+        "internalType": "struct SciPredict.predictionInstance",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
+const [predictionMarketDetails, setPredictionMarketDetails] = useState(null);
 useEffect(() => {
-  console.log(predictionMarketDetails);
-}, [predictionMarketDetails]);
-//setPredictionID(parts[parts.length - 1]);
+  async function fetchData() {
 
+    const result = await get_prediction_market_details(rpc_url, contract_address, abi, prediction_id);
+    setPredictionMarketDetails(result);
+  } 
+  
+  fetchData();
+}, []);
+ 
+//setPredictionID(parts[parts.length - 1]);
+console.log(predictionMarketDetails)
+
+//Handle Big Number
+// Convert prediction_bucket to readable values
+
+// Convert reward_amount to a readable value
+const readable_reward_amount = web3.utils.hexToNumber(predictionMarketDetails?.reward_amount?.hex);
+
+// Convert deadline to a readable value (assuming it represents a Unix timestamp)
+const readable_deadline = new Date(web3.utils.hexToNumber(predictionMarketDetails?.deadline?.hex) * 1000).toLocaleString();
+
+// Convert prediction_id to a readable value
+const readable_prediction_id = web3.utils.hexToNumber(predictionMarketDetails?.prediction_id?.hex);
+
+// Convert outcome to a readable value
+const readable_outcome = web3.utils.hexToNumber(predictionMarketDetails?.outcome?.hex);
+
+// Convert committed_amount_bucket to readable values
+const readable_committed_amount_bucket = predictionMarketDetails?.committed_amount_bucket?.map(bucket => web3.utils.hexToNumber(bucket.hex));
+
+
+/////////
   const classes = useStyles();
 
 
-  const {
+/*   const {
     data: prediction,
     status: predictionStatus,
     error: predictionError,
   } = usePredictionOnce(predictionID);
-  console.log(predictionMarketDetails?.prediction_title)
-  const predictionDetails = usePredictionOnce(predictionID)
+  console.log(predictionMarketDetails?.prediction_title) */
+  //const predictionDetails = usePredictionOnce(predictionID)
 
 // page information
   const predictionTitle = predictionMarketDetails?.prediction_title
-  const options = prediction?.predictionBuckets
+  const options = predictionMarketDetails?.prediction_bucket?.map((bucket) => {
+    if (predictionMarketDetails?.prediction_bucket.length === 2 && bucket.type === 'BigNumber' && (bucket.hex === '0x00' || bucket.hex === '0x01')) {
+      return bucket.hex === '0x00' ? 'No' : 'Yes';
+    } else {
+      return parseInt(bucket.hex);
+    }
+  });
   const predictionCount = 47
-  const predictionRewardAmount = 100
+  const predictionRewardAmount = readable_reward_amount
   const predictionBucketPrices = [0.91, 0.07, 0.09]
 
 //graph data
@@ -203,10 +737,10 @@ useEffect(() => {
               <PeopleIcon />
 
                 <Typography sx={{ fontWeight: 'bold', marginLeft: 2 }}>
-                  <strong style={{ fontWeight: 'bold', padding: 3, ML: 5}}>Predictions:</strong>
+                  <strong style={{ fontWeight: 'bold', padding: 3, ML: 5}}>Deadline:</strong>
                 </Typography>
                 <Typography sx={{ fontWeight: 'bold', marginLeft: 2 }} className={classes.gradientText}>
-                  {predictionCount}
+                  {readable_deadline}
                 </Typography>
               </Box>
                             
