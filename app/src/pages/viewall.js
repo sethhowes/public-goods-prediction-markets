@@ -204,11 +204,11 @@ const useStyles = makeStyles((theme) => ({
                       <Container>
                     <Grid container={true} justifyContent="center" >
                     <Grid item={true} mt={3} mb={2} xs={12} sm={3}>
-                    <Typography  ml={0} variant="overline">Votes</Typography>
 
                       <Box sx={{ textAlign: "center" }}>
 
                         <Typography  sx={{ fontWeight: "bold"}} className={classes.gradientText} variant="h4">51</Typography>
+                        <Typography  ml={0} variant="overline">Votes</Typography>
 
                       </Box>
                     </Grid>
@@ -223,12 +223,12 @@ const useStyles = makeStyles((theme) => ({
                       <Container>
                     <Grid container={true} justifyContent="center" >
                     <Grid item={true} mt={3} mb={2} xs={12} sm={3}>
-                    <Typography  ml={0} variant="overline">Staked</Typography>
+                    
 
                       <Box sx={{ textAlign: "center" }}>
 
                         <Typography  sx={{ fontWeight: "bold"}} className={classes.gradientText} variant="h4">1</Typography>
-
+                        <Typography  ml={0} variant="overline">Staked</Typography>
                       </Box>
                     </Grid>
                   </Grid>
