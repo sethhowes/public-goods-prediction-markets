@@ -1,34 +1,102 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
+//Import libraries
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
 
+//SciPredict contract
 contract SciPredict is ChainlinkClient, ConfirmedOwner {
-
-    using Chainlink for Chainlink.Request;
-
-    constructor() ConfirmedOwner(msg.sender) {
-        setChainlinkToken(0x326C977E6efc84E512bB9C30f76E30c160eD06FB);
-        setChainlinkOracle(0xCC79157eb46F5624204f47AB42b3906cAA40eaB7);
-        jobId = "c1c5e92880894eb6b27d3cae19670aa3";
-        fee = (1 * LINK_DIVISIBILITY) / 10; // 0,1 * 10**18 (Varies by network and job)
+    //Set general variables
+    address nullAddress = 0x0000000000000000000000000000000000000000;
+    
+    //Get chain id
+    function retrieveChainId() public view returns (uint256) {
+        uint256 id;
+        assembly {
+            id := chainid()
+        }
+        return id;
     }
 
-
+    //Only creator modifier
+    modifier onlyCreator(uint predictionId) {
+        require(msg.sender == predictionMarkets[predictionId].market_owner);
+        _;
+    }
+    
+    //Chainlink import
+    using Chainlink for Chainlink.Request;
     bytes32 private jobId;
     uint256 private fee;
     uint private oraclePredictionId;
 
-    modifier onlyCreator(uint predictionId) {
-        require(msg.sender == predictionMarkets[predictionId].owner);
-        _;
+    //TODO UPDATE
+    //Chainlink setting for multiple networks
+    //Mainnet
+    address chainLinkToken_mainnet = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;
+    address chainLinkOracle_mainnet = 0xCC79157eb46F5624204f47AB42b3906cAA40eaB7;
+    bytes32 jobId_mainnet = "c1c5e92880894eb6b27d3cae19670aa3";
+    uint256 fee_mainnet = (1 * LINK_DIVISIBILITY) / 10;
+
+    //Polygon 
+    address chainLinkToken_polygon = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;
+    address chainLinkOracle_polygon = 0xCC79157eb46F5624204f47AB42b3906cAA40eaB7;
+    bytes32 jobId_polygon = "c1c5e92880894eb6b27d3cae19670aa3";
+    uint256 fee_polygon = (1 * LINK_DIVISIBILITY) / 10;
+
+    //Mantle
+    address chainLinkToken_mantle = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;
+    address chainLinkOracle_mantle = 0xCC79157eb46F5624204f47AB42b3906cAA40eaB7;
+    bytes32 jobId_mantle = "c1c5e92880894eb6b27d3cae19670aa3";
+    uint256 fee_mantle = (1 * LINK_DIVISIBILITY) / 10;
+
+    //Scroll
+    address chainLinkToken_scroll = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;
+    address chainLinkOracle_scroll = 0xCC79157eb46F5624204f47AB42b3906cAA40eaB7;
+    bytes32 jobId_scroll = "c1c5e92880894eb6b27d3cae19670aa3";
+    uint256 fee_scroll = (1 * LINK_DIVISIBILITY) / 10;
+
+    constructor() ConfirmedOwner(msg.sender) {
+        uint256 chainId = retrieveChainId();
+        //Mainnet
+        if (chainId == 1){
+            setChainlinkToken(chainLinkToken_mainnet);
+            setChainlinkOracle(chainLinkOracle_mainnet);
+            jobId = jobId_mainnet;
+            fee = fee_mainnet;
+        //Polygon mainnet
+        } else if (chainId == 137){
+            setChainlinkToken(chainLinkToken_polygon);
+            setChainlinkOracle(chainLinkOracle_polygon);
+            jobId = jobId_polygon;
+            fee = fee_polygon;
+        //Mantle testnet
+        } else if (chainId == 5001){
+            setChainlinkToken(chainLinkToken_mantle);
+            setChainlinkOracle(chainLinkOracle_mantle);
+            jobId = jobId_mantle;
+            fee = fee_mantle;
+        //Scroll testnet
+        } else if (chainId == 534353){
+            setChainlinkToken(chainLinkToken_scroll);
+            setChainlinkOracle(chainLinkOracle_scroll);
+            jobId = jobId_scroll;
+            fee = fee_scroll;
+        }
+    }
+
+    //Change chainlink oracle parameters - required for newer chains that have no chainlink yet
+    function changeOracleParameters(address _chainLinkToken, address _chainLinkOracle, bytes32 _jobId, uint256 _fee) onlyOwner external {
+        setChainlinkToken(_chainLinkToken);
+        setChainlinkOracle(_chainLinkOracle);
+        jobId = _jobId;
+        fee = _fee; // 0,1 * 10**18 (Varies by network and job)
     }
 
     //Prediction instance struct 
     struct predictionInstance {
-        
         // Market creator input
         string predictionQuestion; // question 
         string unit; // unit 
@@ -39,12 +107,11 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         string incentiveCurve; // expontential, linear, or none
         bool permissioned;  // permission flag 
         uint deadline; // timestamp to end market in seconds since the epoch
-        string[2] categoryApiEndpoint; // tags for market
-        //string apiEndpoint; // api for getting outcome
+        string[2] categoryApiEndpoint; // tags for market at [0] and api endpoint at [1]
         
         // Internal parameters
         uint id; // id of struct
-        address owner; // market creator
+        address market_owner; // market creator
 
         // Outcome variables
         //uint currentPrediction; // current prediction value
@@ -55,15 +122,28 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     // Prediction Mapping 
     // Map prediction id to metadata
     mapping(uint => predictionInstance) public predictionMarkets;
-    // map prediction id to bets
-    mapping(uint => mapping(address => mapping(uint => uint))) betsMade;
+    // Map prediction id to bets
+    mapping(uint => mapping(address => mapping(uint => uint))) betsMadePerBucket;
+    mapping(uint => mapping(address => mapping(uint => uint))) betsMadePerBucketValue;
 
+    // User per market handling
+    mapping(uint => address[]) userPerMarket;
+
+    function addMarketUser(uint id, address _user) internal {
+        userPerMarket[id].push(_user);
+    }
+
+    function getMarketUser(uint id, uint index) public view returns(address){
+        return userPerMarket[id][index];
+    }
+
+    function userPerMarketLength(uint id) public view returns(uint){
+        return userPerMarket[id].length;
+    }
 
     // Number predictions
     uint predictionCounter = 0;
     uint[] livePredictions;
-
-    address nullAddress = 0x0000000000000000000000000000000000000000;
 
     function requestOutcomeData(string memory apiEndpoint) public returns (bytes32 requestId) {
         Chainlink.Request memory req = buildChainlinkRequest(
@@ -145,7 +225,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
             deadline, // timestamp to end market in seconds since the epoch
             [category, apiEndpoint], // tags for market
             predictionCounter, // id of struct
-            msg.sender, // owner
+            msg.sender, // market_owner
             //0, // current prediction value
             0, // sets outcome to placeholder of 0
             zeroCommittedAmount // total commmitted amount per bucket
@@ -173,7 +253,6 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
 
           if (prediction.deadline > block.timestamp){
             livePredictions.push(prediction.id);
-            // livePredictionCounter += 1;
           }
       }
     }
@@ -183,7 +262,6 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         return livePredictions;
     }
 
-
    // Whitelist check - TO IMPLEMENT CREDENTIALS CURRENTLY DUMMY
    function isWhitelisted() public view returns(bool) {
       return msg.sender == msg.sender;
@@ -192,20 +270,31 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     function placeBet(uint predictionId, uint bucketIndex) public payable {
         // Whitelist check
         require(isWhitelisted(), "User not whitelisted");
+
+        // Deadline check
         require(block.timestamp < predictionMarkets[predictionId].deadline, "The prediction has ended");
+        
         // Check transferred amounts - only native ETH
         require(msg.value > 0, "Amounts needs to surpass 0");
         uint totalCommitted = getTotalCommitted(predictionId) + msg.value;
         uint selectedBucketCommitted = predictionMarkets[predictionId].committedAmountBucket[bucketIndex] + msg.value;
         uint scaledBet = (msg.value * totalCommitted) / selectedBucketCommitted;
+        
         // Add scaled bet to user
-        betsMade[predictionId][msg.sender][bucketIndex] += scaledBet;
+        betsMadePerBucket[predictionId][msg.sender][bucketIndex] += scaledBet;
+        betsMadePerBucketValue[predictionId][msg.sender][bucketIndex] += msg.value;
+        
+        //Add user to market
+        addMarketUser(predictionId, msg.sender);
+        
         // Update amount committed to this bucket
         predictionMarkets[predictionId].committedAmountBucket[bucketIndex] += msg.value;
+        
         // Emit bet event
         emit Bet(msg.sender, predictionId, scaledBet, msg.value);
     }
 
+    // Get current quote for placing a bet
     function getCurrentQuote(uint predictionId, uint bucketIndex, uint proposedBet) public view returns(uint) {
         uint totalCommitted = getTotalCommitted(predictionId) + proposedBet;
         uint selectedBucketCommitted = predictionMarkets[predictionId].committedAmountBucket[bucketIndex] + proposedBet;
@@ -216,8 +305,8 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     // Event to be emitted when user places bet
     event Bet(address indexed _user, uint predictionId, uint scaledBet, uint betAmount);
 
+    // Get current prediction
     function getCurrentPrediction(uint predictionId) public view returns(uint) {
-
         // Get market instance
         predictionInstance memory prediction = predictionMarkets[predictionId];
         
@@ -229,7 +318,12 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
             totalCommittedFunds += prediction.committedAmountBucket[i];
         }
 
-        return weightedValue/totalCommittedFunds;
+        // Check denominator
+        if (totalCommittedFunds != 0){
+            return weightedValue/totalCommittedFunds;
+        } else{
+            return 0;
+        }
     }
 
     // Gets the index for the correct outcome
@@ -258,7 +352,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         // Get index of bucket with correct outcome
         uint correctBucketIndex = getCorrectBucketIndex(predictionId);
         // Get bet placed by user on correct outcome
-        uint correctOutcomeBet = betsMade[predictionId][msg.sender][correctBucketIndex];
+        uint correctOutcomeBet = betsMadePerBucket[predictionId][msg.sender][correctBucketIndex];
         // Bet must be greater than 0
         require(correctOutcomeBet != 0, "You did not place a correct bet");
         // Get total value of correct bets for bucket
@@ -282,8 +376,14 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         updateLivePredictionIds();
     }
 
-    function viewUserPrediction(uint predictionId) public view {
+    //View value per bets
+    function viewUserValuePerBucket(uint predictionId, address user, uint bucketIndex) public view returns(uint) {
+        return betsMadePerBucketValue[predictionId][user][bucketIndex];
+    }
 
+    //View scaled bets
+    function viewUserScaledBetsPerBucket(uint predictionId, address user, uint bucketIndex) public view returns(uint) {
+        return betsMadePerBucket[predictionId][user][bucketIndex];
     }
 
     // Create new category
