@@ -4,11 +4,9 @@ pragma solidity ^0.8.9;
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract SciPredict is ChainlinkClient, ConfirmedOwner {
 
-    using SafeMath for uint;
     using Chainlink for Chainlink.Request;
 
     constructor() ConfirmedOwner(msg.sender) {
@@ -51,7 +49,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         // Outcome variables
         //uint currentPrediction; // current prediction value
         uint outcome; // contains outcome upon completion
-        uint[3] committedAmountBucket; // total commmitted amount per bucket 
+        uint[] committedAmountBucket; // total commmitted amount per bucket 
     }
 
     // Prediction Mapping 
@@ -107,10 +105,16 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         bool permissioned,  // permission flag 
         uint deadline, // timestamp to end market in seconds since the epoch
         string memory category, // tags for market
-        string memory apiEndpoint // api endpoint for oracle
+        string memory apiEndpoint, // api endpoint for oracle
+        uint[] memory zeroCommittedAmount // empty array for bucket initialisation
         ) 
         payable public {
         
+        // Check whether buckets are empty
+        for (uint i = 0; i < zeroCommittedAmount.length; i++) {
+            require(zeroCommittedAmount[i] == 0, "You must supply an empty array");
+        }
+
         //Calculate rewards and check if paid
         // Native ETH case
         if (msg.value != 0 && rewardToken == nullAddress){
@@ -127,10 +131,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         } else{
             revert("Reward token specification unclear.");
         }
-
-        // Initialise dynamic array with zeros
-        uint[3] memory committedAmount;
-
+        
         // Init market
         predictionMarkets[predictionCounter] = predictionInstance(
             predictionQuestion, // question 
@@ -143,12 +144,11 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
             permissioned,  // permission flag 
             deadline, // timestamp to end market in seconds since the epoch
             [category, apiEndpoint], // tags for market
-            //apiEndpoint, // api endpoint for outcome
             predictionCounter, // id of struct
             msg.sender, // owner
             //0, // current prediction value
             0, // sets outcome to placeholder of 0
-            committedAmount // total commmitted amount per bucket
+            zeroCommittedAmount // total commmitted amount per bucket
         );
 
         predictionCounter += 1;
@@ -195,18 +195,28 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         require(block.timestamp < predictionMarkets[predictionId].deadline, "The prediction has ended");
         // Check transferred amounts - only native ETH
         require(msg.value > 0, "Amounts needs to surpass 0");
-        uint totalCommitted = getTotalCommitted(predictionId);
-        uint selectedBucketCommitted = predictionMarkets[predictionId].committedAmountBucket[bucketIndex];
-        uint scaledBet = (msg.value * totalCommitted).div(selectedBucketCommitted);
+        uint totalCommitted = getTotalCommitted(predictionId) + msg.value;
+        uint selectedBucketCommitted = predictionMarkets[predictionId].committedAmountBucket[bucketIndex] + msg.value;
+        uint scaledBet = (msg.value * totalCommitted) / selectedBucketCommitted;
         // Add scaled bet to user
         betsMade[predictionId][msg.sender][bucketIndex] += scaledBet;
         // Update amount committed to this bucket
         predictionMarkets[predictionId].committedAmountBucket[bucketIndex] += msg.value;
+        // Emit bet event
+        emit Bet(msg.sender, predictionId, scaledBet, msg.value);
     }
 
-    function getCurrentPrediction(uint predictionId) public view returns(uint){
-        // TODO: Figure out units
-        //       Use safemath library
+    function getCurrentQuote(uint predictionId, uint bucketIndex, uint proposedBet) public view returns(uint) {
+        uint totalCommitted = getTotalCommitted(predictionId) + proposedBet;
+        uint selectedBucketCommitted = predictionMarkets[predictionId].committedAmountBucket[bucketIndex] + proposedBet;
+        uint currentQuote = selectedBucketCommitted / totalCommitted;
+        return currentQuote;
+    }
+    
+    // Event to be emitted when user places bet
+    event Bet(address indexed _user, uint predictionId, uint scaledBet, uint betAmount);
+
+    function getCurrentPrediction(uint predictionId) public view returns(uint) {
 
         // Get market instance
         predictionInstance memory prediction = predictionMarkets[predictionId];
@@ -254,7 +264,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         // Get total value of correct bets for bucket
         uint totalCorrectBet = predictionMarkets[predictionId].committedAmountBucket[correctBucketIndex];
         // Get 
-        uint[3] memory buckets = predictionMarkets[predictionId].committedAmountBucket;
+        uint[] memory buckets = predictionMarkets[predictionId].committedAmountBucket;
         uint totalCommittedAmount = 0;
         for (uint i = 0; i < buckets.length; i++) {
             totalCommittedAmount += buckets[i];
@@ -270,6 +280,10 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         requestOutcomeData(predictionMarkets[predictionId].categoryApiEndpoint[1]);
         // Remove finished prediction from live predictions
         updateLivePredictionIds();
+    }
+
+    function viewUserPrediction(uint predictionId) public view {
+
     }
 
     // Create new category
