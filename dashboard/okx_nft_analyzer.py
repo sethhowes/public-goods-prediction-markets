@@ -1,16 +1,23 @@
+import cairosvg
 import pickle
 import requests
+
 import pandas as pd
 from PIL import Image
 from io import BytesIO
 
+
+
+
+
+
 def unique(sequence):
+
     """
     return unique values keeping order of a list
     @params:
         sequence        - Required  : sequence with duplicates ([str])
     """
-
     # Init empty set
     seen = set()
     # return ordered set from list
@@ -79,31 +86,56 @@ def get_favorite_color(nft_links, url_to_ref):
     R = 0
     G = 0
     B = 0
-    # Iterate over NFT links
-    for nft_link in nft_links:
-        # Check If NFT already downloaded locally
-        if nft_link in url_to_ref.keys():
-            # Use local image if already downloaded
-            img = Image.open(url_to_ref[nft_link])
-        else:
-            # Request image if not already downloaded
-            response = requests.get(nft_link)
-            img = Image.open(BytesIO(response.content))
-
-            # Update mapping url to ref and Save Image
-            if url_to_ref:
-                url_to_ref[nft_link] = f"./img/img_{len(url_to_ref.keys())-1}.png"
-                img.save(f"./img/img_{len(url_to_ref.keys())-1}.png")
+    # As a few Exceptions may occur, retur (0,0,0) by default
+    try:
+        # Iterate over NFT links
+        for nft_link in nft_links:
+            # Check If NFT already downloaded locally
+            if nft_link in url_to_ref.keys():
+                # Use local image if already downloaded
+                img = Image.open(url_to_ref[nft_link])
+            # PIL doens't work with svg
+            elif nft_link.endswith('svg'):
+                if url_to_ref:
+                    try:
+                        cairosvg.svg2png(url=nft_link, write_to=f"./img/img_{len(url_to_ref.keys())-1}.png")
+                        img = Image.open(f"./img/img_{len(url_to_ref.keys())-1}.png")
+                        url_to_ref[nft_link] = f"./img/img_{len(url_to_ref.keys())-1}.png"
+                    except:
+                        print('Can t get this image')
+                        continue
+                else:
+                    try:
+                        cairosvg.svg2png(url=nft_link, write_to="./img/img_0.png")
+                        img = Image.open("./img/img_0.png")
+                        url_to_ref[nft_link] = "./img/img_0.png"
+                    except:
+                        print('Can t get this image')
+                        continue
             else:
-                url_to_ref[nft_link] = "./img/img_0.png"
-                img.save("./img/img_0.png")
-        
-        # Get RGB values from RGB images
-        if img.mode == 'RGB':
-            colors.extend(list(img.getdata()))
-            R += sum([x[0] for x in colors]) / len(colors)
-            G += sum([x[1] for x in colors]) / len(colors)
-            B += sum([x[2] for x in colors]) / len(colors)
+                # Request image if not already downloaded
+                try:
+                    response = requests.get(nft_link)
+                    img = Image.open(BytesIO(response.content))
+                except:
+                    print('Can t get this image')
+                    continue
+                # Update mapping url to ref and Save Image
+                if url_to_ref:
+                    img.save(f"./img/img_{len(url_to_ref.keys())-1}.png")
+                    url_to_ref[nft_link] = f"./img/img_{len(url_to_ref.keys())-1}.png"                
+                else:
+                    img.save("./img/img_0.png")
+                    url_to_ref[nft_link] = "./img/img_0.png"
+
+            # Get RGB values from RGB images
+            if img.mode == 'RGB':
+                colors.extend(list(img.getdata()))
+                R += sum([x[0] for x in colors]) / len(colors)
+                G += sum([x[1] for x in colors]) / len(colors)
+                B += sum([x[2] for x in colors]) / len(colors)
+    except:
+        return get_color_name((0, 0, 0)), url_to_ref
 
     return get_color_name((R/len(nft_links), G/len(nft_links), B/len(nft_links))), url_to_ref
 
@@ -196,7 +228,7 @@ def analyse_NFT_maketplace ():
 
     analysed_data = initialize_data(actors)
 
-    for index, row in filtered_nft_data.iterrows():
+    for _, row in filtered_nft_data.iterrows():
         hash_id = row['txId']
         timestamp = int(row['createOn'])
         buyer = row['to']
