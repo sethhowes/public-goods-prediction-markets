@@ -67,6 +67,11 @@ function Navbar2(props) {
               </a>
             </Link>
             <Box sx={{ ml: 2, display: { md: "block", xs: "none" } }}>
+            <Link href="/viewall" passHref={true}>
+                <Button component="a" color="inherit">
+                  Dashboard{" "}
+                </Button>
+              </Link>
               <Link href="/dashboard" passHref={true}>
                 <Button component="a" color="inherit">
                   Predict
@@ -77,11 +82,7 @@ function Navbar2(props) {
                   Learn{" "}
                 </Button>
               </Link>
-              <Link href="/viewall" passHref={true}>
-                <Button component="a" color="inherit">
-                  All{" "}
-                </Button>
-              </Link>
+             
               <Button component="a" variant="contained" color="primary" onClick={handleConnectWallet}>
                 {walletAddress?.length > 0
                   ? "Connected: " +
