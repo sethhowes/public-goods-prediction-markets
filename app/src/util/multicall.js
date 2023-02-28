@@ -41,7 +41,7 @@ function get_multi_call_provider(rpc_url){
    return multicall;
 }
 // Returns prediction market details
-async function get_prediction_market_details(rpc_url, contract_address, abi, prediction_id) {
+export async function get_prediction_market_details(rpc_url, contract_address, abi, prediction_id) {
   // Get multicall object
   var multicall = get_multi_call_provider(rpc_url);
   
@@ -63,7 +63,9 @@ async function get_prediction_market_details(rpc_url, contract_address, abi, pre
   ];
 
   // Execute all calls in a single multicall
+  
   const results = await multicall.call(contractCallContext);
+  
   
   // Unpack all individual results
   var all_res = results.results.contract.callsReturnContext;

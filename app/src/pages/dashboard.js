@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Meta from "components/Meta";
 import DashboardSection2 from "components/DashboardSection2";
 import Footer from "components/Footer";
@@ -22,6 +22,8 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { makeStyles } from "@mui/styles";
 import { requireAuth } from "util/auth";
 import { usePredictionOnce } from "util/db";
+import {get_prediction_market_details} from 'util/multicall.js'
+
 const useStyles = makeStyles((theme) => ({
   gradientText: {
     backgroundClip: "text",
@@ -34,11 +36,23 @@ const useStyles = makeStyles((theme) => ({
 
 
 
+
 function DashboardPage(props) {
+  const [predictionMarketDetails, setPredictionMarketDetails] = useState(null);
+  useEffect(() => {
+    async function fetchData() {
+      const result = await get_prediction_market_details();
+      setPredictionMarketDetails(result);
+    }
+    fetchData();
+    console.log(predictionMarketDetails)
+  }, []);
+
 // url parsing  
 const url = window.location.href;
 const parts = url.split("?");
 const [predictionID, setPredictionID] = useState('EaeobLyUTZ3XO2lpRjDp')
+
 
 //setPredictionID(parts[parts.length - 1]);
 

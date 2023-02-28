@@ -199,35 +199,24 @@ function Navbar2(props) {
         onClose={() => setDrawerOpen(false)}
       >
         <List onClick={() => setDrawerOpen(false)} sx={{ width: "250px" }}>
-          <Link href="/about" passHref={true}>
-            <ListItem component="a" button={true}>
-              <ListItemText>About</ListItemText>
-            </ListItem>
-          </Link>
-          <Link href="/pricing" passHref={true}>
-            <ListItem component="a" button={true}>
-              <ListItemText>Pricing</ListItemText>
-            </ListItem>
-          </Link>
-          <Link href="/faq" passHref={true}>
-            <ListItem component="a" button={true}>
-              <ListItemText>FAQ</ListItemText>
-            </ListItem>
-          </Link>
-          <Link href="/contact" passHref={true}>
-            <ListItem component="a" button={true}>
-              <ListItemText>Contact</ListItemText>
-            </ListItem>
-          </Link>
-          <ListItem
-            button={true}
-            component="a"
-            href="https://medium.com"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <ListItemText>Blog</ListItemText>
-          </ListItem>
+        <Link href="/viewall" passHref={true}>
+                <Button component="a" color="inherit">
+                  Dashboard{" "}
+                </Button>
+              </Link>
+              <Link href="/dashboard" passHref={true}>
+                <Button component="a" color="inherit">
+                  Predict
+                </Button>
+              </Link>
+              <Link href="/makeprediction" passHref={true}>
+                <Button component="a" color="inherit">
+                  Learn{" "}
+                </Button>
+              </Link>
+         
+         
+         
 
           {!auth.user && (
             <>
