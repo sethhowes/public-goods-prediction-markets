@@ -21,7 +21,6 @@ import { Button } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import router from "next/router";
 import { useAuth } from "util/auth";
-import createWeb3Prediction from "util/createWeb3Prediction";
 
 const useStyles = makeStyles((theme) => ({
   gradientText: {
@@ -87,15 +86,6 @@ function DashboardPage(props) {
         message: "Prediction created successfully!",
       });
       router.replace("/viewall");
-    createWeb3Prediction(
-      predictionTitle,
-      predictionUnit,
-      predictionBuckets,
-      predictionRewardAmount,
-      predictionEndDate,
-      predictionCategory,
-      predictionApiEndpoint,
-    );
 
     handleFormAlert({
       type: "success",

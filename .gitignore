@@ -1,5 +1,4 @@
 # ignore ALL files in ANY directory named temp
-<<<<<<< HEAD
 _pycache_/
 
 *.csv
@@ -17,6 +16,8 @@ _pycache_/
 
 # next.js
 /.next/
+/.next
+/app/.next
 /out/
 
 # production
@@ -42,5 +43,4 @@ __pycache__/
 node_modules
 typechain-types
 artifacts
->>>>>>> 9bfd2106cd9ec2665697d491caba16517065085b
 .env
