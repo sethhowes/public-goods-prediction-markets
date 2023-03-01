@@ -21,6 +21,10 @@ import { Button } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import router from "next/router";
 import { useAuth } from "util/auth";
+import contract from "../util/contract";
+import { useSigner } from "wagmi";
+import convertUnixTime from "util/convertUnixTime";
+import { ethers } from "ethers";
 
 const useStyles = makeStyles((theme) => ({
   gradientText: {
@@ -32,6 +36,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 function DashboardPage(props) {
+  // Hook for getting signer object
+  const { data: signer, isError, isLoading } = useSigner();
+
   const [formAlert, setFormAlert] = useState(null);
   const auth = useAuth();
   const classes = useStyles();
@@ -44,7 +51,7 @@ function DashboardPage(props) {
     "Outcome 1",
     "Outcome 2",
   ]);
-  const [predictionRewardAmount, setPredictionRewardAmount] = useState(1);
+  const [predictionRewardAmount, setPredictionRewardAmount] = useState(3);
   const [predictionEndDate, setPredictionEndDate] = useState();
   const [predictionCategory, setPredictionCategory] = useState("finance");
   const [predictionApiEndpoint, setPredictionApiEndpoint] =
@@ -64,7 +71,10 @@ function DashboardPage(props) {
     setFormAlert(data);
   };
 
-  const handleSubmit = () => {
+  // Connect signer with contract
+  const contractWithSigner = contract.connect(signer);
+
+  const handleSubmit = async () => {
     createPrediction({
       predictionTitle,
       predictionDescription,
@@ -81,11 +91,31 @@ function DashboardPage(props) {
       user: auth.user.uid,
     });
 
-      handleFormAlert({
-        type: "success",
-        message: "Prediction created successfully!",
-      });
-      router.replace("/viewall");
+    // Converts date state object to UNIX time
+    const unixEndDate = convertUnixTime(predictionEndDate);
+    const tx = await contractWithSigner.createPrediction(
+      predictionTitle,
+      predictionUnit,
+      [1,2,3],
+      predictionRewardAmount,
+      ethers.constants.AddressZero,
+      predictionRewardCurve,
+      predictionPermissioned,
+      unixEndDate,
+      predictionCategory,
+      predictionApiEndpoint,
+      "test",
+      [1, 1, 1],
+      {
+        value: predictionRewardAmount,
+      }
+    );
+
+    handleFormAlert({
+      type: "success",
+      message: "Prediction created successfully!",
+    });
+    router.replace("/viewall");
 
     handleFormAlert({
       type: "success",

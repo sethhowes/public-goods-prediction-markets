@@ -20,7 +20,8 @@ import ListItemText from "@mui/material/ListItemText";
 import Section from "components/Section";
 import { useAuth } from "util/auth";
 import { useTheme } from "@mui/styles";
-import { connectWallet } from "util/connectWallet";
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+
 
 function Navbar2(props) {
   const theme = useTheme();
@@ -28,11 +29,6 @@ function Navbar2(props) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [menuState, setMenuState] = useState(null);
   const [walletAddress, setWalletAddress] = useState("");
-
-  const handleConnectWallet = async () => {
-    const { address } = await connectWallet();
-    setWalletAddress(address);
-  }
 
   // Use inverted logo if specified
   // and we are in dark mode
@@ -87,6 +83,8 @@ function Navbar2(props) {
                   Stake{" "}
                 </Button>
               </Link>
+              <ConnectButton />
+
             </Box>
             <IconButton
               onClick={() => setDrawerOpen(true)}
@@ -120,6 +118,7 @@ function Navbar2(props) {
                   </Link>
                 </>
               )}
+              
 
               {auth.user && (
                 <>
@@ -210,7 +209,7 @@ function Navbar2(props) {
                   Learn{" "}
                 </Button>
               </Link>
-         
+
          
          
 

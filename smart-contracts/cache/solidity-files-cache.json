@@ -2,15 +2,15 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/sethhowes/Desktop/public-goods-prediction-markets/smart-contracts/contracts/SciPredict.sol": {
-      "lastModificationDate": 1677450135704,
-      "contentHash": "448fcb2bacff9e78dd4763a78ff6e7b1",
+      "lastModificationDate": 1677683841632,
+      "contentHash": "61a26fc2403e5c18dbcf0ec73a0aa339",
       "sourceName": "contracts/SciPredict.sol",
       "solcConfig": {
         "version": "0.8.17",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -31,8 +31,7 @@
       "imports": [
         "@uniswap/lib/contracts/libraries/TransferHelper.sol",
         "@chainlink/contracts/src/v0.8/ChainlinkClient.sol",
-        "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol",
-        "@openzeppelin/contracts/utils/math/SafeMath.sol"
+        "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol"
       ],
       "versionPragmas": [
         "^0.8.9"
@@ -42,15 +41,15 @@
       ]
     },
     "/Users/sethhowes/Desktop/public-goods-prediction-markets/smart-contracts/node_modules/@uniswap/lib/contracts/libraries/TransferHelper.sol": {
-      "lastModificationDate": 1677343717330,
+      "lastModificationDate": 1677621468831,
       "contentHash": "7fad4038612c5f040ebd746a3e58e0db",
       "sourceName": "@uniswap/lib/contracts/libraries/TransferHelper.sol",
       "solcConfig": {
         "version": "0.8.17",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -77,15 +76,15 @@
       ]
     },
     "/Users/sethhowes/Desktop/public-goods-prediction-markets/smart-contracts/node_modules/@chainlink/contracts/src/v0.8/ChainlinkClient.sol": {
-      "lastModificationDate": 1677351508011,
+      "lastModificationDate": 1677621545937,
       "contentHash": "6af479cbde42f1a7225c9cebc6e32239",
       "sourceName": "@chainlink/contracts/src/v0.8/ChainlinkClient.sol",
       "solcConfig": {
         "version": "0.8.17",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -120,15 +119,15 @@
       ]
     },
     "/Users/sethhowes/Desktop/public-goods-prediction-markets/smart-contracts/node_modules/@chainlink/contracts/src/v0.8/ConfirmedOwner.sol": {
-      "lastModificationDate": 1677351508022,
+      "lastModificationDate": 1677621545937,
       "contentHash": "16d64572b0310127fc8a771e63be6d20",
       "sourceName": "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol",
       "solcConfig": {
         "version": "0.8.17",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -156,16 +155,51 @@
         "ConfirmedOwner"
       ]
     },
+    "/Users/sethhowes/Desktop/public-goods-prediction-markets/smart-contracts/node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol": {
+      "lastModificationDate": 1677621545987,
+      "contentHash": "06b6aefcae95de6d1597ad8e1d73a08b",
+      "sourceName": "@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
+      "solcConfig": {
+        "version": "0.8.17",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ENSInterface"
+      ]
+    },
     "/Users/sethhowes/Desktop/public-goods-prediction-markets/smart-contracts/node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol": {
-      "lastModificationDate": 1677351508004,
+      "lastModificationDate": 1677621545936,
       "contentHash": "9dc050539cdf1579d5650d41d0df9ec2",
       "sourceName": "@chainlink/contracts/src/v0.8/Chainlink.sol",
       "solcConfig": {
         "version": "0.8.17",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -194,51 +228,16 @@
         "Chainlink"
       ]
     },
-    "/Users/sethhowes/Desktop/public-goods-prediction-markets/smart-contracts/node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol": {
-      "lastModificationDate": 1677351475749,
-      "contentHash": "06b6aefcae95de6d1597ad8e1d73a08b",
-      "sourceName": "@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
-      "solcConfig": {
-        "version": "0.8.17",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "ENSInterface"
-      ]
-    },
     "/Users/sethhowes/Desktop/public-goods-prediction-markets/smart-contracts/node_modules/@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol": {
-      "lastModificationDate": 1677351475839,
+      "lastModificationDate": 1677621545989,
       "contentHash": "da5a0c3bd86c896f6a407f909c57edf3",
       "sourceName": "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
       "solcConfig": {
         "version": "0.8.17",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -264,16 +263,51 @@
         "LinkTokenInterface"
       ]
     },
+    "/Users/sethhowes/Desktop/public-goods-prediction-markets/smart-contracts/node_modules/@chainlink/contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol": {
+      "lastModificationDate": 1677621545986,
+      "contentHash": "14407a6ead15cff8a0e0a7f8037c68f5",
+      "sourceName": "@chainlink/contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+      "solcConfig": {
+        "version": "0.8.17",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ChainlinkRequestInterface"
+      ]
+    },
     "/Users/sethhowes/Desktop/public-goods-prediction-markets/smart-contracts/node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol": {
-      "lastModificationDate": 1677351475862,
+      "lastModificationDate": 1677621555068,
       "contentHash": "e1822c36361fc3a26b5a68df3ddab15d",
       "sourceName": "@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
       "solcConfig": {
         "version": "0.8.17",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -303,15 +337,15 @@
       ]
     },
     "/Users/sethhowes/Desktop/public-goods-prediction-markets/smart-contracts/node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol": {
-      "lastModificationDate": 1677351475878,
+      "lastModificationDate": 1677621555071,
       "contentHash": "27da4b2007d200dd5afff31dbf31ac99",
       "sourceName": "@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
       "solcConfig": {
         "version": "0.8.17",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -338,15 +372,15 @@
       ]
     },
     "/Users/sethhowes/Desktop/public-goods-prediction-markets/smart-contracts/node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol": {
-      "lastModificationDate": 1677351475749,
+      "lastModificationDate": 1677621546010,
       "contentHash": "24a98b0606654e662097eed9ffa91a11",
       "sourceName": "@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol",
       "solcConfig": {
         "version": "0.8.17",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -372,16 +406,16 @@
         "ENSResolver"
       ]
     },
-    "/Users/sethhowes/Desktop/public-goods-prediction-markets/smart-contracts/node_modules/@chainlink/contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol": {
-      "lastModificationDate": 1677351475716,
-      "contentHash": "14407a6ead15cff8a0e0a7f8037c68f5",
-      "sourceName": "@chainlink/contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+    "/Users/sethhowes/Desktop/public-goods-prediction-markets/smart-contracts/node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol": {
+      "lastModificationDate": 1677621546009,
+      "contentHash": "52ac6f99fb0635751ae4ed11139878fd",
+      "sourceName": "@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
       "solcConfig": {
         "version": "0.8.17",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -404,19 +438,19 @@
         "^0.8.0"
       ],
       "artifacts": [
-        "ChainlinkRequestInterface"
+        "BufferChainlink"
       ]
     },
     "/Users/sethhowes/Desktop/public-goods-prediction-markets/smart-contracts/node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol": {
-      "lastModificationDate": 1677351475714,
+      "lastModificationDate": 1677621546009,
       "contentHash": "99b3ee2c29bc0d1a5cba583d9e8d835e",
       "sourceName": "@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
       "solcConfig": {
         "version": "0.8.17",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -444,51 +478,16 @@
         "CBORChainlink"
       ]
     },
-    "/Users/sethhowes/Desktop/public-goods-prediction-markets/smart-contracts/node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol": {
-      "lastModificationDate": 1677351475714,
-      "contentHash": "52ac6f99fb0635751ae4ed11139878fd",
-      "sourceName": "@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
-      "solcConfig": {
-        "version": "0.8.17",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "BufferChainlink"
-      ]
-    },
     "/Users/sethhowes/Desktop/public-goods-prediction-markets/smart-contracts/node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol": {
-      "lastModificationDate": 1677351475871,
+      "lastModificationDate": 1677621555069,
       "contentHash": "6283e42024961596926c2b5015eef8e0",
       "sourceName": "@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
       "solcConfig": {
         "version": "0.8.17",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -515,15 +514,15 @@
       ]
     },
     "/Users/sethhowes/Desktop/public-goods-prediction-markets/smart-contracts/node_modules/@chainlink/contracts/src/v0.8/ConfirmedOwnerWithProposal.sol": {
-      "lastModificationDate": 1677351508031,
+      "lastModificationDate": 1677621545938,
       "contentHash": "8b1c5f02622cd87472493bda6595d1be",
       "sourceName": "@chainlink/contracts/src/v0.8/ConfirmedOwnerWithProposal.sol",
       "solcConfig": {
         "version": "0.8.17",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -552,15 +551,15 @@
       ]
     },
     "/Users/sethhowes/Desktop/public-goods-prediction-markets/smart-contracts/node_modules/@chainlink/contracts/src/v0.8/interfaces/OwnableInterface.sol": {
-      "lastModificationDate": 1677351475873,
+      "lastModificationDate": 1677621555069,
       "contentHash": "2e814c8a9f77897f6995436d97c23d99",
       "sourceName": "@chainlink/contracts/src/v0.8/interfaces/OwnableInterface.sol",
       "solcConfig": {
         "version": "0.8.17",
         "settings": {
           "optimizer": {
-            "enabled": false,
-            "runs": 200
+            "enabled": true,
+            "runs": 1000
           },
           "outputSelection": {
             "*": {
@@ -584,41 +583,6 @@
       ],
       "artifacts": [
         "OwnableInterface"
-      ]
-    },
-    "/Users/sethhowes/Desktop/public-goods-prediction-markets/smart-contracts/node_modules/@openzeppelin/contracts/utils/math/SafeMath.sol": {
-      "lastModificationDate": 1677433472833,
-      "contentHash": "2337f0279507b5edf14a07067adf0d05",
-      "sourceName": "@openzeppelin/contracts/utils/math/SafeMath.sol",
-      "solcConfig": {
-        "version": "0.8.17",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "SafeMath"
       ]
     }
   }

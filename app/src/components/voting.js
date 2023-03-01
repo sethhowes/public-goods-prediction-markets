@@ -1,53 +1,61 @@
 import React, { useState } from "react";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
-import {createVote } from "util/db";
-import {useAuth} from "util/auth";
+import { createVote } from "util/db";
+import { useAuth } from "util/auth";
+import { useSigner } from "wagmi";
+import contract from "../util/contract";
 
 const VotingComponent = ({ useStyles, options, predictionBucketPrices }) => {
+  // Get contract with signer to make bet
+  const { data: signer, isError, isLoading } = useSigner();
+  const contractWithSigner = contract.connect(signer);
+
   const [formAlert, setFormAlert] = useState(null);
-  const auth = useAuth()
+  const auth = useAuth();
 
   const classes = useStyles();
   const [selectedOption, setSelectedOption] = useState(null);
   const [stake, setStake] = useState(1);
   const getPrice = (index) => {
-    const prices = predictionBucketPrices
+    const prices = predictionBucketPrices;
     return prices[index];
   };
 
   const handleFormAlert = (data) => {
     setFormAlert(data);
   };
-// 10 ^ 18
+  // 10 ^ 18
   const subtotal = getPrice(selectedOption) * stake;
-  const price = getPrice(selectedOption)
-  const [showPayoff, setShowPayoff] = useState(); // 
+  const price = getPrice(selectedOption);
+  const [showPayoff, setShowPayoff] = useState(); //
   const handleOptionSelect = (index) => {
     setSelectedOption(index);
-    setShowPayoff(true)
+    setShowPayoff(true);
   };
-  const showValue = (selectedOption + 1)
+  const showValue = selectedOption + 1;
   const handleQuantityChange = (event) => {
     setQuantity(Number(event.target.value));
   };
-  const handlePrediction = () => {
+  const handlePrediction = async () => {
     handleFormAlert({
       type: "success",
-      message: `Prediction created successfully`
+      message: `Prediction created successfully`,
     });
-  createVote({selectedOption, stake, user: auth.user.uid})
+
+    const tx = await contractWithSigner.placeBet(0, 1, {value: 20})
+
+    createVote({ selectedOption, stake, user: auth.user.uid });
     // Your code to make prediction here...
   };
 
   return (
-  
     <div>
-        {formAlert && (
-      <Alert severity={formAlert.type} sx={{ mb: 3 }}>
-        {formAlert.message}
-      </Alert>
-    )}
+      {formAlert && (
+        <Alert severity={formAlert.type} sx={{ mb: 3 }}>
+          {formAlert.message}
+        </Alert>
+      )}
 
       <div style={{ display: "flex", flexDirection: "column" }}>
         {options?.map((option, index) => (
@@ -64,17 +72,28 @@ const VotingComponent = ({ useStyles, options, predictionBucketPrices }) => {
               marginTop: "2px",
               cursor: "pointer",
               fontWeight: "bold", // Add this line
-
             }}
           >
-    {option} 
+            {option}
           </button>
         ))}
       </div>
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "20px" }}>
-      <label>
-        Stake:   
-          <input type="number" value={stake} onChange={handleQuantityChange} style={{ width: "60px" }} />
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          marginTop: "20px",
+        }}
+      >
+        <label>
+          Stake:
+          <input
+            type="number"
+            value={stake}
+            onChange={handleQuantityChange}
+            style={{ width: "60px" }}
+          />
         </label>
         <Button
           disabled={!showPayoff}
@@ -88,24 +107,29 @@ const VotingComponent = ({ useStyles, options, predictionBucketPrices }) => {
             ml: 2,
           }}
         >
-Predict        </Button>
+          Predict{" "}
+        </Button>
       </div>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: "20px" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginTop: "20px",
+        }}
+      >
+        {showPayoff && <div>Subtotal: ${subtotal.toFixed(2)}</div>}
+      </div>
+
       {showPayoff && (
-        <div>
-        
-          Subtotal: ${(subtotal).toFixed(2)}
-        
+        <div
+          style={{ fontWeight: "bold", textAlign: "center", marginTop: "20px" }}
+          className={classes.gradientText}
+        >
+          Expected Payoff: ${(stake * 1 - subtotal).toFixed(2)}
         </div>
-         )}
-        </div>
-
-        {showPayoff && (
-
-<div style={{ fontWeight: "bold", textAlign: "center", marginTop: "20px" }} className={classes.gradientText}>
-Expected Payoff: ${((stake*1) - subtotal).toFixed(2)}
-        </div>)}
-      </div>
+      )}
+    </div>
   );
 };
 
