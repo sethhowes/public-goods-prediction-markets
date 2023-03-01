@@ -977,7 +977,7 @@ console.log(predictionMarketDetails)
                   <strong style={{ fontWeight: 'bold', padding: 3, ML: 5}}>Deadline:</strong>
                 </Typography>
                 <Typography component={'span'} sx={{ fontWeight: 'bold', marginLeft: 2 }} className={classes.gradientText}>
-                  {readableDeadline}
+				{new Date(web3.utils.toNumber(predictionMarketDetails?.deadline.hex) * 1000).toLocaleString()}
                 </Typography>
               </Box>
                             

@@ -28,6 +28,7 @@ import Avatar from '@mui/material/Avatar'
 import { requireAuth } from "util/auth";
 import {get_all_markets} from 'util/multicall.js'
 import Web3 from 'web3';
+const { toDateTime } = require('web3-utils');
 
 
 // Define the contract variables
@@ -779,6 +780,7 @@ var abi = [
   { id: 3, prediction: "What decade will we achieve AGI?", category: "risks", consensus: "2040s", price: 0.68, predictors: 22 },
   ]; */
 const useStyles = makeStyles((theme) => ({
+  
   priceChip: {
     backgroundColor: '#4caf50', 
     color: '#fff', 
@@ -911,14 +913,14 @@ console.log(allPredictionMarkets)
         />
       )    },
     {
-      flex: 0.1,
+      flex: 0.2,
       minWidth: 100,
       field: 'predictors',
-      headerName: 'Predictors',
+      headerName: 'Deadline',
       renderCell: ({ row }) => (
         <Chip
-          label={`${web3.utils.toHex(row.deadline)}`}
-          color="secondary"
+        label={`${new Date(web3.utils.toBN(row.deadline.hex) * 1000).toLocaleString()}`}
+        color="secondary"
           size="small"
           sx={{ fontWeight: "bold" }}
         />
