@@ -172,22 +172,21 @@ const useStyles = makeStyles((theme) => ({
         <Grid item={true} xs={12} md={3}>
         <Card>
                   <CardContent sx={{ padding: 3 }}>
-                  <Typography>Welcome to your SciPredict dashboard.</Typography>
+                  <Typography sx={{ fontWeight: 'bold'}} className={classes.gradientText} variant='h5'>Staking</Typography>
+                  <Typography>Earn yield by staking your tokens in academics.</Typography>
                   </CardContent>
           </Card>
           </Grid>
-        <Grid item={true} xs={12} md={3}>
+        <Grid item={true} xs={12} md={4.5}>
         <Card>
           
                         <CardContent sx={{ padding: 3 }}>
                         <Container>
              <Grid container={true} justifyContent="center" >
             <Grid item={true} mt={3} mb={2} xs={12} sm={3}>
-            <Typography  ml={-2} variant="overline">Predictions</Typography>
 
               <Box sx={{ textAlign: "center" }}>
 
-                <Typography sx={{ fontWeight: "bold"}} className={classes.gradientText} variant="h4">42</Typography>
 
               </Box>
             </Grid>
@@ -196,17 +195,15 @@ const useStyles = makeStyles((theme) => ({
               </CardContent>
           </Card>
           </Grid>
-          <Grid item={true} xs={12} md={3}>
+          <Grid item={true} xs={12} md={4.5}>
                 <Card>
                       <CardContent sx={{ padding: 3 }}>
                       <Container>
                     <Grid container={true} justifyContent="center" >
                     <Grid item={true} mt={3} mb={2} xs={12} sm={3}>
-                    <Typography  ml={0} variant="overline">Votes</Typography>
 
                       <Box sx={{ textAlign: "center" }}>
 
-                        <Typography  sx={{ fontWeight: "bold"}} className={classes.gradientText} variant="h4">51</Typography>
 
                       </Box>
                     </Grid>
@@ -215,32 +212,14 @@ const useStyles = makeStyles((theme) => ({
                       </CardContent>
                   </Card>
           </Grid>
-          <Grid item={true} xs={12} md={3}>
-          <Card>
-                      <CardContent sx={{ padding: 3 }}>
-                      <Container>
-                    <Grid container={true} justifyContent="center" >
-                    <Grid item={true} mt={3} mb={2} xs={12} sm={3}>
-                    <Typography  ml={0} variant="overline">Staked</Typography>
-
-                      <Box sx={{ textAlign: "center" }}>
-
-                        <Typography  sx={{ fontWeight: "bold"}} className={classes.gradientText} variant="h4">1</Typography>
-
-                      </Box>
-                    </Grid>
-                  </Grid>
-                  </Container>
-                      </CardContent>
-                  </Card>
-          </Grid>
+        
           
           <Grid item={true} xs={12} md={12}>
           <Card>
           
               <CardContent sx={{ padding: 3 }}>
                 <Box>
-                <Typography  sx={{ fontWeight: "bold"}} mb={5} className={classes.gradientText} variant="h5" align="left">View All Predictions</Typography>
+                <Typography  sx={{ fontWeight: "bold"}} mb={5} className={classes.gradientText} variant="h5" align="left">View Stake</Typography>
 
                 <div style={{ width: "100%" }}>
  
@@ -257,27 +236,12 @@ const useStyles = makeStyles((theme) => ({
             '& .MuiTabs-indicator': { display: 'none' }
           }}
         >
-           <Tab value='all' sx={{ p: 0 }} label={<RenderTabAvatar category='All' />} />
-          <Tab value='climate' sx={{ p: 0 }} label={<RenderTabAvatar category='Climate' />} />
-          <Tab value='risks' sx={{ p: 0 }} label={<RenderTabAvatar category='Risks' />} />
-          <Tab value='finance' sx={{ p: 0 }} label={<RenderTabAvatar category='Finance' />} />
-
           
         
         </TabList>
         <TabPanel sx={{ p: 0, mt: 5, mb: 10 }} value='all'>
                                   
-                      <DataGrid 
-
-  
-                      columns={columns}
-                      rows={rows}
-                      onRowClick={handleRowClick}
-                components={{ Toolbar: GridToolbar }} 
-                autoHeight // enable auto-height to ensure all rows are visible
-                sx={{ p: 0, mb: 4, '& .MuiButton-root': { color: 'secondary.main' } }}
-                />
-
+                     
 
        </TabPanel>
        <TabPanel sx={{ p: 0, mt: 5, mb: 10 }} value='climate'>

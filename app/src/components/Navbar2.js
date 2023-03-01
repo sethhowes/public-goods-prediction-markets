@@ -82,6 +82,11 @@ function Navbar2(props) {
                   Learn{" "}
                 </Button>
               </Link>
+              <Link href="/stake" passHref={true}>
+                <Button component="a" color="inherit">
+                  Stake{" "}
+                </Button>
+              </Link>
              
               <Button component="a" variant="contained" color="primary" onClick={handleConnectWallet} sx={{
                         backgroundImage:
