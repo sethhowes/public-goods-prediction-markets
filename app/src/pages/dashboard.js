@@ -857,7 +857,12 @@ console.log(predictionMarketDetails)
   const predictionCount = 47
   const predictionRewardAmount = web3.utils.toHex(predictionMarketDetails?.reward_amount)
   const predictionBucketPrices = [0.91, 0.07, 0.09]
-
+  const hexString = predictionMarketDetails?.deadline.hex;
+  const bigIntValue = hexString ? web3.utils.toBN(hexString) : null;
+  if (bigIntValue) {
+} else {
+	// handle the case where hexString is not defined
+  }
 //graph data
   const data = [
     {
@@ -977,7 +982,7 @@ console.log(predictionMarketDetails)
                   <strong style={{ fontWeight: 'bold', padding: 3, ML: 5}}>Deadline:</strong>
                 </Typography>
                 <Typography component={'span'} sx={{ fontWeight: 'bold', marginLeft: 2 }} className={classes.gradientText}>
-				{new Date(web3.utils.toNumber(predictionMarketDetails?.deadline.hex) * 1000).toLocaleString()}
+				{readableDeadline}
                 </Typography>
               </Box>
                             

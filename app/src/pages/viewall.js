@@ -825,10 +825,9 @@ console.log(allPredictionMarkets)
 
     const router = useRouter();
 
-    const handleRowClick = () => {
-    
-      router.push('/dashboard');}
-  
+    const handleRowClick = (prediction_id) => {
+      router.push(`/dashboard?${prediction_id}`);
+    };
   const [value, setValue] = useState('all')
   const [searchText, setSearchText] = useState("Frog");
   const handleSearchTextChange = (event) => {
@@ -1053,8 +1052,11 @@ console.log(allPredictionMarkets)
   
                       columns={columns}
                       rows={rows}
-                      onRowClick={handleRowClick}
-                components={{ Toolbar: GridToolbar }} 
+                      onRowClick={(row) => {
+                      handleRowClick(web3.utils.toNumber(row.row.prediction_id.hex));
+                       
+                      }}
+                                      components={{ Toolbar: GridToolbar }} 
                 autoHeight // enable auto-height to ensure all rows are visible
                 sx={{ p: 0, mb: 4, '& .MuiButton-root': { color: 'secondary.main' } }}
                 getRowId={(row) => web3.utils.toHex(row.prediction_id)}
