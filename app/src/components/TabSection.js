@@ -24,7 +24,7 @@ function TabPanel(props) {
     >
       {value === index && (
         <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
+          <Typography component={'span'} >{children}</Typography>
         </Box>
       )}
     </div>
@@ -57,7 +57,7 @@ export default function ColorTabs(props) {
     
       </Tabs>
       <TabPanel value={value} index={0}>
-      <Typography variant="h6" gutterBottom>Prediction History</Typography>
+      <Box sx={{ fontWeight: 'bold', marginBottom: '1rem' }}>Prediction History</Box>
       <Box sx={{ mt: -8 }}>
   <EnhancedTable />
 </Box>
@@ -66,7 +66,8 @@ export default function ColorTabs(props) {
         <Typography>Tab Two Content</Typography>
       </TabPanel>
       <TabPanel value={value} index={2}>
-    <Typography variant="h6" gutterBottom>Adminstrate Market</Typography>
+      <Box sx={{ fontWeight: 'bold', marginBottom: '1rem' }}>Adminstrate Market</Box>
+
     <Table>
       <TableBody>
       <TableRow>

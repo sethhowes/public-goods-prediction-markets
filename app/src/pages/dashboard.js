@@ -678,7 +678,7 @@ const readable_committed_amount_bucket = predictionMarketDetails?.committed_amou
           <Card>
               <CardContent sx={{  }}>
                 <Box>
-                <Typography variant="h5"  sx={{ fontWeight: "bold", mb: 4}} className={classes.gradientText} align="left">{predictionTitle}</Typography>
+                <Typography component={'span'}sx={{ fontWeight: "bold", mb: 4, fontSize: 24}} className={classes.gradientText} align="left">{predictionTitle}</Typography>
 
                 
                       <ComposedChart
@@ -719,10 +719,10 @@ const readable_committed_amount_bucket = predictionMarketDetails?.committed_amou
               <Box display="flex" alignItems="center">
               <AccountBalanceWalletIcon />
 
-                <Typography sx={{ fontWeight: 'bold', marginLeft: 2 }}>
+                <Typography  component={'span'} sx={{ fontWeight: 'bold', marginLeft: 2 }}>
                     <strong style={{ fontWeight: 'bold', padding: 3, ML: 5}}>Commited Capital:</strong>
                   </Typography>
-                  <Typography sx={{ fontWeight: 'bold', marginLeft: 2 }} className={classes.gradientText}>
+                  <Typography  component={'span'} sx={{ fontWeight: 'bold', marginLeft: 2 }} className={classes.gradientText}>
                     {predictionRewardAmount} ETH
                   </Typography>
                 </Box>
@@ -736,10 +736,10 @@ const readable_committed_amount_bucket = predictionMarketDetails?.committed_amou
                 <Box display="flex" alignItems="center">
               <PeopleIcon />
 
-                <Typography sx={{ fontWeight: 'bold', marginLeft: 2 }}>
+                <Typography component={'span'}sx={{ fontWeight: 'bold', marginLeft: 2 }}>
                   <strong style={{ fontWeight: 'bold', padding: 3, ML: 5}}>Deadline:</strong>
                 </Typography>
-                <Typography sx={{ fontWeight: 'bold', marginLeft: 2 }} className={classes.gradientText}>
+                <Typography component={'span'} sx={{ fontWeight: 'bold', marginLeft: 2 }} className={classes.gradientText}>
                   {readable_deadline}
                 </Typography>
               </Box>
