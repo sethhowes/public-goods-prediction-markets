@@ -83,19 +83,266 @@ async function get_prediction_market_details(rpc_url, contract_address, abi, pre
   req_variables['permissioned'] = results_dict['predictionMarkets'][6];
   req_variables['deadline'] = results_dict['predictionMarkets'][7];
   req_variables['tags'] = results_dict['predictionMarkets'][8][0];
+  req_variables['picture_url'] = results_dict['predictionMarkets'][8][2];
   req_variables['prediction_id'] = results_dict['predictionMarkets'][9];
   req_variables['creator_address'] = results_dict['predictionMarkets'][10];
   req_variables['outcome'] = results_dict['predictionMarkets'][11];
   req_variables['committed_amount_bucket'] = results_dict['predictionMarkets'][12];
 
   try{
-    req_variables['getCurrentPrediction'] = results_dict['getCurrentPrediction'][0];
+    req_variables['current_prediction'] = results_dict['getCurrentPrediction'][0];
   }catch{
-    req_variables['getCurrentPrediction'] = null;
+    req_variables['current_prediction'] = null;
   }
 
   return req_variables;
 }
+
+// Returns all live prediction markets
+async function get_all_markets(rpc_url, contract_address, abi) {
+    // Get multicall object
+    var multicall = await get_multi_call_provider(rpc_url);
+    
+    // Define the first call
+    var contractCallContext = [
+        {
+            reference: 'contract',
+            contractAddress: contract_address,
+            abi: abi,
+            calls: [
+              { reference: 'totalPredictions', methodName: 'totalPredictions', methodParameters: [] },
+            ]
+      },
+    ];
+  
+    // Execute all calls in a single multicall
+    var results = await multicall.call(contractCallContext);
+    
+    // Unpack all markets
+    var call_list = []
+    var total_predictions = results.results.contract.callsReturnContext[0]['returnValues'][0].hex;
+    total_predictions = parseInt(total_predictions.toString(),16);
+
+    const markets = Array.from(Array(total_predictions).keys())
+    
+    for (const pred_id of markets) {
+      //Prepare second request
+      call_list.push(
+        { reference: 'viewPrediction_' + pred_id.toString(), methodName: 'viewPrediction', methodParameters: [pred_id] },
+        { reference: 'getCurrentPrediction_' + pred_id.toString(), methodName: 'getCurrentPrediction', methodParameters: [pred_id] },
+      )
+    }
+
+    // Define the second call
+    contractCallContext = [
+        {
+            reference: 'contract',
+            contractAddress: contract_address,
+            abi: abi,
+            calls: call_list
+        },
+    ];
+
+    // Execute all calls in a single multicall
+    var results = await multicall.call(contractCallContext);
+
+    // Unpack all individual results
+    var all_res = results.results.contract.callsReturnContext;
+    var results_dict = {};
+    for (const res of all_res) {
+      var key = res['reference'];
+      results_dict[key] = res['returnValues'];
+    }
+  
+    // Requested variables
+    var req_list = [];
+
+    for (const pred_id of markets){
+        var details_key = "viewPrediction_"+pred_id.toString();
+        var prediction_key = "getCurrentPrediction_"+pred_id.toString();
+
+        var res_dict = results_dict[details_key];
+        var req_variables = {};
+        req_variables['prediction_title'] = res_dict[0];
+        req_variables['unit'] = res_dict[1];
+        req_variables['prediction_bucket'] = res_dict[2];
+        req_variables['reward_amount'] = res_dict[3];
+        req_variables['reward_token'] = res_dict[4];
+        req_variables['incentive_curve'] = res_dict[5];
+        req_variables['permissioned'] = res_dict[6];
+        req_variables['deadline'] = res_dict[7];
+        req_variables['tags'] = res_dict[8][0];
+        req_variables['picture_url'] = res_dict[8][2];
+        req_variables['prediction_id'] = res_dict[9];
+        req_variables['creator_address'] = res_dict[10];
+        req_variables['outcome'] = res_dict[11];
+        req_variables['committed_amount_bucket'] = res_dict[12];
+      
+        try{
+            req_variables['current_prediction'] = results_dict[prediction_key][0];
+          }catch{
+            req_variables['current_prediction'] = null;
+        }
+
+        req_list.push(req_variables);
+    }
+    return req_list;
+  }
+
+
+// Returns all live prediction markets
+async function get_all_live_markets(rpc_url, contract_address, abi) {
+    // Get multicall object
+    var multicall = await get_multi_call_provider(rpc_url);
+    
+    // Define the first call
+    var contractCallContext = [
+        {
+            reference: 'contract',
+            contractAddress: contract_address,
+            abi: abi,
+            calls: [
+              { reference: 'getLivePredictionIds', methodName: 'getLivePredictionIds', methodParameters: [] },
+            ]
+      },
+    ];
+  
+    // Execute all calls in a single multicall
+    var results = await multicall.call(contractCallContext);
+    
+    // Unpack all live markets
+    const live_markets = []
+    var call_list = []
+    var all_res = results.results.contract.callsReturnContext[0]['returnValues'];
+    for (const res of all_res) {
+      var pred_id = parseInt(res.hex.toString(),16);
+      live_markets.push(pred_id);
+
+      //Prepare second request
+      call_list.push(
+        { reference: 'viewPrediction_' + pred_id.toString(), methodName: 'viewPrediction', methodParameters: [pred_id] },
+        { reference: 'getCurrentPrediction_' + pred_id.toString(), methodName: 'getCurrentPrediction', methodParameters: [pred_id] },
+      )
+    }
+
+    // Define the second call
+    contractCallContext = [
+        {
+            reference: 'contract',
+            contractAddress: contract_address,
+            abi: abi,
+            calls: call_list
+        },
+    ];
+
+    // Execute all calls in a single multicall
+    var results = await multicall.call(contractCallContext);
+
+    // Unpack all individual results
+    var all_res = results.results.contract.callsReturnContext;
+    var results_dict = {};
+    for (const res of all_res) {
+      var key = res['reference'];
+      results_dict[key] = res['returnValues'];
+    }
+  
+    // Requested variables
+    var req_list = [];
+
+    for (const pred_id of live_markets){
+        var details_key = "viewPrediction_"+pred_id.toString();
+        var prediction_key = "getCurrentPrediction_"+pred_id.toString();
+
+        var res_dict = results_dict[details_key];
+        var req_variables = {};
+        req_variables['prediction_title'] = res_dict[0];
+        req_variables['unit'] = res_dict[1];
+        req_variables['prediction_bucket'] = res_dict[2];
+        req_variables['reward_amount'] = res_dict[3];
+        req_variables['reward_token'] = res_dict[4];
+        req_variables['incentive_curve'] = res_dict[5];
+        req_variables['permissioned'] = res_dict[6];
+        req_variables['deadline'] = res_dict[7];
+        req_variables['tags'] = res_dict[8][0];
+        req_variables['picture_url'] = res_dict[8][2];
+        req_variables['prediction_id'] = res_dict[9];
+        req_variables['creator_address'] = res_dict[10];
+        req_variables['outcome'] = res_dict[11];
+        req_variables['committed_amount_bucket'] = res_dict[12];
+      
+        try{
+            req_variables['current_prediction'] = results_dict[prediction_key][0];
+          }catch{
+            req_variables['current_prediction'] = null;
+        }
+
+        req_list.push(req_variables);
+    }
+    return req_list;
+  }
+
+//Get all user that bet per market
+async function get_all_user_bets_per_market(rpc_url, contract_address, abi, prediction_id){
+    // Get multicall object
+    var multicall = await get_multi_call_provider(rpc_url);
+    
+    // Define the first call
+    var contractCallContext = [
+        {
+            reference: 'contract',
+            contractAddress: contract_address,
+            abi: abi,
+            calls: [
+              { reference: 'userPerMarketLength', methodName: 'userPerMarketLength', methodParameters: [prediction_id] },
+            ]
+      },
+    ];
+  
+    // Execute all calls in a single multicall
+    var results = await multicall.call(contractCallContext);
+    
+    // Unpack all markets
+    var call_list = []
+    var total_users = results.results.contract.callsReturnContext[0]['returnValues'][0].hex;
+    total_users = parseInt(total_users.toString(),16);
+
+    const users_list = Array.from(Array(total_users).keys())
+    
+    for (const user_id of users_list) {
+        //Prepare second request
+        call_list.push(
+        { reference: 'getMarketUser' + user_id.toString(), methodName: 'getMarketUser', methodParameters: [prediction_id, user_id] }
+        )
+    }
+
+    // Define the second call
+    contractCallContext = [
+        {
+            reference: 'contract',
+            contractAddress: contract_address,
+            abi: abi,
+            calls: call_list
+        },
+    ];
+    
+    // Execute all calls in a single multicall
+    var results = await multicall.call(contractCallContext);
+
+    var req_list = [];
+    try{
+        // Unpack all individual results
+        var all_res = results.results.contract.callsReturnContext;
+        for (const res of all_res) {
+            req_list.push(res['returnValues'][0]);
+        }
+        return req_list;
+    }catch{
+        return req_list;
+    }
+
+}
+
+
 
 // Get quote
 async function get_quote(rpc_url, contract_address, abi, prediction_id, proposed_bet, bucket_index) {
@@ -132,539 +379,8 @@ async function get_quote(rpc_url, contract_address, abi, prediction_id, proposed
 }
 // Define the contract variables
 const rpc_url = 'https://goerli.gateway.tenderly.co/3Ugz1n4IRjoidr766XDDxX';
-var contract_address = '0x7de742F8baB59c668266D5a541fcd39f7D8DD598';
+var contract_address = '0x886951258Eb0949D0f604c07370971Aa1A1812Df';
 var abi = [
-      {
-        "inputs": [],
-        "stateMutability": "nonpayable",
-        "type": "constructor"
-      },
-      {
-        "anonymous": false,
-        "inputs": [
-          {
-            "indexed": true,
-            "internalType": "bytes32",
-            "name": "id",
-            "type": "bytes32"
-          }
-        ],
-        "name": "ChainlinkCancelled",
-        "type": "event"
-      },
-      {
-        "anonymous": false,
-        "inputs": [
-          {
-            "indexed": true,
-            "internalType": "bytes32",
-            "name": "id",
-            "type": "bytes32"
-          }
-        ],
-        "name": "ChainlinkFulfilled",
-        "type": "event"
-      },
-      {
-        "anonymous": false,
-        "inputs": [
-          {
-            "indexed": true,
-            "internalType": "bytes32",
-            "name": "id",
-            "type": "bytes32"
-          }
-        ],
-        "name": "ChainlinkRequested",
-        "type": "event"
-      },
-      {
-        "anonymous": false,
-        "inputs": [
-          {
-            "indexed": true,
-            "internalType": "address",
-            "name": "from",
-            "type": "address"
-          },
-          {
-            "indexed": true,
-            "internalType": "address",
-            "name": "to",
-            "type": "address"
-          }
-        ],
-        "name": "OwnershipTransferRequested",
-        "type": "event"
-      },
-      {
-        "anonymous": false,
-        "inputs": [
-          {
-            "indexed": true,
-            "internalType": "address",
-            "name": "from",
-            "type": "address"
-          },
-          {
-            "indexed": true,
-            "internalType": "address",
-            "name": "to",
-            "type": "address"
-          }
-        ],
-        "name": "OwnershipTransferred",
-        "type": "event"
-      },
-      {
-        "inputs": [],
-        "name": "acceptOwnership",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "uint256",
-            "name": "predictionId",
-            "type": "uint256"
-          }
-        ],
-        "name": "claimFunds",
-        "outputs": [],
-        "stateMutability": "payable",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "uint256",
-            "name": "predictionId",
-            "type": "uint256"
-          }
-        ],
-        "name": "closeMarket",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "uint256[]",
-            "name": "newBuckets",
-            "type": "uint256[]"
-          },
-          {
-            "internalType": "uint256",
-            "name": "predictionId",
-            "type": "uint256"
-          }
-        ],
-        "name": "createNewBuckets",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "string",
-            "name": "predictionQuestion",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "unit",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256[]",
-            "name": "predictionBucket",
-            "type": "uint256[]"
-          },
-          {
-            "internalType": "uint256",
-            "name": "rewardAmount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address",
-            "name": "rewardToken",
-            "type": "address"
-          },
-          {
-            "internalType": "string",
-            "name": "incentiveCurve",
-            "type": "string"
-          },
-          {
-            "internalType": "bool",
-            "name": "permissioned",
-            "type": "bool"
-          },
-          {
-            "internalType": "uint256",
-            "name": "deadline",
-            "type": "uint256"
-          },
-          {
-            "internalType": "string",
-            "name": "category",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "apiEndpoint",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256[]",
-            "name": "committedAmount",
-            "type": "uint256[]"
-          }
-        ],
-        "name": "createPrediction",
-        "outputs": [],
-        "stateMutability": "payable",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "bytes32",
-            "name": "_requestId",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "uint256",
-            "name": "_outcome",
-            "type": "uint256"
-          }
-        ],
-        "name": "fulfill",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "uint256",
-            "name": "predictionId",
-            "type": "uint256"
-          }
-        ],
-        "name": "getCurrentPrediction",
-        "outputs": [
-          {
-            "internalType": "uint256",
-            "name": "",
-            "type": "uint256"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [],
-        "name": "getLivePredictionIds",
-        "outputs": [
-          {
-            "internalType": "uint256[]",
-            "name": "",
-            "type": "uint256[]"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "uint256",
-            "name": "predictionId",
-            "type": "uint256"
-          }
-        ],
-        "name": "getTotalCommitted",
-        "outputs": [
-          {
-            "internalType": "uint256",
-            "name": "",
-            "type": "uint256"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [],
-        "name": "isWhitelisted",
-        "outputs": [
-          {
-            "internalType": "bool",
-            "name": "",
-            "type": "bool"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [],
-        "name": "owner",
-        "outputs": [
-          {
-            "internalType": "address",
-            "name": "",
-            "type": "address"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "uint256",
-            "name": "predictionId",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "bucketIndex",
-            "type": "uint256"
-          }
-        ],
-        "name": "placeBet",
-        "outputs": [],
-        "stateMutability": "payable",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "uint256",
-            "name": "",
-            "type": "uint256"
-          }
-        ],
-        "name": "predictionMarkets",
-        "outputs": [
-          {
-            "internalType": "string",
-            "name": "predictionQuestion",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "unit",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "rewardAmount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address",
-            "name": "rewardToken",
-            "type": "address"
-          },
-          {
-            "internalType": "string",
-            "name": "incentiveCurve",
-            "type": "string"
-          },
-          {
-            "internalType": "bool",
-            "name": "permissioned",
-            "type": "bool"
-          },
-          {
-            "internalType": "uint256",
-            "name": "deadline",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "id",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address",
-            "name": "owner",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "outcome",
-            "type": "uint256"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "string",
-            "name": "apiEndpoint",
-            "type": "string"
-          }
-        ],
-        "name": "requestOutcomeData",
-        "outputs": [
-          {
-            "internalType": "bytes32",
-            "name": "requestId",
-            "type": "bytes32"
-          }
-        ],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "inputs": [],
-        "name": "totalPredictions",
-        "outputs": [
-          {
-            "internalType": "uint256",
-            "name": "",
-            "type": "uint256"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "address",
-            "name": "to",
-            "type": "address"
-          }
-        ],
-        "name": "transferOwnership",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "inputs": [],
-        "name": "updateLivePredictionIds",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "uint256",
-            "name": "predictionId",
-            "type": "uint256"
-          }
-        ],
-        "name": "viewPrediction",
-        "outputs": [
-          {
-            "components": [
-              {
-                "internalType": "string",
-                "name": "predictionQuestion",
-                "type": "string"
-              },
-              {
-                "internalType": "string",
-                "name": "unit",
-                "type": "string"
-              },
-              {
-                "internalType": "uint256[]",
-                "name": "predictionBucket",
-                "type": "uint256[]"
-              },
-              {
-                "internalType": "uint256",
-                "name": "rewardAmount",
-                "type": "uint256"
-              },
-              {
-                "internalType": "address",
-                "name": "rewardToken",
-                "type": "address"
-              },
-              {
-                "internalType": "string",
-                "name": "incentiveCurve",
-                "type": "string"
-              },
-              {
-                "internalType": "bool",
-                "name": "permissioned",
-                "type": "bool"
-              },
-              {
-                "internalType": "uint256",
-                "name": "deadline",
-                "type": "uint256"
-              },
-              {
-                "internalType": "string[2]",
-                "name": "categoryApiEndpoint",
-                "type": "string[2]"
-              },
-              {
-                "internalType": "uint256",
-                "name": "id",
-                "type": "uint256"
-              },
-              {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-              },
-              {
-                "internalType": "uint256",
-                "name": "outcome",
-                "type": "uint256"
-              },
-              {
-                "internalType": "uint256[]",
-                "name": "committedAmountBucket",
-                "type": "uint256[]"
-              }
-            ],
-            "internalType": "struct SciPredict.predictionInstance",
-            "name": "",
-            "type": "tuple"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      }
-    ];
-var prediction_id = 0;
-
-var prediction_market_details = await get_prediction_market_details(rpc_url, contract_address, abi, prediction_id);
-console.log(prediction_market_details)
-
-// Current quote
-const proposed_bet = 1e18.toString();
-const bucket_index = 0;
-
-// getCurrentQuote(uint predictionId, uint bucketIndex, uint proposedBet)
-var contract_address = '0x71C2468664b8c0c7d0ad0eA59C1fc1ddA15CDA7c';
-var abi = [
-	{
-		"inputs": [],
-		"name": "acceptOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
 	{
 		"inputs": [],
 		"stateMutability": "nonpayable",
@@ -741,6 +457,79 @@ var abi = [
 		"type": "event"
 	},
 	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferRequested",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferred",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "acceptOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_chainLinkToken",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_chainLinkOracle",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "_jobId",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_fee",
+				"type": "uint256"
+			}
+		],
+		"name": "changeOracleParameters",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "uint256",
@@ -797,11 +586,6 @@ var abi = [
 				"type": "string"
 			},
 			{
-				"internalType": "uint256",
-				"name": "unitIncrement",
-				"type": "uint256"
-			},
-			{
 				"internalType": "uint256[]",
 				"name": "predictionBucket",
 				"type": "uint256[]"
@@ -840,6 +624,16 @@ var abi = [
 				"internalType": "string",
 				"name": "apiEndpoint",
 				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "picture_url",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "startCommittedAmount",
+				"type": "uint256[]"
 			}
 		],
 		"name": "createPrediction",
@@ -861,101 +655,6 @@ var abi = [
 			}
 		],
 		"name": "fulfill",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "from",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			}
-		],
-		"name": "OwnershipTransferRequested",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "from",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			}
-		],
-		"name": "OwnershipTransferred",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "predictionId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "bucketIndex",
-				"type": "uint256"
-			}
-		],
-		"name": "placeBet",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "apiEndpoint",
-				"type": "string"
-			}
-		],
-		"name": "requestOutcomeData",
-		"outputs": [
-			{
-				"internalType": "bytes32",
-				"name": "requestId",
-				"type": "bytes32"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			}
-		],
-		"name": "transferOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "updateLivePredictionIds",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -1025,6 +724,30 @@ var abi = [
 		"inputs": [
 			{
 				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "index",
+				"type": "uint256"
+			}
+		],
+		"name": "getMarketUser",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
 				"name": "predictionId",
 				"type": "uint256"
 			}
@@ -1070,6 +793,24 @@ var abi = [
 		"inputs": [
 			{
 				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "bucketIndex",
+				"type": "uint256"
+			}
+		],
+		"name": "placeBet",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
 			}
@@ -1085,11 +826,6 @@ var abi = [
 				"internalType": "string",
 				"name": "unit",
 				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "unitIncrement",
-				"type": "uint256"
 			},
 			{
 				"internalType": "uint256",
@@ -1123,7 +859,7 @@ var abi = [
 			},
 			{
 				"internalType": "address",
-				"name": "owner",
+				"name": "market_owner",
 				"type": "address"
 			},
 			{
@@ -1136,8 +872,79 @@ var abi = [
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "apiEndpoint",
+				"type": "string"
+			}
+		],
+		"name": "requestOutcomeData",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "requestId",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "retrieveChainId",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "totalPredictions",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "updateLivePredictionIds",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			}
+		],
+		"name": "userPerMarketLength",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -1171,11 +978,6 @@ var abi = [
 						"type": "string"
 					},
 					{
-						"internalType": "uint256",
-						"name": "unitIncrement",
-						"type": "uint256"
-					},
-					{
 						"internalType": "uint256[]",
 						"name": "predictionBucket",
 						"type": "uint256[]"
@@ -1206,9 +1008,9 @@ var abi = [
 						"type": "uint256"
 					},
 					{
-						"internalType": "string[2]",
-						"name": "categoryApiEndpoint",
-						"type": "string[2]"
+						"internalType": "string[3]",
+						"name": "category_ApiEndpoint_PictureUrl",
+						"type": "string[3]"
 					},
 					{
 						"internalType": "uint256",
@@ -1217,7 +1019,7 @@ var abi = [
 					},
 					{
 						"internalType": "address",
-						"name": "owner",
+						"name": "market_owner",
 						"type": "address"
 					},
 					{
@@ -1226,9 +1028,9 @@ var abi = [
 						"type": "uint256"
 					},
 					{
-						"internalType": "uint256[3]",
+						"internalType": "uint256[]",
 						"name": "committedAmountBucket",
-						"type": "uint256[3]"
+						"type": "uint256[]"
 					}
 				],
 				"internalType": "struct SciPredict.predictionInstance",
@@ -1245,13 +1047,83 @@ var abi = [
 				"internalType": "uint256",
 				"name": "predictionId",
 				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "bucketIndex",
+				"type": "uint256"
 			}
 		],
-		"name": "viewUserPrediction",
-		"outputs": [],
+		"name": "viewUserScaledBetsPerBucket",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "bucketIndex",
+				"type": "uint256"
+			}
+		],
+		"name": "viewUserValuePerBucket",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	}
 ];
+var prediction_id = 0;
+
+var prediction_market_details = await get_prediction_market_details(rpc_url, contract_address, abi, prediction_id);
+console.log(prediction_market_details)
+
+// Current quote
+const proposed_bet = 1e3.toString();
+const bucket_index = 0;
+
 var current_quote = await get_quote(rpc_url, contract_address, abi, prediction_id, proposed_bet, bucket_index);
-console.log(current_quote)
+console.log(current_quote);
+
+// Get all prediction markets
+var all_prediction_markets = await get_all_markets(rpc_url, contract_address, abi);
+console.log(all_prediction_markets);
+
+// Get all live prediction markets
+var all_live_prediction_markets = await get_all_live_markets(rpc_url, contract_address, abi);
+console.log(all_live_prediction_markets);
+
+// Get all user bets for a prediction market
+var all_user_bets_per_market = await get_all_user_bets_per_market(rpc_url, contract_address, abi, prediction_id);
+console.log(all_user_bets_per_market);
+
+//TO DO
+// get_all_bets_per_bucket_per_user
+// - Get user bet details per market / function viewUserValueBets via known user
