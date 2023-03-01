@@ -100,14 +100,13 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         // Market creator input
         string predictionQuestion; // question 
         string unit; // unit 
-        uint unitIncrement; // increment for adding prediction bucket - 1 / unitIncrement so 10 would be 0.1
         uint[] predictionBucket; // buckets for prediction
         uint rewardAmount; // reward amount - to be transferred from
         address rewardToken; // reward token address - if null address then native ETH is issued
         string incentiveCurve; // expontential, linear, or none
         bool permissioned;  // permission flag 
         uint deadline; // timestamp to end market in seconds since the epoch
-        string[2] categoryApiEndpoint; // tags for market at [0] and api endpoint at [1]
+        string[3] category_ApiEndpoint_PictureUrl; // tags for market at [0] and api endpoint at [1]
         
         // Internal parameters
         uint id; // id of struct
@@ -122,6 +121,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     // Prediction Mapping 
     // Map prediction id to metadata
     mapping(uint => predictionInstance) public predictionMarkets;
+    
     // Map prediction id to bets
     mapping(uint => mapping(address => mapping(uint => uint))) betsMadePerBucket;
     mapping(uint => mapping(address => mapping(uint => uint))) betsMadePerBucketValue;
@@ -129,14 +129,17 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     // User per market handling
     mapping(uint => address[]) userPerMarket;
 
+    // Add item to user per market
     function addMarketUser(uint id, address _user) internal {
         userPerMarket[id].push(_user);
     }
 
+    // Get item to user per market
     function getMarketUser(uint id, uint index) public view returns(address){
         return userPerMarket[id][index];
     }
 
+    // Get user per market length
     function userPerMarketLength(uint id) public view returns(uint){
         return userPerMarket[id].length;
     }
@@ -173,11 +176,11 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         predictionMarkets[oraclePredictionId].outcome = _outcome;
     }
 
-    // // Open a preliminary prediction
+    // Open a prediction market
     function createPrediction(       
         string memory predictionQuestion, // question 
         string memory unit, // unit 
-        uint unitIncrement, // increment for adding prediction bucket
+        // uint unitIncrement, // increment for adding prediction bucket
         uint[] memory predictionBucket, // buckets for prediction
         uint rewardAmount, // reward amount - to be transferred from
         address rewardToken, // reward token address - if null address then native ETH is issued
@@ -186,18 +189,20 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         uint deadline, // timestamp to end market in seconds since the epoch
         string memory category, // tags for market
         string memory apiEndpoint, // api endpoint for oracle
-        uint[] memory zeroCommittedAmount // empty array for bucket initialisation
+        string memory picture_url, // api endpoint for oracle
+        uint[] memory startCommittedAmount // empty array for bucket initialisation
         ) 
         payable public {
         
-        // Check whether buckets are empty
-        for (uint i = 0; i < zeroCommittedAmount.length; i++) {
-            require(zeroCommittedAmount[i] == 0, "You must supply an empty array");
-        }
-
+        //Check whether start capital adds up to reward
+        // // Check whether buckets are empty
+        // for (uint i = 0; i < zeroCommittedAmount.length; i++) {
+        //     require(zeroCommittedAmount[i] == 0, "You must supply an empty array");
+        // }
+        
         //Calculate rewards and check if paid
         // Native ETH case
-        if (msg.value != 0 && rewardToken == nullAddress){
+        if (rewardToken == nullAddress){
             rewardToken = nullAddress;
             rewardAmount = msg.value;
         } else if (msg.value == 0 && rewardToken != nullAddress){
@@ -212,26 +217,36 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
             revert("Reward token specification unclear.");
         }
         
+        //Check whether start capital adds up to reward
+        uint startAmounts = 0;
+        for (uint i = 0; i < startCommittedAmount.length; i++) {
+            startAmounts += startCommittedAmount[i];
+        }
+        require(startAmounts == rewardAmount, "Bucket start amounts do not equal reward amounts");
+
         // Init market
         predictionMarkets[predictionCounter] = predictionInstance(
             predictionQuestion, // question 
             unit, // unit 
-            unitIncrement, // increment for adding prediction bucket
+            // unitIncrement, // increment for adding prediction bucket
             predictionBucket, // buckets for prediction
             rewardAmount, // reward amount - to be transferred from
             rewardToken, // reward token address - if null address then native ETH is issued
             incentiveCurve, // expontential, linear, or none
             permissioned,  // permission flag 
             deadline, // timestamp to end market in seconds since the epoch
-            [category, apiEndpoint], // tags for market
+            [category, apiEndpoint, picture_url], // tags for market
             predictionCounter, // id of struct
             msg.sender, // market_owner
             //0, // current prediction value
             0, // sets outcome to placeholder of 0
-            zeroCommittedAmount // total commmitted amount per bucket
+            startCommittedAmount // total commmitted amount per bucket
         );
 
         predictionCounter += 1;
+
+        //Update live predictions
+        updateLivePredictionIds();
     }
 
     // View number of predictions made
@@ -262,11 +277,12 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         return livePredictions;
     }
 
-   // Whitelist check - TO IMPLEMENT CREDENTIALS CURRENTLY DUMMY
-   function isWhitelisted() public view returns(bool) {
-      return msg.sender == msg.sender;
-   }
-    // // Place a bet for a whitelisted user
+    // Whitelist check - TODO IMPLEMENT CREDENTIALS CURRENTLY DUMMY
+    function isWhitelisted() public view returns(bool) {
+        return msg.sender == msg.sender;
+    }
+
+    // Place a bet for a whitelisted user
     function placeBet(uint predictionId, uint bucketIndex) public payable {
         // Whitelist check
         require(isWhitelisted(), "User not whitelisted");
@@ -286,7 +302,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         
         //Add user to market
         addMarketUser(predictionId, msg.sender);
-        
+
         // Update amount committed to this bucket
         predictionMarkets[predictionId].committedAmountBucket[bucketIndex] += msg.value;
         
@@ -298,7 +314,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     function getCurrentQuote(uint predictionId, uint bucketIndex, uint proposedBet) public view returns(uint) {
         uint totalCommitted = getTotalCommitted(predictionId) + proposedBet;
         uint selectedBucketCommitted = predictionMarkets[predictionId].committedAmountBucket[bucketIndex] + proposedBet;
-        uint currentQuote = selectedBucketCommitted / totalCommitted;
+        uint currentQuote = (selectedBucketCommitted*100000) / totalCommitted;
         return currentQuote;
     }
     
@@ -357,7 +373,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         require(correctOutcomeBet != 0, "You did not place a correct bet");
         // Get total value of correct bets for bucket
         uint totalCorrectBet = predictionMarkets[predictionId].committedAmountBucket[correctBucketIndex];
-        // Get 
+        // Get total committed amount
         uint[] memory buckets = predictionMarkets[predictionId].committedAmountBucket;
         uint totalCommittedAmount = 0;
         for (uint i = 0; i < buckets.length; i++) {
@@ -371,7 +387,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     function closeMarket(uint predictionId) public onlyCreator(predictionId) {
         require(block.timestamp >= predictionMarkets[predictionId].deadline, "Deadline has not yet passed");
         // Call the API endpoint to record outcome for prediction
-        requestOutcomeData(predictionMarkets[predictionId].categoryApiEndpoint[1]);
+        requestOutcomeData(predictionMarkets[predictionId].category_ApiEndpoint_PictureUrl[1]);
         // Remove finished prediction from live predictions
         updateLivePredictionIds();
     }
@@ -388,7 +404,19 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
 
     // Create new category
     function createNewBuckets(uint[] memory newBuckets, uint predictionId) public onlyCreator(predictionId) {
+        uint[] memory prevBuckets = predictionMarkets[predictionId].predictionBucket;
+
+        //Compare arrays and check if all previous values are included in the new buckets
+        for (uint i = 0; i < prevBuckets.length; i++) {
+            bool prevInNew = false;
+            for (uint j = 0; j < newBuckets.length; j++) {
+                if (newBuckets[j] == prevBuckets[i]){
+                    prevInNew = true;
+                }
+            }
+            require(prevInNew == true, "New buckets need to contain old ones");
+        }
+
         predictionMarkets[predictionId].predictionBucket = newBuckets;
     }
-
 }
