@@ -21,6 +21,8 @@ import Section from "components/Section";
 import { useAuth } from "util/auth";
 import { useTheme } from "@mui/styles";
 import { connectWallet } from "util/connectWallet";
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+
 
 function Navbar2(props) {
   const theme = useTheme();
@@ -82,8 +84,8 @@ function Navbar2(props) {
                   Learn{" "}
                 </Button>
               </Link>
-             
-              <Button component="a" variant="contained" color="primary" onClick={handleConnectWallet} sx={{
+              <ConnectButton />
+              {/* <Button component="a" variant="contained" color="primary" onClick={handleConnectWallet} sx={{
                         backgroundImage:
                           "linear-gradient(85.9deg, #1EBEA5 -14.21%, #00B5C4 18.25%, #00A8E6 52.49%, #0096FD 81.67%, #157AFB 111.44%)",
                         color: "white",
@@ -95,7 +97,7 @@ function Navbar2(props) {
                     "..." +
                     String(walletAddress).substring(38)
                   : "Connect Wallet"}
-              </Button>
+              </Button> */}
             </Box>
             <IconButton
               onClick={() => setDrawerOpen(true)}

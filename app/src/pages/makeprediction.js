@@ -21,7 +21,12 @@ import { Button } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import router from "next/router";
 import { useAuth } from "util/auth";
-import createWeb3Prediction from "util/createWeb3Prediction";
+//import createWeb3Prediction from "util/predictionContract"; //@todo rename function
+import { useSigner } from "wagmi";
+import { abi as contractABI } from "../../../smart-contracts/artifacts/contracts/SciPredict.sol/SciPredict.json";
+import { ethers } from "ethers";
+
+
 
 const useStyles = makeStyles((theme) => ({
   gradientText: {
@@ -32,7 +37,11 @@ const useStyles = makeStyles((theme) => ({
     WebkitTextFillColor: "transparent",
   },
 }));
+
 function DashboardPage(props) {
+
+  const { data: signer, isError, isLoading } = useSigner();
+
   const [formAlert, setFormAlert] = useState(null);
   const auth = useAuth();
   const classes = useStyles();
@@ -65,7 +74,16 @@ function DashboardPage(props) {
     setFormAlert(data);
   };
 
-  const handleSubmit = () => {
+  const readableABI = [
+    "function createPrediction(string predictionQuestion, string unit, uint256 unitIncrement, uint256[] predictionBucket, uint256 rewardAmount, address rewardToken, string incentiveCurve, bool permissioned, uint256 deadline, string category, string apiEndpoint, uint256[] zeroCommittedAmount) payable"
+  ]
+  const contract = new ethers.Contract(
+    "0x15793e8af8b52814bd9Cc570c1aD2A65492002C0",
+    readableABI,
+    signer,
+    );
+
+  const handleSubmit = async () => {
     createPrediction({
       predictionTitle,
       predictionDescription,
@@ -76,25 +94,32 @@ function DashboardPage(props) {
       predictionTokenAddress,
       predictionRewardCurve,
       predictionPermissioned,
-      predictionEndDate,
       predictionCategory,
       predictionApiEndpoint,
       user: auth.user.uid,
     });
 
-      handleFormAlert({
-        type: "success",
-        message: "Prediction created successfully!",
-      });
-      router.replace("/viewall");
-    createWeb3Prediction(
-      predictionTitle,
-      predictionUnit,
-      predictionBuckets,
-      predictionRewardAmount,
-      predictionEndDate,
-      predictionCategory,
-      predictionApiEndpoint,
+    handleFormAlert({
+      type: "success",
+      message: "Prediction created successfully!",
+    });
+    router.replace("/viewall");
+    const tx = await contract.createPrediction(
+      "predictionTitle",
+      "C",
+      1,
+      [1,2,3],
+      20,
+      "0x0000000000000000000000000000000000000000",
+      "exponential",
+      true,
+      1677639945,
+      "category",
+      "api",
+      [0, 0, 0],
+      { value: 20,
+        gasLimit: 5000000,
+     }
     );
 
     handleFormAlert({
