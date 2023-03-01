@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Meta from "components/Meta";
-import { useState } from "react";
 import DashboardSection2 from "components/DashboardSection2";
 import Navbar2 from "components/Navbar2";
 import Footer from "components/Footer";
@@ -18,7 +17,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import PredictionData from "components/predictionData";
 import PredictionMeta from "components/predictionMeta"
 import { makeStyles } from "@mui/styles";
-import { DataGrid, GridToolbarContainer, GridToolbar } from "@mui/x-data-grid";
+import { DataGrid, GridToolbarContainer, GridToolbar, selectedGridRowsSelector } from "@mui/x-data-grid";
 import { useDemoData } from "@mui/x-data-grid-generator";
 import { Typography, Chip } from "@mui/material";
 import Tab from '@mui/material/Tab'
@@ -27,7 +26,758 @@ import TabPanel from '@mui/lab/TabPanel'
 import TabContext from '@mui/lab/TabContext'
 import Avatar from '@mui/material/Avatar'
 import { requireAuth } from "util/auth";
+import {get_all_markets} from 'util/multicall.js'
+import Web3 from 'web3';
 
+
+// Define the contract variables
+const rpc_url = 'https://goerli.gateway.tenderly.co/3Ugz1n4IRjoidr766XDDxX';
+var contract_address = '0xC9c037719B0E6aAB162c2dC932ff0ff2E72dc051';
+var abi = [
+	{
+		"inputs": [],
+		"name": "acceptOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "scaledBet",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "betAmount",
+				"type": "uint256"
+			}
+		],
+		"name": "Bet",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "bytes32",
+				"name": "id",
+				"type": "bytes32"
+			}
+		],
+		"name": "ChainlinkCancelled",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "bytes32",
+				"name": "id",
+				"type": "bytes32"
+			}
+		],
+		"name": "ChainlinkFulfilled",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "bytes32",
+				"name": "id",
+				"type": "bytes32"
+			}
+		],
+		"name": "ChainlinkRequested",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_chainLinkToken",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_chainLinkOracle",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "_jobId",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_fee",
+				"type": "uint256"
+			}
+		],
+		"name": "changeOracleParameters",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			}
+		],
+		"name": "claimFunds",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			}
+		],
+		"name": "closeMarket",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256[]",
+				"name": "newBuckets",
+				"type": "uint256[]"
+			},
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			}
+		],
+		"name": "createNewBuckets",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "predictionQuestion",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "unit",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "predictionBucket",
+				"type": "uint256[]"
+			},
+			{
+				"internalType": "uint256",
+				"name": "rewardAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "rewardToken",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "incentiveCurve",
+				"type": "string"
+			},
+			{
+				"internalType": "bool",
+				"name": "permissioned",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "deadline",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "category",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "apiEndpoint",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "picture_url",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "startCommittedAmount",
+				"type": "uint256[]"
+			}
+		],
+		"name": "createPrediction",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "_requestId",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_outcome",
+				"type": "uint256"
+			}
+		],
+		"name": "fulfill",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferRequested",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferred",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "bucketIndex",
+				"type": "uint256"
+			}
+		],
+		"name": "placeBet",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "apiEndpoint",
+				"type": "string"
+			}
+		],
+		"name": "requestOutcomeData",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "requestId",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "updateLivePredictionIds",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			}
+		],
+		"name": "getCurrentPrediction",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "bucketIndex",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "proposedBet",
+				"type": "uint256"
+			}
+		],
+		"name": "getCurrentQuote",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getLivePredictionIds",
+		"outputs": [
+			{
+				"internalType": "uint256[]",
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			}
+		],
+		"name": "getMarketBucketLenght",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "index",
+				"type": "uint256"
+			}
+		],
+		"name": "getMarketUser",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			}
+		],
+		"name": "getTotalCommitted",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "isWhitelisted",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "predictionMarkets",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "predictionQuestion",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "unit",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "rewardAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "rewardToken",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "incentiveCurve",
+				"type": "string"
+			},
+			{
+				"internalType": "bool",
+				"name": "permissioned",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "deadline",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "market_owner",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "outcome",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "retrieveChainId",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "totalPredictions",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			}
+		],
+		"name": "userPerMarketLength",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			}
+		],
+		"name": "viewPrediction",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "predictionQuestion",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "unit",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "predictionBucket",
+						"type": "uint256[]"
+					},
+					{
+						"internalType": "uint256",
+						"name": "rewardAmount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "rewardToken",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "incentiveCurve",
+						"type": "string"
+					},
+					{
+						"internalType": "bool",
+						"name": "permissioned",
+						"type": "bool"
+					},
+					{
+						"internalType": "uint256",
+						"name": "deadline",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string[3]",
+						"name": "category_ApiEndpoint_PictureUrl",
+						"type": "string[3]"
+					},
+					{
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "market_owner",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "outcome",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "committedAmountBucket",
+						"type": "uint256[]"
+					}
+				],
+				"internalType": "struct SciPredict.predictionInstance",
+				"name": "",
+				"type": "tuple"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "bucketIndex",
+				"type": "uint256"
+			}
+		],
+		"name": "viewUserScaledBetsPerBucket",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "bucketIndex",
+				"type": "uint256"
+			}
+		],
+		"name": "viewUserValuePerBucket",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+];
+
+/* let rows = [
+  { id: 1, prediction: "What will be the global average temperature in 2042?", category: "climate", consensus: 25, price: 0.98, predictors: 22 },
+  { id: 2, prediction: "What will the inflation rate be in 2027?", category: "finance", consensus: "4%", price: 0.20, predictors: 22 },
+  { id: 3, prediction: "What decade will we achieve AGI?", category: "risks", consensus: "2040s", price: 0.68, predictors: 22 },
+  ]; */
 const useStyles = makeStyles((theme) => ({
   priceChip: {
     backgroundColor: '#4caf50', 
@@ -48,6 +798,29 @@ const useStyles = makeStyles((theme) => ({
 }));
 
   function DashboardPage(props) {
+//
+const web3 = new Web3();
+const [rows, setRows] = useState([]);
+
+const [allPredictionMarkets, setAllPredictionMarkets] = useState(null);
+useEffect(() => {
+  async function fetchData() {
+
+    const result = await get_all_markets(rpc_url, contract_address, abi);
+    setAllPredictionMarkets(result);
+    setRows(result);  
+
+  } 
+  
+  fetchData();
+}, []);
+ 
+//setPredictionID(parts[parts.length - 1]);
+
+
+//
+console.log(allPredictionMarkets)
+
     const router = useRouter();
 
     const handleRowClick = () => {
@@ -98,11 +871,8 @@ const useStyles = makeStyles((theme) => ({
       });
     }
   };
-  const rows = [
-    { id: 1, prediction: "What will be the global average temperature in 2042?", category: "climate", consensus: 25, price: 0.98, predictors: 22 },
-    { id: 2, prediction: "What will the inflation rate be in 2027?", category: "finance", consensus: "4%", price: 0.20, predictors: 22 },
-    { id: 3, prediction: "What decade will we achieve AGI?", category: "risks", consensus: "2040s", price: 0.68, predictors: 22 },
-    ];
+  
+
   const classes = useStyles();
   const columns = [
     {
@@ -110,14 +880,14 @@ const useStyles = makeStyles((theme) => ({
       minWidth: 100,
       field: 'prediction',
       headerName: 'Prediction',
-      renderCell: ({ row }) =>  <Typography sx={{ fontWeight: 'bold'}} className={classes.gradientText} variant='body2'>{row.prediction}</Typography>
+      renderCell: ({ row }) =>  <Typography sx={{ fontWeight: 'bold'}} className={classes.gradientText} variant='body2'>{row.prediction_title}</Typography>
     },
     {
       flex: 0.2,
       minWidth: 100,
       field: 'category',
       headerName: 'Category',
-      renderCell: ({ row }) =>  <Typography variant='body2'>{row.category}</Typography>
+      renderCell: ({ row }) =>  <Typography variant='body2'>{row.tags}</Typography>
     },
     {
       flex: 0.1,
@@ -125,16 +895,16 @@ const useStyles = makeStyles((theme) => ({
       field: 'consensus',
       headerName: 'Consensus',
       renderCell: ({ row }) => (
-        <Chip label={`${row.consensus}`} className={classes.priceChip} />
+        <Chip label={`${web3.utils.toNumber(row.current_prediction.hex)}`} className={classes.priceChip} />
       )    },
     {
       flex: 0.1,
       minWidth: 100,
       field: 'price',
-      headerName: 'Consensus Price',
+      headerName: 'Reward',
       renderCell: ({ row }) => (
         <Chip
-          label={`$${row.price}`}
+          label={`${web3.utils.toNumber(row.reward_amount.hex)}`}
           color="secondary"
           size="small"
           sx={{ fontWeight: "bold" }}
@@ -145,7 +915,14 @@ const useStyles = makeStyles((theme) => ({
       minWidth: 100,
       field: 'predictors',
       headerName: 'Predictors',
-      renderCell: ({ row }) =>  <Typography variant='body2'>{row.predictors}</Typography>
+      renderCell: ({ row }) => (
+        <Chip
+          label={`${web3.utils.toHex(row.deadline)}`}
+          color="secondary"
+          size="small"
+          sx={{ fontWeight: "bold" }}
+        />
+      ) 
     }
   
   ]
@@ -189,7 +966,7 @@ const useStyles = makeStyles((theme) => ({
 
               <Box sx={{ textAlign: "center" }}>
 
-                <Typography sx={{ fontWeight: "bold"}} className={classes.gradientText} variant="h4">42</Typography>
+                <Typography sx={{ fontWeight: "bold"}} className={classes.gradientText} variant="h4">{rows?.length}</Typography>
                 <Typography  ml={-2} variant="overline">Predictions</Typography>
               </Box>
             </Grid>
@@ -207,7 +984,7 @@ const useStyles = makeStyles((theme) => ({
 
                       <Box sx={{ textAlign: "center" }}>
 
-                        <Typography  sx={{ fontWeight: "bold"}} className={classes.gradientText} variant="h4">51</Typography>
+                        <Typography  sx={{ fontWeight: "bold"}} className={classes.gradientText} variant="h4">0</Typography>
                         <Typography  ml={0} variant="overline">Votes</Typography>
 
                       </Box>
@@ -227,7 +1004,7 @@ const useStyles = makeStyles((theme) => ({
 
                       <Box sx={{ textAlign: "center" }}>
 
-                        <Typography  sx={{ fontWeight: "bold"}} className={classes.gradientText} variant="h4">1</Typography>
+                        <Typography  sx={{ fontWeight: "bold"}} className={classes.gradientText} variant="h4">0</Typography>
                         <Typography  ml={0} variant="overline">Staked</Typography>
                       </Box>
                     </Grid>
@@ -278,6 +1055,7 @@ const useStyles = makeStyles((theme) => ({
                 components={{ Toolbar: GridToolbar }} 
                 autoHeight // enable auto-height to ensure all rows are visible
                 sx={{ p: 0, mb: 4, '& .MuiButton-root': { color: 'secondary.main' } }}
+                getRowId={(row) => web3.utils.toHex(row.prediction_id)}
                 />
 
 
@@ -303,6 +1081,8 @@ const useStyles = makeStyles((theme) => ({
                             components={{ Toolbar: GridToolbar }} 
                             autoHeight // enable auto-height to ensure all rows are visible
                             sx={{ p: 0, mb: 4, '& .MuiButton-root': { color: 'secondary.main' } }}
+                            getRowId={(row) => web3.utils.toHex(row.prediction_id)}
+
                             />
             
             
@@ -327,6 +1107,8 @@ const useStyles = makeStyles((theme) => ({
                                   }}
                             components={{ Toolbar: GridToolbar }} 
                             autoHeight // enable auto-height to ensure all rows are visible
+                            getRowId={(row) => web3.utils.toHex(row.prediction_id)}
+
                             sx={{ p: 0, mb: 4, '& .MuiButton-root': { color: 'secondary.main' } }}
                             />
             
@@ -350,6 +1132,8 @@ const useStyles = makeStyles((theme) => ({
                                       },
                                     },
                                   }}
+                                  getRowId={(row) => web3.utils.toHex(row.prediction_id)}
+
                             components={{ Toolbar: GridToolbar }} 
                             autoHeight // enable auto-height to ensure all rows are visible
                             sx={{ p: 0, mb: 4, '& .MuiButton-root': { color: 'secondary.main' } }}

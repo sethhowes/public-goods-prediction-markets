@@ -5,6 +5,7 @@ import { QueryClientProvider } from "util/db";
 import Navbar2 from "components/Navbar2";
 import Footer from "components/Footer"
 function MyApp({ Component, serverEmotionCache, pageProps }) {
+ 
   return (
     <QueryClientProvider>
       <ThemeProvider serverEmotionCache={serverEmotionCache}>
@@ -15,6 +16,7 @@ function MyApp({ Component, serverEmotionCache, pageProps }) {
     logoInverted="logo.svg"
 
   />
+
           <Component {...pageProps} />
           <Footer
         bgColor="primary"
