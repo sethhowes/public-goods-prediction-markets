@@ -282,7 +282,7 @@ async function get_all_live_markets(rpc_url, contract_address, abi) {
   }
 
 //Get all user that bet per market
-async function get_all_user_bets_per_market(rpc_url, contract_address, abi, prediction_id){
+async function get_all_user_per_market(rpc_url, contract_address, abi, prediction_id){
     // Get multicall object
     var multicall = await get_multi_call_provider(rpc_url);
     
@@ -342,7 +342,74 @@ async function get_all_user_bets_per_market(rpc_url, contract_address, abi, pred
 
 }
 
-
+// Returns all bets per bucket per user
+async function get_all_bets_per_bucket_per_user(rpc_url, contract_address, abi, prediction_id, user_list) {
+    // Get multicall object
+    var multicall = await get_multi_call_provider(rpc_url);
+    
+      // Define the first call
+    var contractCallContext = [
+        {
+            reference: 'contract',
+            contractAddress: contract_address,
+            abi: abi,
+            calls: [
+              { reference: 'getMarketBucketLenght', methodName: 'getMarketBucketLenght', methodParameters: [prediction_id] },
+            ]
+      },
+    ];
+  
+    // Execute all calls in a single multicall
+    var results = await multicall.call(contractCallContext);
+    
+    // Unpack hex
+    var num_buckets = results.results.contract.callsReturnContext[0]['returnValues'][0].hex;
+    num_buckets = parseInt(num_buckets.toString(),16);
+  
+    // Define the second call
+    var call_list = []
+    for (const user of user_list) {
+      for (const bucket_index of Array.from(Array(num_buckets).keys())) {
+        call_list.push(
+          { reference: 'viewUserValuePerBucket_' + user + '_' + bucket_index, methodName: 'viewUserValuePerBucket', methodParameters: [prediction_id, user, bucket_index]},
+        )
+      }
+    }
+  
+    var contractCallContext = [
+        {
+            reference: 'contract',
+            contractAddress: contract_address,
+            abi: abi,
+            calls: call_list
+      },
+    ];
+  
+    // Execute all calls in a single multicall
+    var results = await multicall.call(contractCallContext);
+    
+    // Unpack all individual results
+    var all_res = results.results.contract.callsReturnContext;
+    var results_dict = {};
+    for (const res of all_res) {
+      var key = res['reference'];
+      results_dict[key] = res['returnValues'];
+    }
+  
+    // Requested variables
+    var req_dict = {}
+    for (const user of user_list) {
+      var committed_per_bucket = {}
+      for (const bucket_index of Array.from(Array(num_buckets).keys())) {
+        var res_key = 'viewUserValuePerBucket_' + user + '_' + bucket_index;
+        var bucket_committed = parseInt(results_dict[res_key][0].hex,16);
+        committed_per_bucket[bucket_index.toString()] = bucket_committed;
+      }
+      req_dict[user] = committed_per_bucket;
+  
+      }
+  return req_dict
+  }
 
 // Get quote
 async function get_quote(rpc_url, contract_address, abi, prediction_id, proposed_bet, bucket_index) {
@@ -379,8 +446,15 @@ async function get_quote(rpc_url, contract_address, abi, prediction_id, proposed
 }
 // Define the contract variables
 const rpc_url = 'https://goerli.gateway.tenderly.co/3Ugz1n4IRjoidr766XDDxX';
-var contract_address = '0x886951258Eb0949D0f604c07370971Aa1A1812Df';
+var contract_address = '0xC9c037719B0E6aAB162c2dC932ff0ff2E72dc051';
 var abi = [
+	{
+		"inputs": [],
+		"name": "acceptOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
 	{
 		"inputs": [],
 		"stateMutability": "nonpayable",
@@ -455,51 +529,6 @@ var abi = [
 		],
 		"name": "ChainlinkRequested",
 		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "from",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			}
-		],
-		"name": "OwnershipTransferRequested",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "from",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			}
-		],
-		"name": "OwnershipTransferred",
-		"type": "event"
-	},
-	{
-		"inputs": [],
-		"name": "acceptOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
 	},
 	{
 		"inputs": [
@@ -660,6 +689,101 @@ var abi = [
 		"type": "function"
 	},
 	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferRequested",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferred",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "bucketIndex",
+				"type": "uint256"
+			}
+		],
+		"name": "placeBet",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "apiEndpoint",
+				"type": "string"
+			}
+		],
+		"name": "requestOutcomeData",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "requestId",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "updateLivePredictionIds",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "uint256",
@@ -715,6 +839,25 @@ var abi = [
 				"internalType": "uint256[]",
 				"name": "",
 				"type": "uint256[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			}
+		],
+		"name": "getMarketBucketLenght",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -793,24 +936,6 @@ var abi = [
 		"inputs": [
 			{
 				"internalType": "uint256",
-				"name": "predictionId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "bucketIndex",
-				"type": "uint256"
-			}
-		],
-		"name": "placeBet",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
 			}
@@ -872,25 +997,6 @@ var abi = [
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "apiEndpoint",
-				"type": "string"
-			}
-		],
-		"name": "requestOutcomeData",
-		"outputs": [
-			{
-				"internalType": "bytes32",
-				"name": "requestId",
-				"type": "bytes32"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"inputs": [],
 		"name": "retrieveChainId",
 		"outputs": [
@@ -914,26 +1020,6 @@ var abi = [
 			}
 		],
 		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			}
-		],
-		"name": "transferOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "updateLivePredictionIds",
-		"outputs": [],
-		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -1120,10 +1206,10 @@ console.log(all_prediction_markets);
 var all_live_prediction_markets = await get_all_live_markets(rpc_url, contract_address, abi);
 console.log(all_live_prediction_markets);
 
-// Get all user bets for a prediction market
-var all_user_bets_per_market = await get_all_user_bets_per_market(rpc_url, contract_address, abi, prediction_id);
-console.log(all_user_bets_per_market);
+// Get all users for a prediction market
+var user_list = await get_all_user_per_market(rpc_url, contract_address, abi, prediction_id);
+console.log(user_list);
 
-//TO DO
-// get_all_bets_per_bucket_per_user
-// - Get user bet details per market / function viewUserValueBets via known user
+// Get all user bets for a prediction market
+var all_bets_per_bucket_per_user = await get_all_bets_per_bucket_per_user(rpc_url, contract_address, abi, prediction_id, user_list);
+console.log(all_bets_per_bucket_per_user);

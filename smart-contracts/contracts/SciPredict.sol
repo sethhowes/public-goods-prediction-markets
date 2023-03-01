@@ -397,6 +397,11 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         return betsMadePerBucketValue[predictionId][user][bucketIndex];
     }
 
+    //View value per bets
+    function getMarketBucketLenght(uint predictionId) public view returns(uint) {
+        return predictionMarkets[predictionId].predictionBucket.length;
+    }
+
     //View scaled bets
     function viewUserScaledBetsPerBucket(uint predictionId, address user, uint bucketIndex) public view returns(uint) {
         return betsMadePerBucket[predictionId][user][bucketIndex];
