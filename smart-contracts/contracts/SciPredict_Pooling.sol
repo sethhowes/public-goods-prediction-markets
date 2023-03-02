@@ -37,6 +37,7 @@ interface ISciPredict {
     function viewUserValuePerBucket(uint predictionId, address user, uint bucketIndex) external view returns(uint);
     function placeBetViaPool(uint predictionId, uint bucketIndex) external payable;
     function claimFunds(uint predictionId) external payable;
+    function isClaimableViaPool(uint predictionId) external view returns(bool);
 }
 
 //SciPredict contract
@@ -73,7 +74,6 @@ contract predictPooling is ConfirmedOwner {
     
         //Check if bet from bet address exist
         uint userBet = checkUserBet(betAddress, predictionId, bucketIndex);
-
         require(userBet != 0, "User did not bet so cannot copy bet");
 
         //Place bet via pooling
@@ -81,15 +81,45 @@ contract predictPooling is ConfirmedOwner {
 
     }
 
-    //Claim copied bet - part of the fees goes towards copied betAddress
-    function claimReward(uint predictionId){
-        //Claim rewards 
-        ISciPredict(predictContractInstance).claimFunds(uint predictionId);
-
-        //Somehow make sure that copied bets can only be claimed via this contract
-        //TAKE FEE
-        //ADD FUNCTION TO CHECK IF REWARD IS CLAIMABLE
-        // Run balance checker in main contract X
-
+    //Check if claimable
+    function isClaimable(uint predictionId) public view returns(bool){
+        return ISciPredict(predictContractInstance).isClaimableViaPool(predictionId);
     }
+
+    //Claim copied bet - part of the fees goes towards copied betAddress
+    function claimReward(uint predictionId) public payable{
+        //Check if claimable
+        require(isClaimable(predictionId), "Nothing claimable");
+        
+        // Start balance
+        uint startBalance = address(this).balance;
+        
+        //Claim rewards 
+        ISciPredict(predictContractInstance).claimFunds(predictionId);
+
+        uint endBalance = address(this).balance;
+
+        // Calculate payout for copy better
+        uint rewardAmountNet = (endBalance - startBalance) * copyFee / 10000;
+        
+        // Send reward net of fees to claimer
+        address payable destAddress = payable(msg.sender);
+        destAddress.transfer(rewardAmountNet);
+
+        // TODO Implement payoff to copied address
+        // uint balanceAfterReward = address(this).balance;
+        // uint rewardFees = (balanceAfterReward - startBalance);
+
+        // Send fees to copied better
+        // address copiedBetter = 0x0000000000000000000000000000000000000000;
+        // address payable destAddressFees = payable(copiedBetter);
+        // destAddressFees.transfer(rewardFees);
+    }
+
+    //Withdraw ether
+    function withdrawFunds() onlyOwner payable public {
+        address payable destAddress = payable(msg.sender);
+        destAddress.transfer(address(this).balance);
+    }
+    
 }

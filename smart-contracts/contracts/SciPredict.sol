@@ -134,7 +134,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     mapping(address => bool) poolingTracker;
 
     //Returns if reward is claimbale via pooling contract only
-    function onlyClaimableViaPool(address user) public returns(bool){
+    function onlyClaimableViaPool(address user) public view returns(bool){
         return poolingTracker[user];
     }
 
@@ -186,6 +186,9 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         uint _outcome
     ) public recordChainlinkFulfillment(_requestId) {
         predictionMarkets[oraclePredictionId].outcome = _outcome;
+        
+        //Update outcome bucket
+        setCorrectOutcomeBucket(oraclePredictionId);
     }
 
     // Open a prediction market
@@ -387,6 +390,13 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         }
     }
 
+    mapping(uint => uint) correctBucketTracker; // predictionId to correct bucket mapping
+ 
+    //Set correct outcome bucket
+    function setCorrectOutcomeBucket(uint predictionId) internal{
+        correctBucketTracker[predictionId] = getCorrectBucketIndex(predictionId);
+    }
+
     // Get total amount committed for a given prediction
     function getTotalCommitted(uint predictionId) public view returns (uint) {
         uint totalCommitted = 0;
@@ -396,19 +406,57 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         return totalCommitted;
     }
 
-    // Allow a user to withdraw funds if they placed a correct bet
-    function claimFunds(uint predictionId) public payable {
-        //Check if funds are only claimable via pooling contract
-        require(onlyClaimableViaPool(msg.sender)==false, "Only claimable via pooling contract");
-        
+    //Check if claimable
+    function isClaimable(uint predictionId) public view returns(bool){
         // Funds must be claimed after prediction deadline
-        require(block.timestamp >= predictionMarkets[predictionId].deadline, "The deadline has not yet passed");
+        if (block.timestamp < predictionMarkets[predictionId].deadline){
+            return false;
+        }
+
+        // Get index of bucket with correct outcome
+        uint correctBucketIndex = correctBucketTracker[predictionId];
+        // Get bet placed by user on correct outcome
+        uint correctOutcomeBet = betsMadePerBucket[predictionId][msg.sender][correctBucketIndex];
+        // Bet must be greater than 0
+        if (correctOutcomeBet == 0){
+            return false;
+        }
+        //Check if only claimable via pool
+        if(onlyClaimableViaPool(msg.sender)==true){
+            return false;
+        }
+        return true;
+    }
+
+    //Check if claimable
+    function isClaimableViaPool(uint predictionId) public payable returns(bool){
+        // Funds must be claimed after prediction deadline
+        if (block.timestamp < predictionMarkets[predictionId].deadline){
+            return false;
+        }
         // Get index of bucket with correct outcome
         uint correctBucketIndex = getCorrectBucketIndex(predictionId);
         // Get bet placed by user on correct outcome
         uint correctOutcomeBet = betsMadePerBucket[predictionId][msg.sender][correctBucketIndex];
         // Bet must be greater than 0
-        require(correctOutcomeBet != 0, "You did not place a correct bet");
+        if (correctOutcomeBet == 0){
+            return false;
+        }
+        return true;
+    }
+    // Allow a user to withdraw funds if they placed a correct bet
+    function claimFunds(uint predictionId) public payable {
+        //Check if funds are only claimable via pooling contract
+        require(onlyClaimableViaPool(msg.sender)==false, "Only claimable via pooling contract");
+        
+        //Check if claimable
+        require(isClaimable(predictionId),"Not claimable");
+
+        // Get index of bucket with correct outcome
+        uint correctBucketIndex = getCorrectBucketIndex(predictionId);
+        // Get bet placed by user on correct outcome
+        uint correctOutcomeBet = betsMadePerBucket[predictionId][msg.sender][correctBucketIndex];
+        
         // Get total value of correct bets for bucket
         uint totalCorrectBet = predictionMarkets[predictionId].committedAmountBucket[correctBucketIndex];
         // Get total committed amount
