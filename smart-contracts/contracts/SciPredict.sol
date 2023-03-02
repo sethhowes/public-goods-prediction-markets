@@ -429,13 +429,13 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     }
 
     //Check if claimable
-    function isClaimableViaPool(uint predictionId) public payable returns(bool){
+    function isClaimableViaPool(uint predictionId) public view returns(bool){
         // Funds must be claimed after prediction deadline
         if (block.timestamp < predictionMarkets[predictionId].deadline){
             return false;
         }
         // Get index of bucket with correct outcome
-        uint correctBucketIndex = getCorrectBucketIndex(predictionId);
+        uint correctBucketIndex = correctBucketTracker[predictionId];
         // Get bet placed by user on correct outcome
         uint correctOutcomeBet = betsMadePerBucket[predictionId][msg.sender][correctBucketIndex];
         // Bet must be greater than 0
@@ -444,6 +444,27 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         }
         return true;
     }
+
+    //Get claimable amount
+    function getClaimableAmount(uint predictionId) public view returns(uint){
+        // Get index of bucket with correct outcome
+        uint correctBucketIndex = correctBucketTracker[predictionId];
+        // Get bet placed by user on correct outcome
+        uint correctOutcomeBet = betsMadePerBucket[predictionId][msg.sender][correctBucketIndex];
+
+        // Get total value of correct bets for bucket
+        uint totalCorrectBet = predictionMarkets[predictionId].committedAmountBucket[correctBucketIndex];
+        // Get total committed amount
+        uint[] memory buckets = predictionMarkets[predictionId].committedAmountBucket;
+        uint totalCommittedAmount = 0;
+        for (uint i = 0; i < buckets.length; i++) {
+            totalCommittedAmount += buckets[i];
+        }
+        uint awardAmount = correctOutcomeBet / totalCorrectBet * totalCommittedAmount;
+
+        return awardAmount;
+    }
+
     // Allow a user to withdraw funds if they placed a correct bet
     function claimFunds(uint predictionId) public payable {
         //Check if funds are only claimable via pooling contract

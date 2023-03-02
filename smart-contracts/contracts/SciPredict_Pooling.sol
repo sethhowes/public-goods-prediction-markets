@@ -38,6 +38,7 @@ interface ISciPredict {
     function placeBetViaPool(uint predictionId, uint bucketIndex) external payable;
     function claimFunds(uint predictionId) external payable;
     function isClaimableViaPool(uint predictionId) external view returns(bool);
+    function getClaimableAmount(uint predictionId) external view returns(uint);
 }
 
 //SciPredict contract
@@ -55,9 +56,19 @@ contract predictPooling is ConfirmedOwner {
         predictContractInstance = predictContract;
     }
 
-    //Set predict contract address
+    //Get predict contract address
+    function getPredictContract() public view returns(address){
+        return predictContractInstance;
+    }
+
+    //Set copyfee
     function setCopyFees(uint _copyFee) public onlyOwner{
         copyFee = _copyFee;
+    }
+
+    //Get copyfee
+    function getCopyFees() public view returns(uint){
+        return copyFee;
     }
 
     // Check user bet
@@ -84,6 +95,11 @@ contract predictPooling is ConfirmedOwner {
     //Check if claimable
     function isClaimable(uint predictionId) public view returns(bool){
         return ISciPredict(predictContractInstance).isClaimableViaPool(predictionId);
+    }
+
+    //Get claimable amount
+    function getClaimableAmount(uint predictionId) public view returns(uint){
+        return ISciPredict(predictContractInstance).getClaimableAmount(predictionId);
     }
 
     //Claim copied bet - part of the fees goes towards copied betAddress
