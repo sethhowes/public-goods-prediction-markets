@@ -1213,3 +1213,14 @@ console.log(user_list);
 // Get all user bets for a prediction market
 var all_bets_per_bucket_per_user = await get_all_bets_per_bucket_per_user(rpc_url, contract_address, abi, prediction_id, user_list);
 console.log(all_bets_per_bucket_per_user);
+
+//TO ADD
+// isClaimable
+// getclaimableAmount
+// isClaimableViaPool
+
+
+// POOLING
+// isClaimable
+// getclaimableAmount
+// checkUserBet(address betAddress, uint predictionId, uint bucketIndex) 
