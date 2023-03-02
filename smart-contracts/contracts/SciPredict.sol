@@ -17,6 +17,11 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         poolingContractInstance = poolingContract;
     }
 
+    //Get pooling contract address
+    function getPoolingContract() public view returns(address){
+        return poolingContractInstance;
+    }
+
     //Get chain id
     function retrieveChainId() public view returns (uint256) {
         uint256 id;
@@ -356,7 +361,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     }
     
     // Event to be emitted when user places bet
-    event Bet(address indexed _user, uint predictionId, uint scaledBet, uint betAmount);
+    event Bet(address indexed _user, uint indexed predictionId, uint scaledBet, uint betAmount);
     event Pooling(address indexed _user, uint predictionId, uint scaledBet, uint betAmount);
 
     // Get current prediction
@@ -407,7 +412,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     }
 
     //Check if claimable
-    function isClaimable(uint predictionId) public view returns(bool){
+    function isClaimable(uint predictionId, address user) public view returns(bool){
         // Funds must be claimed after prediction deadline
         if (block.timestamp < predictionMarkets[predictionId].deadline){
             return false;
@@ -416,20 +421,20 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         // Get index of bucket with correct outcome
         uint correctBucketIndex = correctBucketTracker[predictionId];
         // Get bet placed by user on correct outcome
-        uint correctOutcomeBet = betsMadePerBucket[predictionId][msg.sender][correctBucketIndex];
+        uint correctOutcomeBet = betsMadePerBucket[predictionId][user][correctBucketIndex];
         // Bet must be greater than 0
         if (correctOutcomeBet == 0){
             return false;
         }
         //Check if only claimable via pool
-        if(onlyClaimableViaPool(msg.sender)==true){
+        if(onlyClaimableViaPool(user)==true){
             return false;
         }
         return true;
     }
 
-    //Check if claimable
-    function isClaimableViaPool(uint predictionId) public view returns(bool){
+    //Check if claimable via pool
+    function isClaimableViaPool(uint predictionId, address user) public view returns(bool){
         // Funds must be claimed after prediction deadline
         if (block.timestamp < predictionMarkets[predictionId].deadline){
             return false;
@@ -437,7 +442,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         // Get index of bucket with correct outcome
         uint correctBucketIndex = correctBucketTracker[predictionId];
         // Get bet placed by user on correct outcome
-        uint correctOutcomeBet = betsMadePerBucket[predictionId][msg.sender][correctBucketIndex];
+        uint correctOutcomeBet = betsMadePerBucket[predictionId][user][correctBucketIndex];
         // Bet must be greater than 0
         if (correctOutcomeBet == 0){
             return false;
@@ -446,11 +451,11 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     }
 
     //Get claimable amount
-    function getClaimableAmount(uint predictionId) public view returns(uint){
+    function getClaimableAmount(uint predictionId, address user) public view returns(uint){
         // Get index of bucket with correct outcome
         uint correctBucketIndex = correctBucketTracker[predictionId];
         // Get bet placed by user on correct outcome
-        uint correctOutcomeBet = betsMadePerBucket[predictionId][msg.sender][correctBucketIndex];
+        uint correctOutcomeBet = betsMadePerBucket[predictionId][user][correctBucketIndex];
 
         // Get total value of correct bets for bucket
         uint totalCorrectBet = predictionMarkets[predictionId].committedAmountBucket[correctBucketIndex];
@@ -471,7 +476,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         require(onlyClaimableViaPool(msg.sender)==false, "Only claimable via pooling contract");
         
         //Check if claimable
-        require(isClaimable(predictionId),"Not claimable");
+        require(isClaimable(predictionId, msg.sender),"Not claimable");
 
         // Get index of bucket with correct outcome
         uint correctBucketIndex = getCorrectBucketIndex(predictionId);

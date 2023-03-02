@@ -1215,12 +1215,15 @@ var all_bets_per_bucket_per_user = await get_all_bets_per_bucket_per_user(rpc_ur
 console.log(all_bets_per_bucket_per_user);
 
 //TO ADD
+//CHECK CONTRACT
+
 // isClaimable
 // getclaimableAmount
 // isClaimableViaPool
 
 
 // POOLING
+// ADDRESS + ABI
 // isClaimable
 // getclaimableAmount
 // checkUserBet(address betAddress, uint predictionId, uint bucketIndex) 

@@ -37,8 +37,8 @@ interface ISciPredict {
     function viewUserValuePerBucket(uint predictionId, address user, uint bucketIndex) external view returns(uint);
     function placeBetViaPool(uint predictionId, uint bucketIndex) external payable;
     function claimFunds(uint predictionId) external payable;
-    function isClaimableViaPool(uint predictionId) external view returns(bool);
-    function getClaimableAmount(uint predictionId) external view returns(uint);
+    function isClaimableViaPool(uint predictionId, address user) external view returns(bool);
+    function getClaimableAmount(uint predictionId, address user) external view returns(uint);
 }
 
 //SciPredict contract
@@ -93,19 +93,19 @@ contract predictPooling is ConfirmedOwner {
     }
 
     //Check if claimable
-    function isClaimable(uint predictionId) public view returns(bool){
-        return ISciPredict(predictContractInstance).isClaimableViaPool(predictionId);
+    function isClaimable(uint predictionId, address user) public view returns(bool){
+        return ISciPredict(predictContractInstance).isClaimableViaPool(predictionId, user);
     }
 
     //Get claimable amount
-    function getClaimableAmount(uint predictionId) public view returns(uint){
-        return ISciPredict(predictContractInstance).getClaimableAmount(predictionId);
+    function getClaimableAmount(uint predictionId, address user) public view returns(uint){
+        return ISciPredict(predictContractInstance).getClaimableAmount(predictionId, user);
     }
 
     //Claim copied bet - part of the fees goes towards copied betAddress
     function claimReward(uint predictionId) public payable{
         //Check if claimable
-        require(isClaimable(predictionId), "Nothing claimable");
+        require(isClaimable(predictionId, msg.sender), "Nothing claimable");
         
         // Start balance
         uint startBalance = address(this).balance;
