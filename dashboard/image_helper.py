@@ -7,9 +7,9 @@ import pandas as pd
 from PIL import Image
 from io import BytesIO
 
-from config import NFT_MARKETPLACE_RAW_DATA
-
-raw_data = NFT_MARKETPLACE_RAW_DATA
+import os
+os.chdir(r'C:\Users\lucas\OneDrive\Hackathons\ETHDenver 2023\local shit')
+raw_data = 'temp_save_nft_data.csv'
 
 nft_data = pd.read_csv(raw_data, low_memory=False)
 nft_data = nft_data.drop_duplicates(subset=nft_data.columns.difference(['usdPrice', 'Unnamed: 0']))
@@ -34,6 +34,8 @@ images = split(images, 8)
 thread_images = []
 for chunck in images:
     thread_images.append(chunck)
+
+del nft_data
 
 def get_images(images, thread):
 

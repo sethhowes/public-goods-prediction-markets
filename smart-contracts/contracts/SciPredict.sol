@@ -10,7 +10,13 @@ import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
 contract SciPredict is ChainlinkClient, ConfirmedOwner {
     //Set general variables
     address nullAddress = 0x0000000000000000000000000000000000000000;
+    address poolingContractInstance;
     
+    //Set pooling contract address
+    function setPoolingContract(address poolingContract) public onlyOwner{
+        poolingContractInstance = poolingContract;
+    }
+
     //Get chain id
     function retrieveChainId() public view returns (uint256) {
         uint256 id;
@@ -194,12 +200,6 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         ) 
         payable public {
         
-        //Check whether start capital adds up to reward
-        // // Check whether buckets are empty
-        // for (uint i = 0; i < zeroCommittedAmount.length; i++) {
-        //     require(zeroCommittedAmount[i] == 0, "You must supply an empty array");
-        // }
-        
         //Calculate rewards and check if paid
         // Native ETH case
         if (rewardToken == nullAddress){
@@ -310,6 +310,32 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         emit Bet(msg.sender, predictionId, scaledBet, msg.value);
     }
 
+    // Place a bet via pool
+    function placeBetViaPool(uint predictionId, uint bucketIndex) public payable {
+        // Check if pooling contract is calling 
+        require(msg.sender == poolingContractInstance, "Only pooling contract allowed");
+
+        // Deadline check
+        require(block.timestamp < predictionMarkets[predictionId].deadline, "The prediction has ended");
+        
+        // Check transferred amounts - only native ETH
+        require(msg.value > 0, "Amounts needs to surpass 0");
+        uint totalCommitted = getTotalCommitted(predictionId) + msg.value;
+        uint selectedBucketCommitted = predictionMarkets[predictionId].committedAmountBucket[bucketIndex] + msg.value;
+        uint scaledBet = (msg.value * totalCommitted) / selectedBucketCommitted;
+        
+        // Add scaled bet to user via tx.origin
+        betsMadePerBucket[predictionId][tx.origin][bucketIndex] += scaledBet;
+        betsMadePerBucketValue[predictionId][tx.origin][bucketIndex] += msg.value;
+        
+        // Update amount committed to this bucket
+        predictionMarkets[predictionId].committedAmountBucket[bucketIndex] += msg.value;
+        
+        // Emit bet event
+        emit Pooling(msg.sender, predictionId, scaledBet, msg.value);
+    }
+
+
     // Get current quote for placing a bet
     function getCurrentQuote(uint predictionId, uint bucketIndex, uint proposedBet) public view returns(uint) {
         uint totalCommitted = getTotalCommitted(predictionId) + proposedBet;
@@ -320,6 +346,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     
     // Event to be emitted when user places bet
     event Bet(address indexed _user, uint predictionId, uint scaledBet, uint betAmount);
+    event Pooling(address indexed _user, uint predictionId, uint scaledBet, uint betAmount);
 
     // Get current prediction
     function getCurrentPrediction(uint predictionId) public view returns(uint) {
