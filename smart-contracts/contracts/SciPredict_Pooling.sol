@@ -2,11 +2,7 @@
 pragma solidity ^0.8.9;
 
 //Import libraries
-import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
-import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
-
-
 
 interface ISciPredict {
     //Prediction instance struct 
@@ -39,12 +35,16 @@ interface ISciPredict {
     function getCurrentQuote(uint predictionId, uint bucketIndex, uint proposedBet) external view returns(uint);
     function getTotalCommitted(uint predictionId) external view returns (uint);
     function viewUserValuePerBucket(uint predictionId, address user, uint bucketIndex) external view returns(uint);
+    function placeBetViaPool(uint predictionId, uint bucketIndex) external payable;
+    function claimFunds(uint predictionId) external payable;
 }
 
 //SciPredict contract
 contract predictPooling is ConfirmedOwner {
     // address predictContractInstance;
-    address predictContractInstance = 0xC9c037719B0E6aAB162c2dC932ff0ff2E72dc051;
+    address predictContractInstance;
+    uint copyFee;
+
     constructor() ConfirmedOwner(msg.sender){
 
     }
@@ -54,7 +54,13 @@ contract predictPooling is ConfirmedOwner {
         predictContractInstance = predictContract;
     }
 
-    function checkUserBet(address betAddress, uint predictionId, uint bucketIndex) public returns(uint){
+    //Set predict contract address
+    function setCopyFees(uint _copyFee) public onlyOwner{
+        copyFee = _copyFee;
+    }
+
+    // Check user bet
+    function checkUserBet(address betAddress, uint predictionId, uint bucketIndex) public view returns(uint){
         //Check if bet from bet address exist
         uint userBet = ISciPredict(predictContractInstance).viewUserValuePerBucket(predictionId, betAddress, bucketIndex);
         return userBet;
@@ -66,13 +72,24 @@ contract predictPooling is ConfirmedOwner {
         require(msg.value > 0, "Bet value must be greater than 0");
     
         //Check if bet from bet address exist
-        uint userBet = ISciPredict(predictContractInstance).viewUserValuePerBucket(predictionId, betAddress, bucketIndex);
+        uint userBet = checkUserBet(betAddress, predictionId, bucketIndex);
 
         require(userBet != 0, "User did not bet so cannot copy bet");
 
-        ISciPredict(predictContractInstance).placeBet{value: msg.value}(predictionId, bucketIndex);
+        //Place bet via pooling
+        ISciPredict(predictContractInstance).placeBetViaPool{value: msg.value}(predictionId, bucketIndex);
 
-        //Fix tx origin issue
-        //Write placeBetViaPool function that get tx_origin and then uses this to store
+    }
+
+    //Claim copied bet - part of the fees goes towards copied betAddress
+    function claimReward(uint predictionId){
+        //Claim rewards 
+        ISciPredict(predictContractInstance).claimFunds(uint predictionId);
+
+        //Somehow make sure that copied bets can only be claimed via this contract
+        //TAKE FEE
+        //ADD FUNCTION TO CHECK IF REWARD IS CLAIMABLE
+        // Run balance checker in main contract X
+
     }
 }

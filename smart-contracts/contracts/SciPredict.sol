@@ -131,6 +131,12 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     // Map prediction id to bets
     mapping(uint => mapping(address => mapping(uint => uint))) betsMadePerBucket;
     mapping(uint => mapping(address => mapping(uint => uint))) betsMadePerBucketValue;
+    mapping(address => bool) poolingTracker;
+
+    //Returns if reward is claimbale via pooling contract only
+    function onlyClaimableViaPool(address user) public returns(bool){
+        return poolingTracker[user];
+    }
 
     // User per market handling
     mapping(uint => address[]) userPerMarket;
@@ -331,6 +337,8 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         // Update amount committed to this bucket
         predictionMarkets[predictionId].committedAmountBucket[bucketIndex] += msg.value;
         
+        poolingTracker[tx.origin] = true;
+
         // Emit bet event
         emit Pooling(msg.sender, predictionId, scaledBet, msg.value);
     }
@@ -390,6 +398,9 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
 
     // Allow a user to withdraw funds if they placed a correct bet
     function claimFunds(uint predictionId) public payable {
+        //Check if funds are only claimable via pooling contract
+        require(onlyClaimableViaPool(msg.sender)==false, "Only claimable via pooling contract");
+        
         // Funds must be claimed after prediction deadline
         require(block.timestamp >= predictionMarkets[predictionId].deadline, "The deadline has not yet passed");
         // Get index of bucket with correct outcome
