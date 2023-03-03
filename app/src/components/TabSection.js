@@ -45,6 +45,7 @@ export default function ColorTabs(props) {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+  const committedUserCapital = 3
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -55,11 +56,11 @@ export default function ColorTabs(props) {
         indicatorColor="secondary"
         aria-label="secondary tabs example"
       >
+        <Tab label="Details" />
         <Tab label="History" />
-        <Tab label="Redeem" />
-        <Tab label="Adminstrator" />
+        
       </Tabs>
-      <TabPanel value={value} index={0}>
+      <TabPanel value={value} index={1}>
         <Box sx={{ fontWeight: "bold", marginBottom: "1rem" }}>
           Prediction History
         </Box>
@@ -67,27 +68,32 @@ export default function ColorTabs(props) {
           <EnhancedTable />
         </Box>
       </TabPanel>
-      <TabPanel value={value} index={1}>
-        <Typography>Tab Two Content</Typography>
-      </TabPanel>
-      <TabPanel value={value} index={2}>
+   
+      <TabPanel value={value} index={0}>
         <Box sx={{ fontWeight: "bold", marginBottom: "1rem" }}>
-          Adminstrate Market
+          Details
         </Box>
 
         <Table>
           <TableBody>
+          <TableRow>
+              <TableCell>Creator Address</TableCell>
+              <TableCell align="right">
+                {props.creatorAddress}
+              </TableCell>
+            </TableRow>
             <TableRow>
               <TableCell>My Committed Capital</TableCell>
               <TableCell align="right">
-                3 ETH {/* @todo change this from being hardcoded */}
+                {committedUserCapital} ETH {/* @todo change this from being hardcoded */}
               </TableCell>
             </TableRow>
             <TableRow>
               <TableCell>Close Market</TableCell>
               <TableCell align="right">
-                <Button variant="contained" onClick={handleCloseMarket}>
-                  Close Market {/*@todo only display if the deadline has passed AND if the creator has connected their wallet */}
+                <Button   disabled={props.userAddress === props.creatorAddress ? false : true}
+ variant="contained" color="error" onClick={handleCloseMarket}>
+                  Close Market 
                 </Button>
               </TableCell>
             </TableRow>

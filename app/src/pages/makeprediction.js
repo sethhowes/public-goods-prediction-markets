@@ -21,11 +21,12 @@ import { Button } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import router from "next/router";
 import { useAuth } from "util/auth";
-import contract from "../util/contract";
+import { contract } from "../util/contract";
 import { useSigner } from "wagmi";
 import convertUnixTime from "util/convertUnixTime";
 import { ethers } from "ethers";
 import { distributeFunds } from "../util/distributeFunds";
+import getHistoricalBets from "util/getHistoricalBets";
 
 const useStyles = makeStyles((theme) => ({
   gradientText: {
@@ -51,7 +52,7 @@ function DashboardPage(props) {
   const [predictionBuckets, setPredictionBuckets] = useState([
     1,
     2,
-    3,
+    3
   ]);
   const [predictionRewardAmount, setPredictionRewardAmount] = useState(3);
   const [predictionEndDate, setPredictionEndDate] = useState();
@@ -92,12 +93,15 @@ function DashboardPage(props) {
       predictionApiEndpoint,
       user: auth.user.uid,
     });
-
+    distributeFunds();
     // Converts date state object to UNIX time
     const unixEndDate = convertUnixTime(predictionEndDate);
+
+  
     // Split reward amount
     const initialBucketAmounts = distributeFunds(predictionRewardAmount, predictionBuckets.length);
-
+    
+    //const historicalBets = getHistoricalBets("0xdc6Dc980F7F2491b352517B27D0e6Af9baa42501", 0); // @todo display this data on the front end
     const tx = await contractWithSigner.createPrediction(
       predictionTitle,
       predictionUnit,

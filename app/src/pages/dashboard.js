@@ -8,6 +8,8 @@ import Section from "components/Section";
 import SectionHeader from "components/SectionHeader";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
+import { useAccount } from 'wagmi'
+
 
 import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, defs, linearGradient, stop  } from 'recharts';
 import VotingComponent from "components/voting";
@@ -50,6 +52,7 @@ function DashboardPage(props) {
   // url parsing  
   const web3 = new Web3();
 
+  const { address, isConnecting, isDisconnected } = useAccount()
 
   let prediction_id = 0;
 
@@ -313,7 +316,7 @@ const COLORS = ['#0088FE', '#00C49F'];
             <Card>
               <CardContent sx={{ padding: 3 }}>
                 <Box>
-                  <ColorTabs useStyles = {useStyles} />
+                  <ColorTabs userAddress = {address} creatorAddress =  {predictionMarketDetails?.creator_address} useStyles = {useStyles} />
               
                 </Box>
               </CardContent>
