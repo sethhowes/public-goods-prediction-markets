@@ -21,9 +21,9 @@ function HeroSection(props) {
       <Container>
         <Grid container={true} alignItems="center" spacing={6}>
           <Grid container={true} item={true} direction="column" xs={12} md={12}>
-            <Box sx={{ textAlign: { xs: "center", md: "center" } }}>
+            <Box sx={{ textAlign: { xs: "center", md: "center"} }}>
                 <Box>
-            <Typography variant="h2"  sx={{ fontWeight: "bold", mb: 4}} className={classes.gradientText} align="center">Get answers to the world's toughest questions
+            <Typography variant="h2"  sx={{ fontWeight: "bold", mt: 8, mb: 4}} className={classes.gradientText} align="center">Get answers to the world's toughest questions
 </Typography>
             <Typography variant="p"   align="center">Access verified predictions from the world's top experts.
 </Typography>

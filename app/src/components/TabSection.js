@@ -10,7 +10,7 @@ import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
-import contract from "../util/contract";
+import {contract} from "../util/contract";
 import { useSigner } from "wagmi";
 
 function TabPanel(props) {

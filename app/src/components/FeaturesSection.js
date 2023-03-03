@@ -54,7 +54,11 @@ function FeaturesSection(props) {
                 },
               }}
             >
-              <img src="images/screenshot.jpg" alt="" />
+             <img
+        src="images/screenshot.png"
+        alt=""
+        style={{ borderRadius: '10px' }}
+      />
             </Box>
           </Grid>
           <Grid item={true} xs={12} md={6}>

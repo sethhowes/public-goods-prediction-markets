@@ -172,14 +172,9 @@ function DashboardPage(props) {
               <Card>
                 <CardContent sx={{ padding: 3 }}>
                   <Box>
-                    <Typography
-                      variant="h5"
-                      sx={{ fontWeight: "bold", mb: 4 }}
-                      className={classes.gradientText}
-                      align="left"
-                    >
-                      Request Prediction
-                    </Typography>
+                  <Typography component={'span'}sx={{ fontWeight: "bold", mb: 4, fontSize: 24}} className={classes.gradientText} align="left">Request Prediction</Typography>
+
+                   
 
                     <PredictionData
                       showNameField={props.showNameField}

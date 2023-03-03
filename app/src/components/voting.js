@@ -4,7 +4,7 @@ import Alert from "@mui/material/Alert";
 import { createVote } from "util/db";
 import { useAuth } from "util/auth";
 import { useSigner } from "wagmi";
-import contract from "../util/contract";
+import {contract} from "../util/contract";
 import {get_quote} from 'util/multicall.js'
 import Web3 from "web3";
 
@@ -38,8 +38,6 @@ const VotingComponent = (props) => {
     setSelectedOption(index);
     setShowPayoff(true);
     fetchData();
-
-   
   };
 
   // Current quote

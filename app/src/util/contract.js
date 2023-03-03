@@ -1,6 +1,10 @@
 import { ethers } from "ethers";
 
-const contractABI = [
+
+// Define the contract variables
+const rpc_url = 'https://goerli.gateway.tenderly.co/3Ugz1n4IRjoidr766XDDxX';
+var contract_address = '0xC9c037719B0E6aAB162c2dC932ff0ff2E72dc051';
+const abi = [
 	{
 		"inputs": [],
 		"name": "acceptOwnership",
@@ -739,14 +743,14 @@ const contractABI = [
 		"type": "function"
 	}
 ];
-
+const contractABI = abi
 const provider = new ethers.providers.JsonRpcProvider("https://goerli.gateway.tenderly.co/3Ugz1n4IRjoidr766XDDxX");
 
-const contractAddress = "0xC9c037719B0E6aAB162c2dC932ff0ff2E72dc051";
+const contractAddress = contract_address
 const contract = new ethers.Contract(
     contractAddress,
     contractABI,
     provider
 )
 
-export default contract;
+export { abi, contract, contract_address, rpc_url};
