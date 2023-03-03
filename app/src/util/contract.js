@@ -905,7 +905,7 @@ const contractABI = [
     type: "function",
   },
 ];
-
+const abi = contractABI
 const provider = new ethers.providers.JsonRpcProvider(
   "https://goerli.gateway.tenderly.co/3Ugz1n4IRjoidr766XDDxX"
 );

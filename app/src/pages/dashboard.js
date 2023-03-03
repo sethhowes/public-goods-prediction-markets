@@ -18,11 +18,11 @@ import ColorTabs from "components/TabSection"
 import PeopleIcon from '@mui/icons-material/People';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { makeStyles } from "@mui/styles";
+import { getHistoricalBetsPerUser, getHistoricalBetsPerPrediction } from "util/getHistoricalBets";
 
 import {get_prediction_market_details} from 'util/multicall.js'
 import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts';
 import { abi, contract_address, rpc_url } from 'util/contract.js'
-import { getHistoricalBetsPerUser, getHistoricalBetsPerPrediction } from "util/getHistoricalBets";
 
 import Web3 from 'web3';
 
@@ -30,9 +30,9 @@ const pieData = [
 	{ name: 'True', value: 600 },
 	{ name: 'False', value: 400 },
   ];
-  
+  //@todo: Seth make helper function to handle this
 
-// @todo create helper function to parse bets to true and false 
+
 const useStyles = makeStyles((theme) => ({
   gradientText: {
     backgroundClip: "text",
@@ -68,6 +68,7 @@ const [readableDeadline, setReadableDeadline] = useState(null);
 const [readablePredictionID, setReadablePredictionID] = useState(null);
 const [readablePredictionOutcome, setReadablePredictionOutcome] = useState(null);
 const [readableCommittedAmountBucket, setReadableCommittedAmountBucket] = useState(null);
+const [predictionBuckets, setPredictionBuckets] = useState(null);
 
 useEffect(() => {
 	async function fetchData() {
@@ -88,10 +89,10 @@ useEffect(() => {
 		// Convert prediction_bucket to readable values
 		setReadableCommittedAmountBucket(predictionMarketDetails?.committed_amount_bucket?.map(bucket => web3.utils.hexToNumber(bucket.hex)));
 		
-		const historicalBetsPerUser = getHistoricalBetsPerUser("0xdc6Dc980F7F2491b352517B27D0e6Af9baa42501", 0); // @todo display this data on the front end
+		/* const historicalBetsPerUser = getHistoricalBetsPerUser("0xdc6Dc980F7F2491b352517B27D0e6Af9baa42501", 0); // @todo display this data on the front end
 		const historicalBetsPerPrediction = getHistoricalBetsPerPrediction(1);
 		console.log("MARK")
-		console.log(historicalBetsPerPrediction);
+		console.log(historicalBetsPerPrediction); */
   } 
   
   fetchData();
@@ -117,7 +118,7 @@ useEffect(() => {
   //const predictionDetails = usePredictionOnce(predictionID)
 
 // page information
-const [pie, setPie] = useState();
+const [pie, setPie] = useState(); 
 
 const predictionTitle = predictionMarketDetails?.prediction_title;
 const predictionBucket = predictionMarketDetails?.prediction_bucket;
@@ -147,7 +148,7 @@ useEffect(() => {
 	// handle the case where hexString is not defined
   }
 //graph data
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+const COLORS = ['#0088FE', '#00C49F'];
 
   const data = [
     {
