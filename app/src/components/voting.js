@@ -43,7 +43,7 @@ const VotingComponent = ({ useStyles, options, predictionBucketPrices }) => {
       message: `Prediction created successfully`,
     });
 
-    const tx = await contractWithSigner.placeBet(0, 1, {value: 20})
+    const tx = await contractWithSigner.placeBet(0, 1, {value: 20}) // UPDATE PARAMETERS WITH PREDICTION ID, BUCKET INDEX @todo
 
     createVote({ selectedOption, stake, user: auth.user.uid });
     // Your code to make prediction here...
