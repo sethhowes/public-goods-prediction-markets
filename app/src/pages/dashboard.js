@@ -23,6 +23,8 @@ import { makeStyles } from "@mui/styles";
 import { requireAuth } from "util/auth";
 import { usePredictionOnce } from "util/db";
 import {get_prediction_market_details} from 'util/multicall.js'
+
+
 import Web3 from 'web3';
 
 const useStyles = makeStyles((theme) => ({
@@ -998,7 +1000,7 @@ useEffect(() => {
             <Card>
               <CardContent sx={{ padding: 3 }}>
                 <Box>
-                <VotingComponent useStyles = {useStyles} options={options} predictionBucketPrices={predictionBucketPrices} />
+                <VotingComponent rpc_url = {rpc_url} prediction_id = {prediction_id} contract_address = {contract_address} abi = {abi} useStyles = {useStyles} options={options} predictionBucketPrices={predictionBucketPrices} />
               
                 </Box>
               </CardContent>

@@ -5,20 +5,23 @@ import { createVote } from "util/db";
 import { useAuth } from "util/auth";
 import { useSigner } from "wagmi";
 import contract from "../util/contract";
+import {get_quote} from 'util/multicall.js'
+import Web3 from "web3";
 
-const VotingComponent = ({ useStyles, options, predictionBucketPrices }) => {
+const VotingComponent = (props) => {
   // Get contract with signer to make bet
   const { data: signer, isError, isLoading } = useSigner();
   const contractWithSigner = contract.connect(signer);
 
   const [formAlert, setFormAlert] = useState(null);
   const auth = useAuth();
+  const web3 = new Web3();
 
-  const classes = useStyles();
-  const [selectedOption, setSelectedOption] = useState(null);
+  const classes = props.useStyles();
+  const [selectedOption, setSelectedOption] = useState(0);
   const [stake, setStake] = useState(1);
   const getPrice = (index) => {
-    const prices = predictionBucketPrices;
+    const prices = props.predictionBucketPrices;
     return prices[index];
   };
 
@@ -29,10 +32,28 @@ const VotingComponent = ({ useStyles, options, predictionBucketPrices }) => {
   const subtotal = getPrice(selectedOption) * stake;
   const price = getPrice(selectedOption);
   const [showPayoff, setShowPayoff] = useState(); //
+  const [quote, setQuote] = useState()
   const handleOptionSelect = (index) => {
     setSelectedOption(index);
     setShowPayoff(true);
+    fetchData();
+
+   
   };
+
+  // Current quote
+let proposed_bet = 1e3.toString();
+proposed_bet = stake.toString()
+let bucket_index = 0;
+bucket_index = selectedOption 
+
+  async function fetchData() {
+    const result = await  get_quote(props.rpc_url, props.contract_address, props.abi, props.prediction_id, proposed_bet, bucket_index)
+    setQuote(result);
+    console.log(result)
+  } 
+  
+  
   const showValue = selectedOption + 1;
   const handleQuantityChange = (event) => {
     setStake(Number(event.target.value));
@@ -58,7 +79,7 @@ const VotingComponent = ({ useStyles, options, predictionBucketPrices }) => {
       )}
 
       <div style={{ display: "flex", flexDirection: "column" }}>
-        {options?.map((option, index) => (
+        {props.options?.map((option, index) => (
           <button
             key={option}
             onClick={() => handleOptionSelect(index)}
@@ -118,7 +139,7 @@ const VotingComponent = ({ useStyles, options, predictionBucketPrices }) => {
           marginTop: "20px",
         }}
       >
-        {showPayoff && <div>Subtotal: ${subtotal.toFixed(2)}</div>}
+        {showPayoff && <div>Subtotal: {web3.utils.toNumber(quote?.hex)} </div>}
       </div>
 
       {showPayoff && (
