@@ -75,7 +75,7 @@ function Navbar2(props) {
               </Link>
               <Link href="/makeprediction" passHref={true}>
                 <Button component="a" color="inherit">
-                  Learn{" "}
+                  Create{" "}
                 </Button>
               </Link>
               <Link href="/stake" passHref={true}>
@@ -134,7 +134,7 @@ function Navbar2(props) {
               </Link>
               <Link href="/makeprediction" passHref={true}>
                 <Button component="a" color="inherit">
-                  Learn{" "}
+                  Create
                 </Button>
               </Link>
 

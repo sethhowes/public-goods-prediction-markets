@@ -32,7 +32,7 @@ function predictionData(props) {
    
   };
   const handleAddValue = () => {
-    const value = document.querySelector("#value").value + " " + document.querySelector("#unit").value ;
+    const value = document.querySelector("#value").value ;
     if (value) {
       setValues([...values, value]); // <-- add the entered value to the list of values
       document.querySelector("#value").value = "";

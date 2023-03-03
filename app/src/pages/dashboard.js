@@ -42,11 +42,18 @@ function DashboardPage(props) {
   // url parsing  
   const web3 = new Web3();
 
-const url = window.location.href;
-const parts = url.split("?");
-let prediction_id = 0;
 
-prediction_id = parts[parts.length - 1]
+  let prediction_id = 0;
+
+
+  if (typeof window !== 'undefined') {
+	const url = window.location.href;
+	const parts = url.split("?");
+  
+	prediction_id = parts[parts.length - 1]
+  }
+
+
 
 // Define the contract variables
 const rpc_url = 'https://goerli.gateway.tenderly.co/3Ugz1n4IRjoidr766XDDxX';
@@ -806,10 +813,10 @@ useEffect(() => {
 	// Convert reward_amount to a readable value
 	setReadableRewardAmount(web3.utils.toHex(predictionMarketDetails?.reward_amount));
 	// Convert deadline to a readable value (assuming it represents a Unix timestamp)
-	if(predictionMarketDetails?.deadline){
-		const readable_deadline = new Date(web3.utils.hexToNumber(predictionMarketDetails?.deadline?.hex) * 1000).toLocaleString();
+		const readable_deadline = web3.utils.toNumber(predictionMarketDetails?.deadline?.hex) * 1000
+		console.log(readable_deadline)
 	setReadableDeadline(readable_deadline);
-	}
+	
 	// Convert prediction_id to a readable value
 
 	setReadablePredictionID(web3.utils.toNumber(predictionMarketDetails?.prediction_id?.hex));
@@ -980,7 +987,7 @@ useEffect(() => {
                   <strong style={{ fontWeight: 'bold', padding: 3, ML: 5}}>Deadline:</strong>
                 </Typography>
                 <Typography component={'span'} sx={{ fontWeight: 'bold', marginLeft: 2 }} className={classes.gradientText}>
-				{readableDeadline}
+				{new Date(web3.utils.toNumber(predictionMarketDetails?.deadline.hex) * 1000).toLocaleString()}
                 </Typography>
               </Box>
                             
