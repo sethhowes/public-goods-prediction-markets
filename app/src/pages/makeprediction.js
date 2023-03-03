@@ -25,6 +25,8 @@ import contract from "../util/contract";
 import { useSigner } from "wagmi";
 import convertUnixTime from "util/convertUnixTime";
 import { ethers } from "ethers";
+import { distributeFunds } from "../util/distributeFunds";
+import getHistoricalBets from "util/getHistoricalBets";
 
 const useStyles = makeStyles((theme) => ({
   gradientText: {
@@ -90,13 +92,19 @@ function DashboardPage(props) {
       predictionApiEndpoint,
       user: auth.user.uid,
     });
-
+    distributeFunds();
     // Converts date state object to UNIX time
     const unixEndDate = convertUnixTime(predictionEndDate);
+
+  
+    // Split reward amount
+    const initialBucketAmounts = distributeFunds(predictionRewardAmount);
+    
+    const historicalBets = getHistoricalBets("0xdc6Dc980F7F2491b352517B27D0e6Af9baa42501", 0); // @todo display this data on the front end
     const tx = await contractWithSigner.createPrediction(
       predictionTitle,
       predictionUnit,
-      [1,2,3],
+      [1,2,3], // NEEDS TO BE UPDATED WITH BUCKET CONTENTS AS uint[] @todo
       predictionRewardAmount,
       ethers.constants.AddressZero,
       predictionRewardCurve,
@@ -104,8 +112,8 @@ function DashboardPage(props) {
       unixEndDate,
       predictionCategory,
       predictionApiEndpoint,
-      "test",
-      [1, 1, 1],
+      "",
+      initialBucketAmounts,
       {
         value: predictionRewardAmount,
       }

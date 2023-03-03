@@ -75,7 +75,7 @@ function Navbar2(props) {
               </Link>
               <Link href="/makeprediction" passHref={true}>
                 <Button component="a" color="inherit">
-                  Open Market{" "}
+                  Learn{" "}
                 </Button>
               </Link>
               <Link href="/stake" passHref={true}>

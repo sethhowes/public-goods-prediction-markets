@@ -7,7 +7,7 @@ const MANTLE_NETWORK_MULTICALL_CONTRACT_ADDRESS = '0x';
 const SCROLL_NETWORK_MULTICALL_CONTRACT_ADDRESS = '0x';
 
 //Returns multicall object
-async function get_multi_call_provider(rpc_url){
+async function get_multi_call_provider(rpc_url) {
    //Set provider to Tenderly :)
    const web3 = new Web3(rpc_url);
  
