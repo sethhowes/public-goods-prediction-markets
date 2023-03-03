@@ -25,6 +25,7 @@ const VotingComponent = (props) => {
     return prices[index];
   };
 
+
   const handleFormAlert = (data) => {
     setFormAlert(data);
   };
@@ -49,11 +50,11 @@ bucket_index = selectedOption
 
   async function fetchData() {
     const result = await  get_quote(props.rpc_url, props.contract_address, props.abi, props.prediction_id, proposed_bet, bucket_index)
-    setQuote(result);
-    console.log(result)
+    setQuote (result)
   } 
   
-  
+
+
   const showValue = selectedOption + 1;
   const handleQuantityChange = (event) => {
     setStake(Number(event.target.value));
@@ -139,7 +140,7 @@ bucket_index = selectedOption
           marginTop: "20px",
         }}
       >
-        {showPayoff && <div>Subtotal: {web3.utils.toNumber(quote?.hex)} </div>}
+{showPayoff && quote && <div>Subtotal:{quote.toString()} </div>}
       </div>
 
       {showPayoff && (
