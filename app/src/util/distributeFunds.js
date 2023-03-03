@@ -1,21 +1,19 @@
-export function distributeFunds(num) {
+export function distributeFunds(num, bucketNumber) {
 
   // Divide the initial integer into three equal parts
-  const part = Math.floor(num / 3);
+  const part = Math.floor(num / bucketNumber);
 
   // Calculate the remaining amount
-  const remainder = num % 3;
+  const remainder = num % bucketNumber;
 
-  // Create an array to store the three integers
+  // Create an array to store the integers
   const integers = [];
 
-  // Add the first integer
-  integers.push(part);
-
-  // Add the second integer
-  integers.push(part);
-
-  // Add the third integer
+  for (let i = 0; i < (bucketNumber - 1); i++) {
+    integers.push(part);
+  }
+  
+  // Add the final integer
   integers.push(part + remainder);
 
   return integers;
