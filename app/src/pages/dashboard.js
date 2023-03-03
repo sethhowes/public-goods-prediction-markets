@@ -814,7 +814,6 @@ useEffect(() => {
 	setReadableRewardAmount(web3.utils.toHex(predictionMarketDetails?.reward_amount));
 	// Convert deadline to a readable value (assuming it represents a Unix timestamp)
 		const readable_deadline = web3.utils.toNumber(predictionMarketDetails?.deadline?.hex) * 1000
-		console.log(readable_deadline)
 	setReadableDeadline(readable_deadline);
 	
 	// Convert prediction_id to a readable value
