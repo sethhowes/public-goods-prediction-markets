@@ -35,7 +35,7 @@ const VotingComponent = ({ useStyles, options, predictionBucketPrices }) => {
   };
   const showValue = selectedOption + 1;
   const handleQuantityChange = (event) => {
-    setQuantity(Number(event.target.value));
+    setStake(Number(event.target.value));
   };
   const handlePrediction = async () => {
     handleFormAlert({
