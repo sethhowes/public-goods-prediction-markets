@@ -64,7 +64,7 @@ function Navbar2(props) {
             </Link>
             <Box sx={{ ml: 2, display: { md: "block", xs: "none" } }}>
             <Link href="/viewall" passHref={true}>
-                <Button component="a" color="inherit">
+                <Button ccolor="inherit" omponent="a">
                   Dashboard{" "}
                 </Button>
               </Link>

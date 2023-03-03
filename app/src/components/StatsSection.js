@@ -6,6 +6,9 @@ import Typography from "@mui/material/Typography";
 import Section from "components/Section";
 
 function StatsSection(props) {
+
+  const classes = props.useStyles();
+
   const items = [
     {
       title: "Total Predictions",
@@ -38,7 +41,7 @@ function StatsSection(props) {
             <Grid item={true} xs={12} sm={3} key={index}>
               <Box sx={{ textAlign: "center" }}>
                 <Typography variant="overline">{item.title}</Typography>
-                <Typography variant="h4">{item.stat}</Typography>
+                <Typography className={classes.gradientText} variant="h4">{item.stat}</Typography>
               </Box>
             </Grid>
           ))}

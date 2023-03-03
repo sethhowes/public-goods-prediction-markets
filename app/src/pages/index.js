@@ -23,7 +23,7 @@ function IndexPage(props) {
     bgImageOpacity={1}
     title="Get answers to the world's toughest questions"
     subtitle="Access verified predictions from the world's top experts."
-    image="/images/researchher.png"
+    image=""
     buttonText="Get Started"
     buttonColor="secondary"
     buttonPath="/pricing"
@@ -34,6 +34,7 @@ function IndexPage(props) {
     size="medium"
     bgImage=""
     bgImageOpacity={1}
+    useStyles = {useStyles}
   />
   <FeaturesSection
     bgColor="primary"
