@@ -227,7 +227,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
                 address(this),
                 rewardAmount
             );
-        } else{
+        } else {
             revert("Reward token specification unclear.");
         }
         

@@ -22,6 +22,7 @@ import { makeStyles } from "@mui/styles";
 import {get_prediction_market_details} from 'util/multicall.js'
 import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts';
 import { abi, contract_address, rpc_url } from 'util/contract.js'
+import { getHistoricalBetsPerUser, getHistoricalBetsPerPrediction } from "util/getHistoricalBets";
 
 import Web3 from 'web3';
 
@@ -31,7 +32,7 @@ const pieData = [
   ];
   
 
-
+// @todo create helper function to parse bets to true and false 
 const useStyles = makeStyles((theme) => ({
   gradientText: {
     backgroundClip: "text",
@@ -67,27 +68,30 @@ const [readableDeadline, setReadableDeadline] = useState(null);
 const [readablePredictionID, setReadablePredictionID] = useState(null);
 const [readablePredictionOutcome, setReadablePredictionOutcome] = useState(null);
 const [readableCommittedAmountBucket, setReadableCommittedAmountBucket] = useState(null);
-const [predictionBuckets, setPredictionBuckets] = useState(null);
 
 useEffect(() => {
-  async function fetchData() {
-    const result = await get_prediction_market_details(rpc_url, contract_address, abi, prediction_id);
-    setPredictionMarketDetails(result);
-	// Convert reward_amount to a readable value
-	setReadableRewardAmount(web3.utils.toHex(predictionMarketDetails?.reward_amount));
-	// Convert deadline to a readable value (assuming it represents a Unix timestamp)
+	async function fetchData() {
+		const result = await get_prediction_market_details(rpc_url, contract_address, abi, prediction_id);
+		setPredictionMarketDetails(result);
+		// Convert reward_amount to a readable value
+		setReadableRewardAmount(web3.utils.toHex(predictionMarketDetails?.reward_amount));
+		// Convert deadline to a readable value (assuming it represents a Unix timestamp)
 		const readable_deadline = web3.utils.toNumber(predictionMarketDetails?.deadline?.hex) * 1000
-	setReadableDeadline(readable_deadline);
-	
-	// Convert prediction_id to a readable value
-
-	setReadablePredictionID(web3.utils.toNumber(predictionMarketDetails?.prediction_id?.hex));
-	// Convert outcome to a readable value
-
-     setReadablePredictionOutcome(web3.utils.toNumber(predictionMarketDetails?.outcome?.hex));
-	// Convert prediction_bucket to readable values
-	setReadableCommittedAmountBucket(predictionMarketDetails?.committed_amount_bucket?.map(bucket => web3.utils.hexToNumber(bucket.hex)));
-
+		setReadableDeadline(readable_deadline);
+		
+		// Convert prediction_id to a readable value
+		
+		setReadablePredictionID(web3.utils.toNumber(predictionMarketDetails?.prediction_id?.hex));
+		// Convert outcome to a readable value
+		
+		setReadablePredictionOutcome(web3.utils.toNumber(predictionMarketDetails?.outcome?.hex));
+		// Convert prediction_bucket to readable values
+		setReadableCommittedAmountBucket(predictionMarketDetails?.committed_amount_bucket?.map(bucket => web3.utils.hexToNumber(bucket.hex)));
+		
+		const historicalBetsPerUser = getHistoricalBetsPerUser("0xdc6Dc980F7F2491b352517B27D0e6Af9baa42501", 0); // @todo display this data on the front end
+		const historicalBetsPerPrediction = getHistoricalBetsPerPrediction(1);
+		console.log("MARK")
+		console.log(historicalBetsPerPrediction);
   } 
   
   fetchData();
