@@ -349,7 +349,7 @@ const useStyles = makeStyles((theme) => ({
   );
 }
 
-export default requireAuth(DashboardPage);
+export default DashboardPage;
 
 
 

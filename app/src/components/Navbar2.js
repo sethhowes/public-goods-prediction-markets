@@ -75,7 +75,7 @@ function Navbar2(props) {
               </Link>
               <Link href="/makeprediction" passHref={true}>
                 <Button component="a" color="inherit">
-                  Learn{" "}
+                  Open Market{" "}
                 </Button>
               </Link>
               <Link href="/stake" passHref={true}>
@@ -83,7 +83,7 @@ function Navbar2(props) {
                   Stake{" "}
                 </Button>
               </Link>
-              <ConnectButton />
+              
 
             </Box>
             <IconButton
@@ -94,85 +94,13 @@ function Navbar2(props) {
             >
               <MenuIcon />
             </IconButton>
-            <Box sx={{ ml: "auto", display: { md: "block", xs: "none" } }}>
-              {!auth.user && (
-                <>
-                  <Link href="/auth/signin" passHref={true}>
-                    <Button component="a" color="inherit">
-                      Sign in
-                    </Button>
-                  </Link>
-                  <Link href="/auth/signup" passHref={true}>
-                    <Button
-                      component="a"
-                      variant="contained"
-                      sx={{
-                        backgroundImage:
-                          "linear-gradient(85.9deg, #1EBEA5 -14.21%, #00B5C4 18.25%, #00A8E6 52.49%, #0096FD 81.67%, #157AFB 111.44%)",
-                        color: "white",
-                        ml: 1,
-                      }}
-                    >
-                      Sign up
-                    </Button>
-                  </Link>
-                </>
-              )}
-              
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", ml: "auto", mr: "10px", }}>
+            
+                    <ConnectButton/>
+               
+                
 
-              {auth.user && (
-                <>
-                  <Button
-                    color="inherit"
-                    aria-label="Account"
-                    aria-controls="account-menu"
-                    aria-haspopup="true"
-                    onClick={(event) => {
-                      handleOpenMenu(event, "account-menu");
-                    }}
-                  >
-                    Account
-                    <ExpandMoreIcon />
-                  </Button>
-                  <Menu
-                    id="account-menu"
-                    open={
-                      menuState && menuState.id === "account-menu"
-                        ? true
-                        : false
-                    }
-                    anchorEl={menuState && menuState.anchor}
-                    onClick={handleCloseMenu}
-                    onClose={handleCloseMenu}
-                    keepMounted={true}
-                    anchorOrigin={{
-                      vertical: "bottom",
-                      horizontal: "center",
-                    }}
-                    transformOrigin={{
-                      vertical: "top",
-                      horizontal: "center",
-                    }}
-                  >
-                    <div>
-                      <Link href="/dashboard" passHref={true}>
-                        <MenuItem component="a">Dashboard</MenuItem>
-                      </Link>
-                      <Link href="/settings/general" passHref={true}>
-                        <MenuItem component="a">Settings</MenuItem>
-                      </Link>
-                      <Divider />
-                      <MenuItem
-                        onClick={(event) => {
-                          auth.signout();
-                        }}
-                      >
-                        Signout
-                      </MenuItem>
-                    </div>
-                  </Menu>
-                </>
-              )}
+             
 
               <IconButton
                 color="inherit"
@@ -213,46 +141,8 @@ function Navbar2(props) {
          
          
 
-          {!auth.user && (
-            <>
-              <Link href="/auth/signin" passHref={true}>
-                <ListItem component="a" button={true}>
-                  <ListItemText>Sign in</ListItemText>
-                </ListItem>
-              </Link>
-              <ListItem>
-                <Link href="/auth/signup" passHref={true}>
-                  <Button component="a" variant="contained" color="primary">
-                    Sign up
-                  </Button>
-                </Link>
-              </ListItem>
-            </>
-          )}
 
-          {auth.user && (
-            <>
-              <Link href="/dashboard" passHref={true}>
-                <ListItem component="a" button={true}>
-                  <ListItemText>Dashboard</ListItemText>
-                </ListItem>
-              </Link>
-              <Link href="/settings/general" passHref={true}>
-                <ListItem component="a" button={true}>
-                  <ListItemText>Settings</ListItemText>
-                </ListItem>
-              </Link>
-              <Divider />
-              <ListItem
-                button={true}
-                onClick={(event) => {
-                  auth.signout();
-                }}
-              >
-                <ListItemText>Sign out</ListItemText>
-              </ListItem>
-            </>
-          )}
+         
 
           <ListItem>
             <IconButton

@@ -35,4 +35,4 @@ export function getStaticProps({ params }) {
   return { props: {} };
 }
 
-export default requireAuth(SettingsPage);
+export default SettingsPage;

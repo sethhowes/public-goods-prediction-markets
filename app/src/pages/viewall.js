@@ -1175,7 +1175,7 @@ console.log(allPredictionMarkets)
   );
 }
 
-export default requireAuth(DashboardPage);
+export default DashboardPage;
 
 
 
