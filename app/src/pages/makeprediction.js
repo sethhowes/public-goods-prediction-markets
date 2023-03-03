@@ -104,7 +104,7 @@ function DashboardPage(props) {
     const tx = await contractWithSigner.createPrediction(
       predictionTitle,
       predictionUnit,
-      [1,2,3], // NEEDS TO BE UPDATED WITH BUCKET CONTENTS AS uint[] @todo
+      predictionBuckets, 
       predictionRewardAmount,
       ethers.constants.AddressZero,
       predictionRewardCurve,

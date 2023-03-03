@@ -32,9 +32,16 @@ function predictionData(props) {
    
   };
   const handleAddValue = () => {
-    const value = document.querySelector("#value").value ;
-    if (value) {
-      setValues([...values, value]); // <-- add the entered value to the list of values
+    const value = document.querySelector("#value").value;
+    
+    // Regular expression to check if the entered value is a number or true/false
+    const numberOrBooleanRegex = /^(\d+|\d*\.\d+|true|false)$/;
+    
+    // Check if the entered value matches the pattern of a number or true/false
+    if (numberOrBooleanRegex.test(value)) {
+      // Convert true/false to 0/1 and numbers to integers
+      const convertedValue = value === "true" ? 1 : value === "false" ? 0 : parseInt(value, 10);
+      setValues([...values, convertedValue]);
       document.querySelector("#value").value = "";
     }
   };
