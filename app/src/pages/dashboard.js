@@ -22,7 +22,7 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { makeStyles } from "@mui/styles";
 import { getHistoricalBetsPerUser, getHistoricalBetsPerPrediction } from "util/getHistoricalBets";
 
-import {get_prediction_market_details} from 'util/multicall.js'
+import {get_prediction_market_details, get_all_user_per_market} from 'util/multicall.js'
 import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts';
 import { abi, contract_address, rpc_url } from 'util/contract.js'
 
@@ -99,6 +99,8 @@ useEffect(() => {
   } 
   
   fetchData();
+  console.log(get_all_user_per_market(rpc_url, contract_address, abi, prediction_id))
+
 }, []);
  
 //setPredictionID(parts[parts.length - 1]);

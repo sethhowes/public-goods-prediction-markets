@@ -335,7 +335,7 @@ console.log(allPredictionMarkets)
                                         items: [
                                           {
                                             columnField: 'category',
-                                            value: "Climate",
+                                            value: "climate",
                                             operatorValue: 'contains',
                                           },
                                         ],
@@ -362,7 +362,7 @@ console.log(allPredictionMarkets)
                                         items: [
                                           {
                                             columnField: 'category',
-                                            value: "Risks",
+                                            value: "risks",
                                             operatorValue: 'contains',
                                           },
                                         ],
@@ -389,7 +389,7 @@ console.log(allPredictionMarkets)
                                         items: [
                                           {
                                             columnField: 'category',
-                                            value: "Finance",
+                                            value: "finance",
                                             operatorValue: 'contains',
                                           },
                                         ],

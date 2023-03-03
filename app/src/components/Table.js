@@ -24,25 +24,21 @@ import { visuallyHidden } from '@mui/utils';
 
 
 
-function createData(name, calories, fat, carbs, protein) {
+
+const votes = {
+  "0xdc6Dc980F7F2491b352517B27D0e6Af9baa42501": { 0: 0, 1: 40, 2: 0, 3: 0 },
+  "0xf2B719136656BF21c2B2a255F586afa34102b71d": { 0: 0, 1: 0, 2: 100000, 3: 0 },
+};
+
+const rows = Object.entries(votes).map(([address, options]) => {
   return {
-    name,
-    calories,
-    fat,
-    carbs,
-    protein,
+    address: address,
+    amountIndex0: options[0],
+    amountIndex1: options[1],
+    amountIndex2: options[2],
+    amountIndex3: options[3],
   };
-}
-
-const rows = [
-  createData('Vote1', 305, 3.7),
-  createData('Vote2', 452, 25.0),
-  createData('Vote3', 262, 16.0),
-  createData('Vote4', 159, 6.0),
-  createData('Vote5', 356, 16.0),
-  createData('Vote6', 408, 3.2),
-
-];
+});
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -78,24 +74,35 @@ function stableSort(array, comparator) {
 
 const headCells = [
   {
-    id: 'name',
+    id: 'address',
     numeric: false,
-    disablePadding: true,
-    label: 'Vote',
+    disablePadding: false,
+    label: 'address',
   },
   {
-    id: 'calories',
+    id: 'amountIndex0',
     numeric: true,
     disablePadding: false,
-    label: 'User',
+    label: '0',
   },
   {
-    id: 'fat',
+    id: 'amountIndex1',
     numeric: true,
     disablePadding: false,
-    label: 'Date',
+    label: '1',
   },
-
+  {
+    id: 'amountIndex2',
+    numeric: true,
+    disablePadding: false,
+    label: '2',
+  },
+  {
+    id: 'amountIndex3',
+    numeric: true,
+    disablePadding: false,
+    label: '3',
+  },
 ];
 
 function EnhancedTableHead(props) {
@@ -108,13 +115,10 @@ function EnhancedTableHead(props) {
   return (
     <TableHead>
       <TableRow>
-        <TableCell padding="checkbox">
-          
-        </TableCell>
-        {headCells.map((headCell) => (
+        
+      {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
-            align={headCell.numeric ? 'right' : 'left'}
             padding={headCell.disablePadding ? 'none' : 'normal'}
             sortDirection={orderBy === headCell.id ? order : false}
           >
@@ -245,28 +249,22 @@ export default function EnhancedTable() {
                   return (
                     <TableRow
                       hover
-                      onClick={(event) => handleClick(event, row.name)}
-                      role="checkbox"
-                      aria-checked={isItemSelected}
-                      tabIndex={-1}
-                      key={row.name}
+                      onClick={(event) => handleClick(event, row.address)}
+                      key={row.address}
                       selected={isItemSelected}
                     >
-                      <TableCell padding="checkbox">
-                       
-                      </TableCell>
-                      <TableCell
+                    {/*  <TableCell
                         component="th"
-                        id={labelId}
+                        id={row.address}
                         scope="row"
                         padding="none"
                       >
-                        {row.name}
-                      </TableCell>
-                      <TableCell align="right">{row.calories}</TableCell>
-                      <TableCell align="right">{row.fat}</TableCell>
-                      <TableCell align="right">{row.carbs}</TableCell>
-                      <TableCell align="right">{row.protein}</TableCell>
+                        {row.address}
+                      </TableCell> */}
+                      <TableCell>{row.address}</TableCell>
+                      <TableCell>{row.amountIndex1}</TableCell>
+                      <TableCell >{row.amountIndex2}</TableCell>
+                      <TableCell>{row.amountIndex3}</TableCell>
                     </TableRow>
                   );
                 })}
