@@ -143,6 +143,16 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         return poolingTracker[user];
     }
 
+    //Returns block.timestamp
+    function getTimeStamp() public view returns(uint){
+        return block.timestamp;
+    }
+
+    //Check deadline passed
+    function timePassed(uint predictionId) public view returns(bool){
+        return block.timestamp >= predictionMarkets[predictionId].deadline;
+    }
+
     // User per market handling
     mapping(uint => address[]) userPerMarket;
 
@@ -194,6 +204,15 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         
         //Update outcome bucket
         setCorrectOutcomeBucket(oraclePredictionId);
+    }
+
+    //Override outcome for testing
+    function overrideOutcome(uint predictionId, uint _outcome) public onlyOwner {
+        //Set prediction outcome
+        predictionMarkets[predictionId].outcome = _outcome;
+        
+        //Update outcome bucket
+        setCorrectOutcomeBucket(predictionId);
     }
 
     // Open a prediction market
@@ -465,18 +484,49 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         for (uint i = 0; i < buckets.length; i++) {
             totalCommittedAmount += buckets[i];
         }
-        uint awardAmount = correctOutcomeBet / totalCorrectBet * totalCommittedAmount;
+        uint awardAmount = correctOutcomeBet * totalCommittedAmount / totalCorrectBet;
 
         return awardAmount;
     }
 
+    //Get total committed amount
+    function getTotalCommittedAmount(uint predictionId) public view returns(uint){
+        // Get index of bucket with correct outcome
+        uint correctBucketIndex = correctBucketTracker[predictionId];
+
+        // Get total committed amount
+        uint[] memory buckets = predictionMarkets[predictionId].committedAmountBucket;
+        uint totalCommittedAmount = 0;
+        for (uint i = 0; i < buckets.length; i++) {
+            totalCommittedAmount += buckets[i];
+        }
+
+        return totalCommittedAmount;
+    }
+
+    //Get betting amounts
+    function getBettingAmounts(uint predictionId, address user) public view returns(uint[2] memory){
+        // Get index of bucket with correct outcome
+        uint correctBucketIndex = correctBucketTracker[predictionId];
+        // Get bet placed by user on correct outcome
+        uint correctOutcomeBet = betsMadePerBucket[predictionId][user][correctBucketIndex];
+
+        // Get total value of correct bets for bucket
+        uint totalCorrectBet = predictionMarkets[predictionId].committedAmountBucket[correctBucketIndex];
+
+        return [correctOutcomeBet, totalCorrectBet];
+    }
+
     // Allow a user to withdraw funds if they placed a correct bet
     function claimFunds(uint predictionId) public payable {
-        //Check if funds are only claimable via pooling contract
-        require(onlyClaimableViaPool(msg.sender)==false, "Only claimable via pooling contract");
-        
-        //Check if claimable
-        require(isClaimable(predictionId, msg.sender),"Not claimable");
+        //Claimable handling
+        if (msg.sender == poolingContractInstance){
+            //Check if funds are only claimable via pooling contract
+            require(onlyClaimableViaPool(msg.sender)==false, "Only claimable via pooling contract");
+        } else{
+            //Check if claimable
+            require(isClaimable(predictionId, msg.sender),"Not claimable");
+        }
 
         // Get index of bucket with correct outcome
         uint correctBucketIndex = getCorrectBucketIndex(predictionId);
@@ -491,12 +541,12 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         for (uint i = 0; i < buckets.length; i++) {
             totalCommittedAmount += buckets[i];
         }
-        uint awardAmount = correctOutcomeBet / totalCorrectBet * totalCommittedAmount;
+        uint awardAmount = correctOutcomeBet * totalCommittedAmount / totalCorrectBet;
         payable(msg.sender).transfer(awardAmount);
     }
 
     // Close a market
-    function closeMarket(uint predictionId) public onlyCreator(predictionId) {
+    function closeMarket(uint predictionId) public payable onlyCreator(predictionId) {
         require(block.timestamp >= predictionMarkets[predictionId].deadline, "Deadline has not yet passed");
         // Call the API endpoint to record outcome for prediction
         requestOutcomeData(predictionMarkets[predictionId].category_ApiEndpoint_PictureUrl[1]);

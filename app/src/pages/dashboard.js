@@ -319,7 +319,7 @@ const COLORS = ['#0088FE', '#00C49F'];
             <Card>
               <CardContent sx={{ padding: 3 }}>
                 <Box>
-                  <ColorTabs options = {options} predictionUsers = {predictionUsers} userAddress = {address} creatorAddress =  {predictionMarketDetails?.creator_address} useStyles = {useStyles} />
+                  <ColorTabs optionds = {options} predictionUsers = {predictionUsers} userAddress = {address} creatorAddress =  {predictionMarketDetails?.creator_address} useStyles = {useStyles} />
               
                 </Box>
               </CardContent>

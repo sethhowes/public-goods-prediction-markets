@@ -117,6 +117,7 @@ contract predictPooling is ConfirmedOwner {
 
         // Calculate payout for copy better
         uint rewardAmountNet = (endBalance - startBalance) * copyFee / 10000;
+        rewardAmountNet = (rewardAmountNet > endBalance? endBalance: rewardAmountNet);
         
         // Send reward net of fees to claimer
         address payable destAddress = payable(msg.sender);
@@ -137,5 +138,8 @@ contract predictPooling is ConfirmedOwner {
         address payable destAddress = payable(msg.sender);
         destAddress.transfer(address(this).balance);
     }
+
+    receive() external payable{}
+    fallback() external payable{}
     
 }
