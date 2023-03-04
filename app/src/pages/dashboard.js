@@ -21,10 +21,10 @@ import PeopleIcon from '@mui/icons-material/People';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { makeStyles } from "@mui/styles";
 import { getHistoricalBetsPerUser, getHistoricalBetsPerPrediction } from "util/getHistoricalBets";
-
 import {get_prediction_market_details, get_all_user_per_market} from 'util/multicall.js'
 import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts';
 import { abi, contract_address, rpc_url } from 'util/contract.js'
+import { convertToDecimal } from "util/convertToDecimal";
 
 import Web3 from 'web3';
 
@@ -32,8 +32,6 @@ const pieData = [
 	{ name: 'True', value: 600 },
 	{ name: 'False', value: 400 },
   ];
-  //@todo: Seth make helper function to handle this
-
 
 const useStyles = makeStyles((theme) => ({
   gradientText: {
@@ -76,7 +74,11 @@ const [predictionBuckets, setPredictionBuckets] = useState(null);
 useEffect(() => {
 	async function fetchData() {
 		const result = await get_prediction_market_details(rpc_url, contract_address, abi, prediction_id);
+    console.log("res", result)
+    const decimalResults = convertToDecimal(result);
+
 		setPredictionMarketDetails(result);
+
 		// Convert reward_amount to a readable value
 		setReadableRewardAmount(web3.utils.toHex(predictionMarketDetails?.reward_amount));
 		// Convert deadline to a readable value (assuming it represents a Unix timestamp)
@@ -91,15 +93,13 @@ useEffect(() => {
 		setReadablePredictionOutcome(web3.utils.toNumber(predictionMarketDetails?.outcome?.hex));
 		// Convert prediction_bucket to readable values
 		setReadableCommittedAmountBucket(predictionMarketDetails?.committed_amount_bucket?.map(bucket => web3.utils.hexToNumber(bucket.hex)));
-		
+    console.log(readableCommittedAmountBucket);
 		/* const historicalBetsPerUser = getHistoricalBetsPerUser("0xdc6Dc980F7F2491b352517B27D0e6Af9baa42501", 0); // @todo display this data on the front end
 		const historicalBetsPerPrediction = getHistoricalBetsPerPrediction(1);
-		console.log("MARK")
 		console.log(historicalBetsPerPrediction); */
   } 
   
   fetchData();
-  console.log(get_all_user_per_market(rpc_url, contract_address, abi, prediction_id))
 
 }, []);
  
@@ -136,7 +136,7 @@ const options = predictionBucket?.map((bucket) => {
   }
 });
 
-useEffect(() => {
+useEffect(async () => {
 	if (predictionBucket?.length === 2) {
 	  setPie(1);
 	}
