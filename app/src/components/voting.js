@@ -109,7 +109,7 @@ const VotingComponent = (props) => {
               fontWeight: "bold", // Add this line
             }}
           >
-            {option}
+            {option} 
           </button>
         ))}
       </div>

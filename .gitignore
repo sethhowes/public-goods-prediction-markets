@@ -45,3 +45,5 @@ node_modules
 typechain-types
 artifacts
 .env
+
+solidity-files-cache.json
