@@ -7,7 +7,8 @@ from PIL import Image
 from io import BytesIO
 
 # from config import NFT_MARKETPLACE_RAW_DATA
-
+import os
+os.chdir(r'C:\Users\lucas\OneDrive\Hackathons\ETHDenver 2023\local shit')
 NFT_MARKETPLACE_RAW_DATA = r'C:\Users\lucas\OneDrive\Hackathons\ETHDenver 2023\local shit\temp_save_nft_data.csv'
 
 
