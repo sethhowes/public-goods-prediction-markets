@@ -13,131 +13,124 @@ import Paper from "@mui/material/Paper";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import TextField from "@mui/material/TextField"; // import TextField
-
+import { useSigner } from 'wagmi';
+import { stakingContract } from "util/stakingContract";
 
 function Row(props) {
-  const { row } = props;
-  const [open, setOpen] = React.useState(false);
+    const { row, betList } = props;
+    const [open, setOpen] = React.useState(false);
 
-  return (
-    <React.Fragment>
-      <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
-        <TableCell>
-          <IconButton
-            aria-label="expand row"
-            size="small"
-            onClick={() => setOpen(!open)}
-          >
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        </TableCell>
-        <TableCell component="th" scope="row">
-          {row.Address}
-        </TableCell>
-        <TableCell align="left">{row.Trades}</TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 1 }}>
-              <Typography variant="h6" gutterBottom component="div">
-                Prediction History
-              </Typography>
-              <Table size="small" aria-label="purchases">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Date</TableCell>
-                    <TableCell>Market</TableCell>
-                    <TableCell align="right">Prediction</TableCell>
-                    <TableCell align="right">Copy</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {row.history.map((historyRow) => (
-                    <TableRow key={historyRow.date}>
-                      <TableCell component="th" scope="row">
-                        {historyRow.date}
-                      </TableCell>
-                      <TableCell>{historyRow.customerId}</TableCell>
-                      <TableCell align="right">{historyRow.amount}</TableCell>
+    const { data: signer, isError, isLoading } = useSigner();
 
-                      <TableCell align="right">{historyRow.amount3}</TableCell>
-
-                      <TableCell align="right">
+    const handleCopy = (async () => {
+      const contractWithSigner = stakingContract.connect(signer);
+      const tx = await contractWithSigner.copyBet("0xf2B719136656BF21c2B2a255F586afa34102b71d", 0, 1, {value: 20}); // address, predictionId, bucketIndex, value
+    })
+  
+    return (
+      <React.Fragment>
+        <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
+          <TableCell>
+            <IconButton
+              aria-label="expand row"
+              size="small"
+              onClick={() => setOpen(!open)}
+            >
+              {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            </IconButton>
+          </TableCell>
+          <TableCell component="th" scope="row">
+            {row.Address}
+          </TableCell>
+          <TableCell align="left">{row.Trades}</TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+            <Collapse in={open} timeout="auto" unmountOnExit>
+              <Box sx={{ margin: 1 }}>
+                <Typography variant="h6" gutterBottom component="div">
+                  Prediction History
+                </Typography>
+                <Table size="small" aria-label="purchases">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Market</TableCell>
+                      <TableCell align="right">Prediction</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {betList[row.Address]?.map(([market, prediction]) => (
+                      <TableRow key={market}>
+                        <TableCell>{market}</TableCell>
+                        <TableCell align="right">{prediction}</TableCell>
+                        <TableCell align="right">
                         {" "}
-                        <a href="https://example.com">
+                        <a onClick={handleCopy}>
                           <span role="img" aria-label="rocket ship">
                             🚀
                           </span>
                         </a>
                       </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </React.Fragment>
-  );
-}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
+            </Collapse>
+          </TableCell>
+        </TableRow>
+      </React.Fragment>
+    );
+  }
+
+//
+/* (2) [{…}, {…}]
+0: 
+0x52Bdc5B6f89A95b1e8171ee21090b428ea01C5d6 : {0: 0, 1: 1, 2: 0, 3: 0}
+0xf2B719136656BF21c2B2a255F586afa34102b71d: {0: 0, 1: 1999999000000000, 2: 0, 3: 0}
+1: 
+0x52Bdc5B6f89A95b1e8171ee21090b428ea01C5d6: {0: 0, 1: 0, 2: 0, 3: 0}
+0xf2B719136656BF21c2B2a255F586afa34102b71d: {0: 0, 1: 2000, 2: 0, 3: 0} */
 
 export default function StakingTable(props) {
     const [search, setSearch] = React.useState("");
  const userList = props.userList
-   const rows = userList.map((user) => (
-    {
-      id: 1,
-      Address: user,
-      Trades: 17,
-      history: [
-        {
-          date: "2020-01-05",
-          customerId: "What was the climate?",
-          amount: "30 on 4c"
-        },
-        {
-          date: "2020-01-02",
-          customerId: "What was the temperature in 22?",
-          amount: "20 on 6c"
-        }
-      ]
-    }
-    ));
-    // add more rows with a history property as needed
- 
-
-
+ const betList = props.betList
+ const rows = userList.map((user) => ({
+    id: 1,
+    Address: user,
+    Trades: "0",
+    history: [],
+  }));
+  
   return (
     <TableContainer component={Paper}>
-        <TextField
+      <TextField
         label="Search"
         variant="outlined"
+        size="small"
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        mb = {2}
+        onChange={(event) => setSearch(event.target.value)}
       />
       <Table aria-label="collapsible table">
         <TableHead>
           <TableRow>
             <TableCell />
             <TableCell>Address</TableCell>
-            <TableCell>Trades</TableCell>
+            <TableCell align="left">Trades</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-  {rows
-    .filter(
-      (row) =>
-        row.Address?.toLowerCase().includes(search.toLowerCase()) ||
-        row.Trades.toString().includes(search.toLowerCase())
-    )
-    .map((row) => (
-      <Row key={row.name} row={row} />
-    ))}
-</TableBody>
+          {rows
+            .filter((row) => row.Address.toLowerCase().includes(search.toLowerCase()))
+            .map((row) => (
+              <Row key={row.Address} row={row} betList={betList} />
+            ))}
+        </TableBody>
       </Table>
     </TableContainer>
   );
-}
+ 
+
+
+            }
