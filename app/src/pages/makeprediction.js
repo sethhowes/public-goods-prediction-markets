@@ -56,7 +56,7 @@ function DashboardPage(props) {
   ]);
   const [predictionRewardAmount, setPredictionRewardAmount] = useState(3);
   const [predictionEndDate, setPredictionEndDate] = useState();
-  const [predictionCategory, setPredictionCategory] = useState("finance");
+  const [predictionCategory, setPredictionCategory] = useState("");
   const [predictionApiEndpoint, setPredictionApiEndpoint] =
     useState("API Endpoint");
   const [predictionRewardCurve, setPredictionRewardCurve] =
@@ -126,11 +126,7 @@ function DashboardPage(props) {
     });
     router.replace("/viewall");
 
-    handleFormAlert({
-      type: "success",
-      message: "Prediction created successfully!",
-    });
-    router.replace("/dashboard");
+    
   };
 
   return (
@@ -211,6 +207,7 @@ function DashboardPage(props) {
                         setPredictionRewardAmount={setPredictionRewardAmount}
                         setPredictionTokenAddress={setPredictionTokenAddress}
                         setPredictionRewardCurve={setPredictionRewardCurve}
+                        setPredictionCategory={setPredictionCategory}
                         setPredictionPermissioned={setPredictionPermissioned}
                         setPredictionEndDate={setPredictionEndDate}
                         predictionEndDate={predictionEndDate}

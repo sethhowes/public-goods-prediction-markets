@@ -25,6 +25,7 @@ function predictionMeta(props) {
   const setPredictionPermissioned= props.setPredictionPermissioned
   const setPredictionEndDate= props.setPredictionEndDate
   const setPredictionApiEndpoint= props.setPredictionApiEndpoint
+  const setPredictionCategory= props.setPredictionCategory
   const [selectedEndDate, setSelectedEndDate] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(""); // <-- state for storing selected category
 
@@ -44,6 +45,7 @@ function predictionMeta(props) {
   };
   const handleCategoryChange = (event) => {
     setSelectedCategory(event.target.value);
+    setPredictionCategory(event.target.value)
   }
 
   const categories = [

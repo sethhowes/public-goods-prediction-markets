@@ -3,7 +3,7 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import EnhancedTable from "components/Table";
+import EnhancedTable from "components/Table2";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import Button from "@mui/material/Button";
 import Table from "@mui/material/Table";
@@ -34,12 +34,13 @@ function TabPanel(props) {
 }
 
 export default function ColorTabs(props) {
+  console.log(props.options)
   const [value, setValue] = React.useState(0);
   const classes = props.useStyles();
   const { data: signer, isError, isLoading } = useSigner();
   const handleCloseMarket = async () => {
     const contractWithSigner = contract.connect(signer);
-    const tx = await contractWithSigner.closeMarket(1);
+    const tx = await contractWithSigner.closeMarket(3);
   };
 
   const handleChange = (event, newValue) => {
@@ -61,11 +62,11 @@ export default function ColorTabs(props) {
         
       </Tabs>
       <TabPanel value={value} index={1}>
-        <Box sx={{ fontWeight: "bold", marginBottom: "1rem" }}>
+        <Box mb={2} sx={{ fontWeight: "bold", marginBottom: "1rem" }}>
           Prediction History
         </Box>
-        <Box sx={{ mt: -8 }}>
-          <EnhancedTable />
+        <Box sx={{ mt: 8 }}>
+          <EnhancedTable options = {props.options} predictionUsers = {props.predictionUsers} />
         </Box>
       </TabPanel>
    

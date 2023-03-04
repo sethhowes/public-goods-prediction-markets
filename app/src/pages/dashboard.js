@@ -72,11 +72,13 @@ const [readablePredictionID, setReadablePredictionID] = useState(null);
 const [readablePredictionOutcome, setReadablePredictionOutcome] = useState(null);
 const [readableCommittedAmountBucket, setReadableCommittedAmountBucket] = useState(null);
 const [predictionBuckets, setPredictionBuckets] = useState(null);
-
+const [predictionUsers, setPredictionUsers] = useState(null);
 useEffect(() => {
 	async function fetchData() {
-		const result = await get_prediction_market_details(rpc_url, contract_address, abi, prediction_id);
-		setPredictionMarketDetails(result);
+		const result_markets = await get_prediction_market_details(rpc_url, contract_address, abi, prediction_id);
+		const result_users = await get_all_user_per_market(rpc_url, contract_address, abi, prediction_id)
+		setPredictionUsers(result_users)
+		setPredictionMarketDetails(result_markets);
 		// Convert reward_amount to a readable value
 		setReadableRewardAmount(web3.utils.toHex(predictionMarketDetails?.reward_amount));
 		// Convert deadline to a readable value (assuming it represents a Unix timestamp)
@@ -99,7 +101,6 @@ useEffect(() => {
   } 
   
   fetchData();
-  console.log(get_all_user_per_market(rpc_url, contract_address, abi, prediction_id))
 
 }, []);
  
@@ -318,7 +319,7 @@ const COLORS = ['#0088FE', '#00C49F'];
             <Card>
               <CardContent sx={{ padding: 3 }}>
                 <Box>
-                  <ColorTabs userAddress = {address} creatorAddress =  {predictionMarketDetails?.creator_address} useStyles = {useStyles} />
+                  <ColorTabs options = {options} predictionUsers = {predictionUsers} userAddress = {address} creatorAddress =  {predictionMarketDetails?.creator_address} useStyles = {useStyles} />
               
                 </Box>
               </CardContent>
