@@ -12,6 +12,8 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import TextField from "@mui/material/TextField"; // import TextField
+
 
 function Row(props) {
   const { row } = props;
@@ -82,6 +84,8 @@ function Row(props) {
 }
 
 export default function StakingTable() {
+    const [search, setSearch] = React.useState("");
+
   const rows = [
     {
       id: 1,
@@ -121,6 +125,13 @@ export default function StakingTable() {
   ];
   return (
     <TableContainer component={Paper}>
+        <TextField
+        label="Search"
+        variant="outlined"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        mb = {2}
+      />
       <Table aria-label="collapsible table">
         <TableHead>
           <TableRow>
@@ -130,10 +141,16 @@ export default function StakingTable() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <Row key={row.name} row={row} />
-          ))}
-        </TableBody>
+  {rows
+    .filter(
+      (row) =>
+        row.Address.toLowerCase().includes(search.toLowerCase()) ||
+        row.Trades.toString().includes(search.toLowerCase())
+    )
+    .map((row) => (
+      <Row key={row.name} row={row} />
+    ))}
+</TableBody>
       </Table>
     </TableContainer>
   );

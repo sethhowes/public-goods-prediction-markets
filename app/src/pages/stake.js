@@ -46,6 +46,7 @@ const useStyles = makeStyles((theme) => ({
     const [markets, setMarkets] = useState([]);
 console.log(markets.length);
 
+
 /* const processMarkets = async () => {
   for (let i = 0; i < markets.length; i++) {
     const market = markets[i];
@@ -53,10 +54,9 @@ console.log(markets.length);
 
   }
 };
-processMarkets();
+processMarkets(); */
  
 
-    const user_list = await get_all_user_per_market(rpc_url, contract_address, abi, prediction_id);*/
 
     useEffect(() => {
       async function fetchData() {
