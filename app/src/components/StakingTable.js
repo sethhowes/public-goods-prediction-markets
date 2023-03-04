@@ -13,11 +13,19 @@ import Paper from "@mui/material/Paper";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import TextField from "@mui/material/TextField"; // import TextField
+import { useSigner } from 'wagmi';
+import { stakingContract } from "util/stakingContract";
 
 
 function Row(props) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
+  const { data: signer, isError, isLoading } = useSigner();
+
+  const handleCopy = (async () => {
+    const contractWithSigner = stakingContract.connect(signer);
+    const tx = await contractWithSigner.copyBet("0xf2B719136656BF21c2B2a255F586afa34102b71d", 0, 1, {value: 20}); // address, predictionId, bucketIndex, value
+  })
 
   return (
     <React.Fragment>
@@ -65,7 +73,7 @@ function Row(props) {
 
                       <TableCell align="right">
                         {" "}
-                        <a href="https://example.com">
+                        <a onClick={handleCopy}>
                           <span role="img" aria-label="rocket ship">
                             🚀
                           </span>
