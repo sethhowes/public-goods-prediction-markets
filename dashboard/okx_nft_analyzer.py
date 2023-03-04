@@ -6,8 +6,9 @@ import pandas as pd
 from PIL import Image
 from io import BytesIO
 
-from config import NFT_MARKETPLACE_RAW_DATA
+# from config import NFT_MARKETPLACE_RAW_DATA
 
+NFT_MARKETPLACE_RAW_DATA = r'C:\Users\lucas\OneDrive\Hackathons\ETHDenver 2023\local shit\temp_save_nft_data.csv'
 
 
 
@@ -330,7 +331,7 @@ def analyse_NFT_maketplace (filename):
     # Complete the data with favorite color, PNL per user per collection, PNL
     for i, actor in enumerate(actors):
         print(i, '/', len(actors))
-        analysed_data[actor]['favorite_color'], url_to_ref = get_favorite_color(analysed_data[actor]['nft_links'], url_to_ref)
+        # analysed_data[actor]['favorite_color'], url_to_ref = get_favorite_color(analysed_data[actor]['nft_links'], url_to_ref)
         add_per_user_per_collection_volume(analysed_data[actor]['operations'])
         analysed_data[actor]['pnl'] = get_actor_pnl(analysed_data[actor]['operations'])
 

@@ -353,7 +353,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         predictionMarkets[predictionId].committedAmountBucket[bucketIndex] += msg.value;
         
         // Emit bet event
-        emit Bet(msg.sender, predictionId, scaledBet, msg.value, block.timestamp);
+        emit Bet(msg.sender, predictionId, scaledBet, msg.value, block.timestamp, bucketIndex);
         // Add bet amount to array
         betAmounts[predictionId].push(msg.value);
         // Add bet timestamp to array
@@ -384,7 +384,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         poolingTracker[tx.origin] = true;
 
         // Emit bet event
-        emit Pooling(msg.sender, predictionId, scaledBet, msg.value);
+        emit Pooling(msg.sender, predictionId, scaledBet, msg.value, block.timestamp, bucketIndex);
     }
 
 
@@ -397,8 +397,8 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     }
     
     // Event to be emitted when user places bet
-    event Bet(address indexed _user, uint indexed predictionId, uint scaledBet, uint betAmount, uint timeStamp);
-    event Pooling(address indexed _user, uint predictionId, uint scaledBet, uint betAmount);
+    event Bet(address indexed _user, uint indexed predictionId, uint scaledBet, uint betAmount, uint timeStamp, uint bucketIndex);
+    event Pooling(address indexed _user, uint predictionId, uint scaledBet, uint betAmount, uint timeStamp, uint bucketIndex);
 
     // Get current prediction
     function getCurrentPrediction(uint predictionId) public view returns(uint) {
