@@ -12,7 +12,7 @@ import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import { contract } from "../util/contract";
 import { useSigner } from "wagmi";
-
+import { useAccount } from 'wagmi'
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -36,7 +36,8 @@ function TabPanel(props) {
 }
 
 export default function ColorTabs(props) {
-  
+
+  const { address, isConnecting, isDisconnected } = useAccount();
   const [value, setValue] = React.useState(0);
   const classes = props.useStyles();
   const { data: signer, isError, isLoading } = useSigner();
@@ -97,7 +98,8 @@ export default function ColorTabs(props) {
                 {committedUserCapital} ETH {/* @todo change this from being hardcoded */}
               </TableCell>
             </TableRow>
-            <TableRow>
+            {(props.creatorAddress == address) ?
+            (<TableRow>
               <TableCell>Close Market</TableCell>
               <TableCell align="right">
                 <Button disabled={props.userAddress === props.creatorAddress ? false : true}
@@ -105,7 +107,7 @@ export default function ColorTabs(props) {
                   Close Market 
                 </Button>
               </TableCell>
-            </TableRow>
+            </TableRow>) : (<></>)}
             <TableRow>
               <TableCell>Claim Funds</TableCell>
               <TableCell align="right">

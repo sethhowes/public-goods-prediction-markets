@@ -9,8 +9,10 @@ import { get_quote } from "util/multicall.js";
 import Web3 from "web3";
 import { ethers } from "ethers";
 import { parseQuoteResult } from "util/parseQuoteResult";
+import { useNetwork } from 'wagmi'
 
 const VotingComponent = (props) => {
+  const { chain, chains } = useNetwork()
   // Get contract with signer to make bet
   const { data: signer, isError, isLoading } = useSigner();
   const contractWithSigner = contract.connect(signer);
@@ -44,7 +46,6 @@ const VotingComponent = (props) => {
       proposed_bet,
       bucket_index
     );
-    console.log("UNPARSED", result)
     result = parseQuoteResult(result, stake);
     setQuote(result);
   }
@@ -121,11 +122,8 @@ const VotingComponent = (props) => {
         }}
       >
         <label>
-          Stake (ETH):
+          Stake ({chain?.nativeCurrency.symbol}):
           <input
-            type="number"
-            min="0"
- // @todo check whether this nedd to stay in 
             onChange={handleQuantityChange}
             style={{ width: "60px", marginLeft: "10px" }}
           />

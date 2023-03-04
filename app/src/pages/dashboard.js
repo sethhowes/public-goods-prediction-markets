@@ -25,6 +25,7 @@ import {
 } from "recharts";
 import VotingComponent from "components/voting";
 import Typography from "@mui/material/Typography";
+import { useNetwork } from 'wagmi'
 
 import ColorTabs from "components/TabSection";
 
@@ -60,6 +61,7 @@ const useStyles = makeStyles((theme) => ({
 function DashboardPage(props) {
   // url parsing
   const web3 = new Web3();
+  const { chain, chains } = useNetwork()
 
   const { address, isConnecting, isDisconnected } = useAccount();
 
@@ -351,7 +353,7 @@ function DashboardPage(props) {
                         {
                           sumBuckets(predictionMarketDetails?.committed_amount_bucket, predictionMarketDetails?.committed_amount_bucket.length)
                         }{" "}
-                        ETH
+                        {chain?.nativeCurrency.symbol}
                       </Typography>
                     </Box>
                   </CardContent>
