@@ -314,6 +314,19 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     function isWhitelisted() public view returns(bool) {
         return msg.sender == msg.sender;
     }
+    	
+    // Bet mapping
+    mapping(uint => uint[]) public betAmounts;
+    function viewBetAmounts(uint predictionId) public view returns (uint[] memory) {
+        return betAmounts[predictionId];
+    }
+    // Timestamp mapping
+    mapping(uint => uint[]) public betTimestamps;
+    
+    function viewBetTimestamps(uint predictionId) public view returns (uint[] memory) {
+        return betTimestamps[predictionId];
+    }
+
 
     // Place a bet for a whitelisted user
     function placeBet(uint predictionId, uint bucketIndex) public payable {
@@ -340,7 +353,11 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         predictionMarkets[predictionId].committedAmountBucket[bucketIndex] += msg.value;
         
         // Emit bet event
-        emit Bet(msg.sender, predictionId, scaledBet, msg.value);
+        emit Bet(msg.sender, predictionId, scaledBet, msg.value, block.timestamp);
+        // Add bet amount to array
+        betAmounts[predictionId].push(msg.value);
+        // Add bet timestamp to array
+        betTimestamps[predictionId].push(block.timestamp);
     }
 
     // Place a bet via pool
@@ -380,7 +397,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     }
     
     // Event to be emitted when user places bet
-    event Bet(address indexed _user, uint indexed predictionId, uint scaledBet, uint betAmount);
+    event Bet(address indexed _user, uint indexed predictionId, uint scaledBet, uint betAmount, uint timeStamp);
     event Pooling(address indexed _user, uint predictionId, uint scaledBet, uint betAmount);
 
     // Get current prediction
