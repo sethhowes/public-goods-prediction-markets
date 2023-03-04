@@ -556,7 +556,7 @@ export async function time_passed(rpc_url, contract_address, abi, prediction_id)
 	return result;
   }
   
-// Define the contract variables
+/* // Define the contract variables
 const rpc_url = 'https://goerli.gateway.tenderly.co/3Ugz1n4IRjoidr766XDDxX';
 var contract_address = '0x34E2fE6bd61024995A4C18Ea8F0084e8d7652e19';
 var abi = [
@@ -1674,9 +1674,9 @@ console.log(prediction_market_details)
 
 // Current quote
 const proposed_bet = 1e3.toString();
-const bucket_index = 0;
+const bucket_index = 0; */
 
-var current_quote = await get_quote(rpc_url, contract_address, abi, prediction_id, proposed_bet, bucket_index);
+/* var current_quote = await get_quote(rpc_url, contract_address, abi, prediction_id, proposed_bet, bucket_index);
 console.log(current_quote);
 
 // Get all prediction markets
@@ -1693,10 +1693,10 @@ console.log(user_list);
 
 // Get all user bets for a prediction market
 var all_bets_per_bucket_per_user = await get_all_bets_per_bucket_per_user(rpc_url, contract_address, abi, prediction_id, user_list);
-console.log(all_bets_per_bucket_per_user);
+console.log(all_bets_per_bucket_per_user); */
 
 // is claimable
-var user = "0xf2B719136656BF21c2B2a255F586afa34102b71d";
+/* var user = "0xf2B719136656BF21c2B2a255F586afa34102b71d";
 var is_claimable_result = await is_claimable(rpc_url, contract_address, abi, prediction_id, user);
 console.log(is_claimable_result);
 
@@ -1710,7 +1710,7 @@ console.log(claimable_amount);
 
 // Check is time expired
 var is_time_passed = await time_passed(rpc_url, contract_address, abi, prediction_id);
-console.log(is_time_passed);
+console.log(is_time_passed); */
 
 // POOLING CONTRACT
 var pooling_contract_address = '0xD60C2c1Be205e6Cb4083c9E4A5735e84C901C8C9';
@@ -1973,9 +1973,9 @@ var pooling_abi = [
 		"type": "receive"
 	}
 ];
-var is_claimable_result_pooling = await is_claimable(rpc_url, pooling_contract_address, pooling_abi, prediction_id, pooling_user);
+/* var is_claimable_result_pooling = await is_claimable(rpc_url, pooling_contract_address, pooling_abi, prediction_id, pooling_user);
 console.log(is_claimable_result_pooling);
 
 // Get claimable amount
 var claimable_amount_pooling = await get_claimable_amount(rpc_url, pooling_contract_address, pooling_abi, prediction_id, pooling_user);
-console.log(claimable_amount_pooling);
+console.log(claimable_amount_pooling); */
