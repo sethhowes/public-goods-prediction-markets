@@ -260,3 +260,15 @@ export function QueryClientProvider(props) {
     </QueryClientProviderBase>
   );
 }
+
+
+// Fetch graph data once
+export function useGraph(id) {
+  return useQuery(
+    ["historical", { id }],
+    // When fetching once there is no need to use `createQuery` to setup a subscription
+    // Just fetch normally using `getDoc` so that we return a promise
+    () => getDoc(doc(db, "historical", id)).then(format),
+    { enabled: !!id }
+  );
+}

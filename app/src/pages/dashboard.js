@@ -9,7 +9,7 @@ import SectionHeader from "components/SectionHeader";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import { useAccount } from "wagmi";
-
+import {useGraph } from "util/db"
 import {
   ComposedChart,
   Area,
@@ -161,6 +161,7 @@ function DashboardPage(props) {
 
   const predictionTitle = predictionMarketDetails?.prediction_title;
   const predictionBucket = predictionMarketDetails?.prediction_bucket;
+  const [graphData, setGraphData] = useState()
 
   const options = predictionBucket?.map((bucket) => {
     if (
@@ -194,36 +195,26 @@ function DashboardPage(props) {
   //graph data
   const COLORS = ["#0088FE", "#00C49F"];
 
-  const data = [
-    {
-      name: "2018",
-      Temperature: 4,
-    },
-    {
-      name: "2019",
-      Temperature: 2,
-    },
-    {
-      name: "2020",
-      Temperature: 1,
-    },
-    {
-      name: "2021",
-      Temperature: 2,
-    },
-    {
-      name: "2022",
-      Temperature: 3,
-    },
-    {
-      name: "2023",
-      Temperature: 4,
-    },
-    {
-      name: "2024",
-      Temperature: 5,
-    },
-  ];
+ 
+  const { data: itemData, status: itemStatus } = useGraph('goerli');
+
+  useEffect(() => {
+    if (itemData != undefined) {
+      let results = itemData[0].averaged;
+      setGraphData(results);
+    }
+  }, [itemData]);
+  
+  console.log(graphData)
+ let data = []
+  if (graphData){
+  data = Object.keys(graphData).map((timestamp) => ({
+    name: new Date(Number(timestamp) * 1000),
+    temperature: graphData[timestamp],
+  }));
+  console.log('data', data)
+}
+  
   return (
     <>
       <Meta title="Dashboard" />

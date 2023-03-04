@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
 
     const [markets, setMarkets] = useState([]);
     const [userList, setUserList] = useState([]);
-
+    const [resultsUsersBets, setResultsUsersBets] = useState([]);
 console.log(markets.length);
 
 
@@ -69,6 +69,25 @@ useEffect(() => {
   });
 }, [markets]);
 
+
+useEffect(() => {
+  async function fetchBets() {
+    let results = [];
+    for (let i = 0; i < markets.length; i++) {
+      const market = markets[i];
+      const bets = await get_all_bets_per_bucket_per_user(rpc_url, contract_address, abi, market.prediction_id, userList);
+      results.push(bets); // add the bets to the results array
+    }
+    setResultsUsersBets(results);
+  }
+
+  if (markets.length > 0 && userList.length > 0) { // check if either array is empty before executing
+    fetchBets();
+  }
+}, [markets, userList, rpc_url, contract_address, abi, setResultsUsersBets]);
+
+let votes = resultsUsersBets
+console.log('votes', resultsUsersBets)
 
 console.log('users', userList)
 
@@ -178,16 +197,19 @@ console.log('users', userList)
                   </CardContent>
           </Card>
           </Grid>
-        <Grid item={true} xs={12} md={4.5}>
+          <Grid item={true} xs={12} md={3}>
         <Card>
           
                         <CardContent sx={{ padding: 3 }}>
                         <Container>
              <Grid container={true} justifyContent="center" >
             <Grid item={true} mt={3} mb={2} xs={12} sm={3}>
+          
 
               <Box sx={{ textAlign: "center" }}>
 
+                <Typography sx={{ fontWeight: "bold"}} className={classes.gradientText} variant="h4">{markets.length}</Typography>
+                <Typography  ml={-2} variant="overline">Predictions</Typography>
               </Box>
             </Grid>
            </Grid>
@@ -195,7 +217,7 @@ console.log('users', userList)
               </CardContent>
           </Card>
           </Grid>
-          <Grid item={true} xs={12} md={4.5}>
+          <Grid item={true} xs={12} md={3}>
                 <Card>
                       <CardContent sx={{ padding: 3 }}>
                       <Container>
@@ -204,6 +226,8 @@ console.log('users', userList)
 
                       <Box sx={{ textAlign: "center" }}>
 
+                        <Typography  sx={{ fontWeight: "bold"}} className={classes.gradientText} variant="h4">{userList.length}</Typography>
+                        <Typography  ml={0} variant="overline">Users</Typography>
 
                       </Box>
                     </Grid>
@@ -212,6 +236,26 @@ console.log('users', userList)
                       </CardContent>
                   </Card>
           </Grid>
+          <Grid item={true} xs={12} md={3}>
+          <Card>
+                      <CardContent sx={{ padding: 3 }}>
+                      <Container>
+                    <Grid container={true} justifyContent="center" >
+                    <Grid item={true} mt={3} mb={2} xs={12} sm={3}>
+                    
+
+                      <Box sx={{ textAlign: "center" }}>
+
+                        <Typography  sx={{ fontWeight: "bold"}} className={classes.gradientText} variant="h4">0</Typography>
+                        <Typography  ml={0} variant="overline">Bets</Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                  </Container>
+                      </CardContent>
+                  </Card>
+          </Grid>
+         
         
           
           <Grid item={true} xs={12} md={12}>
@@ -222,7 +266,7 @@ console.log('users', userList)
                 <Typography  sx={{ fontWeight: "bold"}} mb={5} className={classes.gradientText} variant="h5" align="left">Follow the Cognoscenti</Typography>
 
                 <div style={{ width: "100%" }}>
-                <StakingTable userList = {userList} />
+                <StakingTable betsList = {resultsUsersBets} userList = {userList} />
              
                   </div>
          </Box>
