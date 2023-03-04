@@ -15,17 +15,31 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import TextField from "@mui/material/TextField"; // import TextField
 import { useSigner } from 'wagmi';
 import { stakingContract } from "util/stakingContract";
+import {get_bets_by_user} from 'util/multicall.js'
+import {rpc_url, contract_address, abi} from 'util/contract.js'
 
 function Row(props) {
     const { row, betList } = props
     const [open, setOpen] = React.useState(false);
-
+    const [bets, setBets] = React.useState([]);
     const { data: signer, isError, isLoading } = useSigner();
 
     const handleCopy = (async () => {
       const contractWithSigner = stakingContract.connect(signer);
       const tx = await contractWithSigner.copyBet("0xf2B719136656BF21c2B2a255F586afa34102b71d", 0, 1, {value: 20}); // address, predictionId, bucketIndex, value
     })
+    React.useEffect(() => {
+        async function fetchBets() {
+          const bets = await get_bets_by_user(rpc_url, contract_address, abi, row.Address);
+          setBets(bets[row.Address]);
+        }
+        if (open) {
+          fetchBets();
+        console.log(bets)
+        }
+      }, [open, row.Address]);
+    
+    
     return (
       <React.Fragment>
         <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
@@ -58,8 +72,10 @@ function Row(props) {
             </TableRow>
           </TableHead>
           <TableBody>
+          
+
               <TableRow >
-                <TableCell>Market</TableCell>
+                <TableCell></TableCell>
                 <TableCell align="right">Prediction</TableCell>
                 <TableCell align="right">
                   {" "}
@@ -70,7 +86,7 @@ function Row(props) {
                   </a>
                 </TableCell>
               </TableRow>
-       
+         
           </TableBody>
         </Table>
       </Box>
