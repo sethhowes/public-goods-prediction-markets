@@ -1,13 +1,11 @@
-import { ethers } from "ethers";
-import contract from "./contract";
+import { contract } from "./contract";
 
-export function getHistoricalBetsPerUser(betAddress, predictionId) {
-
-    // List all bets *from* myAddress
-    return contract.filters.Bet(betAddress);
+export async function getHistoricalBetAmounts(predictionId) {
+  const pastBetAmounts = await contract.viewBetAmounts(predictionId);
+  return pastBetAmounts;
 }
-  
-export function getHistoricalBetsPerPrediction(predictionId) {
 
-    return contract.filters.Bet(null, predictionId);
-} 
+export async function getHistoricalBetTimestamps(predictionId) {
+  const pastBetTimestamps = await contract.viewBetTimestamps(predictionId);
+  return pastBetTimestamps;
+}
