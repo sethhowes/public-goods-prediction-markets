@@ -10,92 +10,64 @@ import Section from "components/Section";
 import SectionHeader from "components/SectionHeader";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
-
+import { useEffect } from "react";
 import { makeStyles } from "@mui/styles";
 import { Typography, Chip } from "@mui/material";
 import Web3 from 'web3';
+import {rpc_url, contract_address, abi} from 'util/contract.js'
 
-import Collapse from "@mui/material/Collapse";
-import IconButton from "@mui/material/IconButton";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import {get_all_markets} from 'util/multicall.js'
+import {get_all_user_per_market, get_all_bets_per_bucket_per_user} from 'util/multicall.js'
 
-function Row(props) {
-  const { row } = props;
-  const [open, setOpen] = React.useState(false);
+import StakingTable from "components/StakingTable";
 
-  return (
-    <React.Fragment>
-      <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
-        <TableCell>
-          <IconButton
-            aria-label="expand row"
-            size="small"
-            onClick={() => setOpen(!open)}
-          >
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        </TableCell>
-        <TableCell component="th" scope="row">
-          {row.Address}
-        </TableCell>
-        <TableCell align="left">{row.Trades}</TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 1 }}>
-              <Typography variant="h6" gutterBottom component="div">
-                Prediction History
-              </Typography>
-              <Table size="small" aria-label="purchases">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Date</TableCell>
-                    <TableCell>Market</TableCell>
-                    <TableCell align="right">Prediction</TableCell>
-                    <TableCell align="right">Copy</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {row.history.map((historyRow) => (
-                    <TableRow key={historyRow.date}>
-                      <TableCell component="th" scope="row">
-                        {historyRow.date}
-                      </TableCell>
-                      <TableCell>{historyRow.customerId}</TableCell>
-                      <TableCell align="right">{historyRow.amount}</TableCell>
-
-                      <TableCell align="right">{historyRow.amount3}</TableCell>
-
-                      <TableCell align="right">
-                        {" "}
-                        <a href="https://example.com">
-                          <span role="img" aria-label="rocket ship">
-                            🚀
-                          </span>
-                        </a>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </React.Fragment>
-  );
-}
+const useStyles = makeStyles((theme) => ({
+  
+  priceChip: {
+    backgroundColor: '#4caf50', 
+    color: '#fff', 
+  },
+  gradientText: {
+    backgroundClip: "text",
+    backgroundImage:
+      "linear-gradient(85.9deg, #1EBEA5 -14.21%, #00B5C4 18.25%, #00A8E6 52.49%, #0096FD 81.67%, #157AFB 111.44%)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+  },
+  toolbarContainer: {
+    "& .MuiButton-root": {
+      color: theme.palette.secondary.main,
+    },
+  },
+}));
 
   function DashboardPage(props) {
+
+    const [markets, setMarkets] = useState([]);
+console.log(markets.length);
+
+/* const processMarkets = async () => {
+  for (let i = 0; i < markets.length; i++) {
+    const market = markets[i];
+    const user_list = await get_all_user_per_market(rpc_url, contract_address, abi, market.prediction_id);
+
+  }
+};
+processMarkets();
+ 
+
+    const user_list = await get_all_user_per_market(rpc_url, contract_address, abi, prediction_id);*/
+
+    useEffect(() => {
+      async function fetchData() {
+    
+        const result = await get_all_markets(rpc_url, contract_address, abi);
+        setMarkets(result);
+    
+      } 
+      
+      fetchData();
+    }, []);
     const web3 = new Web3();
 
     const router = useRouter();
@@ -232,10 +204,10 @@ function Row(props) {
           
               <CardContent sx={{ padding: 3 }}>
                 <Box>
-                <Typography  sx={{ fontWeight: "bold"}} mb={5} className={classes.gradientText} variant="h5" align="left">View Stake</Typography>
+                <Typography  sx={{ fontWeight: "bold"}} mb={5} className={classes.gradientText} variant="h5" align="left">Follow the Cognoscenti</Typography>
 
                 <div style={{ width: "100%" }}>
- 
+                <StakingTable />
              
                   </div>
          </Box>

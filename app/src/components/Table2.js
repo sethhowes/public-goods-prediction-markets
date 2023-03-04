@@ -34,7 +34,6 @@ if (typeof window !== 'undefined') {
 
   }
   const user_list = await get_all_user_per_market(rpc_url, contract_address, abi, prediction_id);
-  console.log(user_list)
 
   
   const rows = [
@@ -57,7 +56,6 @@ if (typeof window !== 'undefined') {
 
     }
     fetchBets();
-    console.log('bets' + resultsUsersBets)
     votes = resultsUsersBets
 
   }, [user_list]);
