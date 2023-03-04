@@ -67,26 +67,32 @@ function Row(props) {
         <Table size="small" aria-label="purchases">
           <TableHead>
             <TableRow>
-              <TableCell>Market</TableCell>
-              <TableCell align="right">Prediction</TableCell>
+{/*               Need to turn into human readable bet amount - that's my next step and also get market name.
+ */}              <TableCell align="left">Market </TableCell>
+              <TableCell align="left">Bucket 1 </TableCell>
+              <TableCell align="left">Bucket 2 </TableCell>
+              <TableCell align="left">Bucket 3 </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-          
-
-              <TableRow >
-                <TableCell></TableCell>
-                <TableCell align="right">Prediction</TableCell>
-                <TableCell align="right">
-                  {" "}
-                  <a onClick={handleCopy}>
-                    <span role="img" aria-label="rocket ship">
-                      🚀
-                    </span>
-                  </a>
-                </TableCell>
-              </TableRow>
+          {Object.keys(bets).map((betId) => (
+      <TableRow key={betId}>
+        <TableCell>{betId}</TableCell>
+        <TableCell>{bets[betId][0]}</TableCell>
+        <TableCell>{bets[betId][1]}</TableCell>
+        <TableCell>{bets[betId][2]}</TableCell>
          
+        <TableCell align="right">
+                {" "}
+                <a onClick={handleCopy}>
+                  <span role="img" aria-label="rocket ship">
+                    🚀
+                  </span>
+                </a>
+              </TableCell>
+         
+      </TableRow>))}
+             
           </TableBody>
         </Table>
       </Box>
