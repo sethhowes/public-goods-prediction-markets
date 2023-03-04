@@ -34,10 +34,22 @@ const VotingComponent = (props) => {
   const price = getPrice(selectedOption);
   const [showPayoff, setShowPayoff] = useState(); //
   const [quote, setQuote] = useState()
+  async function fetchData() {
+    const result = await  get_quote(props.rpc_url, props.contract_address, props.abi, props.prediction_id, proposed_bet, bucket_index)
+    setQuote (result)
+
+  } 
   const handleOptionSelect = (index) => {
     setSelectedOption(index);
     setShowPayoff(true);
     fetchData();
+    console.log('quote', quote)
+    
+    console.log('quote',  web3.utils.toNumber(quote?.hex))
+   console.log('quote',  web3.utils.toNumber(quote))
+
+
+
   };
 
   // Current quote
@@ -46,12 +58,8 @@ proposed_bet = stake.toString()
 let bucket_index = 0;
 bucket_index = selectedOption 
 
-  async function fetchData() {
-    const result = await  get_quote(props.rpc_url, props.contract_address, props.abi, props.prediction_id, proposed_bet, bucket_index)
-    setQuote (result)
-  } 
+ 
   
-
 
   const showValue = selectedOption + 1;
   const handleQuantityChange = (event) => {
@@ -63,7 +71,7 @@ bucket_index = selectedOption
       message: `Prediction created successfully`,
     });
 
-    const tx = await contractWithSigner.placeBet(0, 1, {value: 20}) // UPDATE PARAMETERS WITH PREDICTION ID, BUCKET INDEX @todo
+    const tx = await contractWithSigner.placeBet(props.prediction_id, bucket_index, {value: stake}) // UPDATE PARAMETERS WITH PREDICTION ID, BUCKET INDEX @todo
 
     createVote({ selectedOption, stake, user: auth.user.uid });
     // Your code to make prediction here...
@@ -140,7 +148,6 @@ bucket_index = selectedOption
       >
 {showPayoff && quote && <div>Subtotal:{quote.toString()} </div>}
       </div>
-
       {showPayoff && (
         <div
           style={{ fontWeight: "bold", textAlign: "center", marginTop: "20px" }}
