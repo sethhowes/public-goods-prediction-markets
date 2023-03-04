@@ -10,11 +10,13 @@ import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
-import {contract} from "../util/contract";
+import { contract } from "../util/contract";
 import { useSigner } from "wagmi";
+import { useAccount } from 'wagmi'
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
+  const { data: signer, isError, isLoading } = useSigner();
 
   return (
     <div
@@ -34,13 +36,21 @@ function TabPanel(props) {
 }
 
 export default function ColorTabs(props) {
+
+  const { address, isConnecting, isDisconnected } = useAccount();
   const [value, setValue] = React.useState(0);
   const classes = props.useStyles();
   const { data: signer, isError, isLoading } = useSigner();
+
   const handleCloseMarket = async () => {
     const contractWithSigner = contract.connect(signer);
-    const tx = await contractWithSigner.closeMarket(3);
+    const tx = await contractWithSigner.closeMarket(3); //@todo Change hardcoded prediction id
   };
+
+  const handleClaimFunds = async() => {
+    const contractWithSigner = contract.connect(signer);
+    const tx = await contractWithSigner.claimFunds(2); //@todo Change hardcoded prediction id
+  }
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -88,12 +98,22 @@ export default function ColorTabs(props) {
                 {committedUserCapital} ETH {/* @todo change this from being hardcoded */}
               </TableCell>
             </TableRow>
-            <TableRow>
+            {(props.creatorAddress == address) ?
+            (<TableRow>
               <TableCell>Close Market</TableCell>
               <TableCell align="right">
                 <Button disabled={props.userAddress === props.creatorAddress ? false : true}
  variant="contained" color="error" onClick={handleCloseMarket}>
                   Close Market 
+                </Button>
+              </TableCell>
+            </TableRow>) : (<></>)}
+            <TableRow>
+              <TableCell>Claim Funds</TableCell>
+              <TableCell align="right">
+                <Button
+ variant="contained" color="error" onClick={handleClaimFunds}>
+                  Claim Funds 
                 </Button>
               </TableCell>
             </TableRow>

@@ -703,6 +703,40 @@ async function get_bets_by_user(rpc_url, contract_address, abi, user) {
 	return bets_by_user;
   }
   
+// Get time passed
+async function get_bets_by_all_users(rpc_url, contract_address, abi) {	
+	// Get all markets
+	var num_markets_res = await num_markets(rpc_url, contract_address, abi);
+	
+	var user_per_markets = await get_all_user_for_multiple_markets(rpc_url, contract_address, abi, num_markets_res)
+
+	var bets_by_user = {};
+
+	for (var market_id in user_per_markets){
+		var user_list = user_per_markets[market_id];
+		for (var user of user_list){
+
+			var bets = await get_all_bets_per_bucket_per_user(rpc_url, contract_address, abi, market_id, [user]);
+
+			//Check if bets is null
+			if (bets == null){
+				continue;
+			}
+			//If user not in bets_by_user, add it
+			if (!(user in bets_by_user)){
+				bets_by_user[user] = {};
+
+				bets_by_user[user][market_id]= bets[user];
+			} else{
+				bets_by_user[user][market_id] = bets[user];
+			}
+
+		}
+	}
+
+	return bets_by_user;
+  }
+  
 // Define the contract variables
 const rpc_url = 'https://goerli.gateway.tenderly.co/3Ugz1n4IRjoidr766XDDxX';
 var contract_address = '0x34E2fE6bd61024995A4C18Ea8F0084e8d7652e19';
@@ -1864,6 +1898,8 @@ var user = "0xf2B719136656BF21c2B2a255F586afa34102b71d";
 var get_user_bets = await get_bets_by_user(rpc_url, contract_address, abi, user);
 console.log(get_user_bets);
 
+var get_all_user_bets = await get_bets_by_all_users(rpc_url, contract_address, abi);
+console.log(get_all_user_bets);
 // // POOLING CONTRACT
 // var pooling_contract_address = '0xD60C2c1Be205e6Cb4083c9E4A5735e84C901C8C9';
 // var pooling_user = "0xdD9CECb2Ad144A32CbEB2dF7aEd229750C4e77Fc";

@@ -9,3 +9,8 @@ export async function getHistoricalBetTimestamps(predictionId) {
   const pastBetTimestamps = await contract.viewBetTimestamps(predictionId);
   return pastBetTimestamps;
 }
+
+export async function getHistoricalBetBuckets(predictionId) {
+  const pastBetBuckets = await contract.getBetBucketIndex(predictionId);
+  return pastBetBuckets;
+}

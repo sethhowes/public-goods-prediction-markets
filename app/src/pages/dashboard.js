@@ -25,6 +25,7 @@ import {
 } from "recharts";
 import VotingComponent from "components/voting";
 import Typography from "@mui/material/Typography";
+import { useNetwork } from 'wagmi'
 
 import ColorTabs from "components/TabSection";
 
@@ -43,6 +44,7 @@ import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from "recharts";
 import { abi, contract_address, rpc_url } from "util/contract.js";
 import { convertToDecimal } from "util/convertToDecimal";
 import { parseHistoricalBets } from "util/parseHistoricalBets";
+import { sumBuckets } from "util/sumBuckets";
 
 import Web3 from "web3";
 
@@ -59,6 +61,7 @@ const useStyles = makeStyles((theme) => ({
 function DashboardPage(props) {
   // url parsing
   const web3 = new Web3();
+  const { chain, chains } = useNetwork()
 
   const { address, isConnecting, isDisconnected } = useAccount();
 
@@ -136,6 +139,7 @@ function DashboardPage(props) {
     }
 
     fetchData();
+    
   }, []);
 
   //setPredictionID(parts[parts.length - 1]);
@@ -338,7 +342,7 @@ function DashboardPage(props) {
                         <strong
                           style={{ fontWeight: "bold", padding: 3, ML: 5 }}
                         >
-                          Commited Capital:
+                          Committed Capital:
                         </strong>
                       </Typography>
                       <Typography
@@ -346,10 +350,10 @@ function DashboardPage(props) {
                         sx={{ fontWeight: "bold", marginLeft: 2 }}
                         className={classes.gradientText}
                       >
-                        {web3.utils.toNumber(
-                          predictionMarketDetails?.reward_amount.hex
-                        )}{" "}
-                        ETH
+                        {
+                          sumBuckets(predictionMarketDetails?.committed_amount_bucket, predictionMarketDetails?.committed_amount_bucket.length)
+                        }{" "}
+                        {chain?.nativeCurrency.symbol}
                       </Typography>
                     </Box>
                   </CardContent>

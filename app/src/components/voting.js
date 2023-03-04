@@ -4,11 +4,15 @@ import Alert from "@mui/material/Alert";
 import { createVote } from "util/db";
 import { useAuth } from "util/auth";
 import { useSigner } from "wagmi";
-import {contract} from "../util/contract";
-import {get_quote} from 'util/multicall.js'
+import { contract } from "../util/contract";
+import { get_quote } from "util/multicall.js";
 import Web3 from "web3";
+import { ethers } from "ethers";
+import { parseQuoteResult } from "util/parseQuoteResult";
+import { useNetwork } from 'wagmi'
 
 const VotingComponent = (props) => {
+  const { chain, chains } = useNetwork()
   // Get contract with signer to make bet
   const { data: signer, isError, isLoading } = useSigner();
   const contractWithSigner = contract.connect(signer);
@@ -19,12 +23,11 @@ const VotingComponent = (props) => {
 
   const classes = props.useStyles();
   const [selectedOption, setSelectedOption] = useState(0);
-  const [stake, setStake] = useState(1);
+  const [stake, setStake] = useState(0);
   const getPrice = (index) => {
     const prices = props.predictionBucketPrices;
     return prices[index];
   };
-
 
   const handleFormAlert = (data) => {
     setFormAlert(data);
@@ -33,44 +36,49 @@ const VotingComponent = (props) => {
   const subtotal = getPrice(selectedOption) * stake;
   const price = getPrice(selectedOption);
   const [showPayoff, setShowPayoff] = useState(); //
-  const [quote, setQuote] = useState()
+  const [quote, setQuote] = useState();
   async function fetchData() {
-    const result = await  get_quote(props.rpc_url, props.contract_address, props.abi, props.prediction_id, proposed_bet, bucket_index)
-    setQuote (result)
-
-  } 
+    let result = await get_quote(
+      props.rpc_url,
+      props.contract_address,
+      props.abi,
+      props.prediction_id,
+      proposed_bet,
+      bucket_index
+    );
+    result = parseQuoteResult(result, stake);
+    setQuote(result);
+  }
   const handleOptionSelect = (index) => {
     setSelectedOption(index);
     setShowPayoff(true);
     fetchData();
-    console.log('quote', quote)
-    
-
-
-
-
   };
 
   // Current quote
-let proposed_bet = 1e3.toString();
-proposed_bet = stake.toString()
-let bucket_index = 0;
-bucket_index = selectedOption 
-
- 
-  
+  let proposed_bet = (1e3).toString();
+  proposed_bet = stake.toString();
+  let bucket_index = 0;
+  bucket_index = selectedOption;
 
   const showValue = selectedOption + 1;
   const handleQuantityChange = (event) => {
-    setStake(Number(event.target.value));
+    const ethStake = Number(event.target.value);
+    const weiStake = ethers.utils.parseEther(ethStake.toString());
+    setStake(weiStake);
   };
+
   const handlePrediction = async () => {
     handleFormAlert({
       type: "success",
       message: `Prediction created successfully`,
     });
 
-    const tx = await contractWithSigner.placeBet(props.prediction_id, bucket_index, {value: stake}) // UPDATE PARAMETERS WITH PREDICTION ID, BUCKET INDEX @todo
+    const tx = await contractWithSigner.placeBet(
+      props.prediction_id,
+      bucket_index,
+      { value: stake }
+    ); // UPDATE PARAMETERS WITH PREDICTION ID, BUCKET INDEX @todo
 
     createVote({ selectedOption, stake, user: auth.user.uid });
     // Your code to make prediction here...
@@ -114,12 +122,10 @@ bucket_index = selectedOption
         }}
       >
         <label>
-          Stake:
+          Stake ({chain?.nativeCurrency.symbol}):
           <input
-            type="number"
-            value={stake}
             onChange={handleQuantityChange}
-            style={{ width: "60px" }}
+            style={{ width: "60px", marginLeft: "10px" }}
           />
         </label>
         <Button
@@ -145,14 +151,14 @@ bucket_index = selectedOption
           marginTop: "20px",
         }}
       >
-{showPayoff && quote && <div>Odds:{quote[0]} </div>}
+        {showPayoff && quote && <div>Odds:{quote[0]} </div>}
       </div>
       {showPayoff && quote && quote.length >= 2 && (
         <div
           style={{ fontWeight: "bold", textAlign: "center", marginTop: "20px" }}
           className={classes.gradientText}
-        >      
- Expected Payoff: {quote[1]}    
+        >
+          Expected Payoff: {quote[1]} ETH
         </div>
       )}
     </div>
