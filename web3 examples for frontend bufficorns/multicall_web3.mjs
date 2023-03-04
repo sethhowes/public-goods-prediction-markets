@@ -444,6 +444,97 @@ async function get_quote(rpc_url, contract_address, abi, prediction_id, proposed
 
   return req_variables;
 }
+
+// Is claimable
+async function is_claimable(rpc_url, contract_address, abi, prediction_id, user) {
+	// Get multicall object
+	var multicall = await get_multi_call_provider(rpc_url);
+	// Define the calls
+	const contractCallContext = [
+		{
+			reference: 'contract',
+			contractAddress: contract_address,
+			abi: abi,
+			calls: [
+			  { reference: 'isClaimable', methodName: 'isClaimable', methodParameters: [prediction_id, user] },
+			]
+	  },
+	];
+  
+	// Execute all calls in a single multicall
+	const results = await multicall.call(contractCallContext);
+	
+	// Unpack all individual results
+	var all_res = results.results.contract.callsReturnContext;
+	var results_dict = {};
+	for (const res of all_res) {
+	  var key = res['reference'];
+	  results_dict[key] = res['returnValues'];
+	}
+  
+	return results_dict;
+  }
+  
+// Is claimable via pool
+async function is_claimable_pool(rpc_url, contract_address, abi, prediction_id, user) {
+	// Get multicall object
+	var multicall = await get_multi_call_provider(rpc_url);
+	// Define the calls
+	const contractCallContext = [
+		{
+			reference: 'contract',
+			contractAddress: contract_address,
+			abi: abi,
+			calls: [
+			  { reference: 'isClaimableViaPool', methodName: 'isClaimableViaPool', methodParameters: [prediction_id, user] },
+			]
+	  },
+	];
+  
+	// Execute all calls in a single multicall
+	const results = await multicall.call(contractCallContext);
+	
+	// Unpack all individual results
+	var all_res = results.results.contract.callsReturnContext;
+	var results_dict = {};
+	for (const res of all_res) {
+	  var key = res['reference'];
+	  results_dict[key] = res['returnValues'];
+	}
+  
+	return results_dict;
+  }
+  
+// Get claimable amount
+async function get_claimable_amount(rpc_url, contract_address, abi, prediction_id, user) {
+	// Get multicall object
+	var multicall = await get_multi_call_provider(rpc_url);
+	// Define the calls
+	const contractCallContext = [
+		{
+			reference: 'contract',
+			contractAddress: contract_address,
+			abi: abi,
+			calls: [
+			  { reference: 'getClaimableAmount', methodName: 'getClaimableAmount', methodParameters: [prediction_id, user] },
+			]
+	  },
+	];
+  
+	// Execute all calls in a single multicall
+	const results = await multicall.call(contractCallContext);
+	
+	// Unpack all individual results
+	var all_res = results.results.contract.callsReturnContext;
+	var results_dict = {};
+	for (const res of all_res) {
+	  var key = res['reference'];
+	  results_dict[key] = res['returnValues'];
+	}
+  
+	return results_dict;
+  }
+  
 // Define the contract variables
 const rpc_url = 'https://goerli.gateway.tenderly.co/3Ugz1n4IRjoidr766XDDxX';
 var contract_address = '0xC9c037719B0E6aAB162c2dC932ff0ff2E72dc051';
@@ -1214,12 +1305,27 @@ console.log(user_list);
 var all_bets_per_bucket_per_user = await get_all_bets_per_bucket_per_user(rpc_url, contract_address, abi, prediction_id, user_list);
 console.log(all_bets_per_bucket_per_user);
 
+// is claimable
+user = "0x00000000";
+var is_claimable = await is_claimable(rpc_url, contract_address, abi, prediction_id, user);
+console.log(is_claimable);
+
+// is claimable via pool
+var is_claimable_pool = await is_claimable_pool(rpc_url, contract_address, abi, prediction_id, user);
+console.log(is_claimable_pool);
+
+// Get claimable amount
+var claimable_amount = await get_claimable_amount(rpc_url, contract_address, abi, prediction_id, user);
+console.log(claimable_amount);
+
+
+// 
 //TO ADD
 //CHECK CONTRACT
 
-// isClaimable
-// getclaimableAmount
-// isClaimableViaPool
+// isClaimable X
+// getclaimableAmount X
+// isClaimableViaPool X
 
 
 // POOLING
