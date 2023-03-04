@@ -98,6 +98,40 @@ export async function get_prediction_market_details(rpc_url, contract_address, a
   return req_variables;
 }
 
+// Get time passed
+export async function get_bets_by_all_users(rpc_url, contract_address, abi) {	
+	// Get all markets
+	var num_markets_res = await num_markets(rpc_url, contract_address, abi);
+
+	var user_per_markets = await get_all_user_for_multiple_markets(rpc_url, contract_address, abi, num_markets_res)
+
+	var bets_by_user = {};
+
+	for (var market_id in user_per_markets){
+		var user_list = user_per_markets[market_id];
+		for (var user of user_list){
+
+			var bets = await get_all_bets_per_bucket_per_user(rpc_url, contract_address, abi, market_id, [user]);
+
+			//Check if bets is null
+			if (bets == null){
+				continue;
+			}
+			//If user not in bets_by_user, add it
+			if (!(user in bets_by_user)){
+				bets_by_user[user] = {};
+
+				bets_by_user[user][market_id]= bets[user];
+			} else{
+				bets_by_user[user][market_id] = bets[user];
+			}
+
+		}
+	}
+
+	return bets_by_user;
+  }
+
 // Returns all live prediction markets
 export async function get_all_markets(rpc_url, contract_address, abi) {
     // Get multicall object
@@ -555,7 +589,150 @@ export async function time_passed(rpc_url, contract_address, abi, prediction_id)
 	
 	return result;
   }
+
+ // Get num markets
+ async function num_markets(rpc_url, contract_address, abi) {
+	// Get multicall object
+	var multicall = await get_multi_call_provider(rpc_url);
+	// Define the calls
+	const contractCallContext = [
+		{
+			reference: 'contract',
+			contractAddress: contract_address,
+			abi: abi,
+			calls: [
+			  { reference: 'totalPredictions', methodName: 'totalPredictions'},
+			]
+	  },
+	];
+
+	// Execute all calls in a single multicall
+	const results = await multicall.call(contractCallContext);
+
+	// Unpack all individual results
+	var all_res = results.results.contract.callsReturnContext;
+	var result = all_res[0]['returnValues'][0];
+
+	return parseInt(result.hex,16);
+  }
+
+
+//Get all user that bet for multiple market
+async function get_all_user_for_multiple_markets(rpc_url, contract_address, abi, num_markets){
+    // Get multicall object
+    var multicall = await get_multi_call_provider(rpc_url);
+
+    // Define the first call
+	var calls_list = [];
+	for (var i = 0; i < num_markets; i++) {
+		calls_list.push({ reference: 'userPerMarketLength', methodName: 'userPerMarketLength', methodParameters: [i] });
+	}
+    var contractCallContext = [
+        {
+            reference: 'contract',
+            contractAddress: contract_address,
+            abi: abi,
+            calls: calls_list
+      },
+    ];
+
+    // Execute all calls in a single multicall
+    var results = await multicall.call(contractCallContext);
+
+	//Unpack
+	var index_per_market = {}
+	var counter = 0;
+	for (var return_data of results.results.contract.callsReturnContext){
+		var result = return_data['returnValues'][0];
+		index_per_market[counter] = parseInt(result.hex,16);
+		counter++;
+	}
+
+    // Unpack all markets
+    var call_list = []
+
+	//Prepare second request
+    for (var i = 0; i < num_markets; i++) {
+		var index_counter = index_per_market[i];
+
+		for (var j = 0; j < index_counter; j++) {
+			//Prepare second request
+			call_list.push(
+			{ reference: 'getMarketUser_' + i.toString() + '_' + j.toString(), methodName: 'getMarketUser', methodParameters: [i, j] }
+			)
+		}
+	}
+
+    // Define the second call
+    contractCallContext = [
+        {
+            reference: 'contract',
+            contractAddress: contract_address,
+            abi: abi,
+            calls: call_list
+        },
+    ];
+
+    // Execute all calls in a single multicall
+    var results = await multicall.call(contractCallContext);
+
+    var req_list = {};
+    try{
+        // Unpack all individual results
+        var all_res = results.results.contract.callsReturnContext;
+        for (const res of all_res) {
+			var pred_id = res['reference'].split('_')[1];
+
+			//Check if key exists in req_list
+			if (pred_id in req_list){
+				var temp_array = req_list[pred_id];
+				temp_array.push(res['returnValues'][0]);
+				req_list[pred_id] =temp_array.flat();
+			} else {
+				req_list[pred_id] = res['returnValues'];
+
+			}
+        }
+        return req_list;
+    }catch{
+        return req_list;
+    }
+
+}
   
+ export async function get_bets_by_user(rpc_url, contract_address, abi, user) {	
+	// Get all markets
+	var num_markets_res = await num_markets(rpc_url, contract_address, abi);
+	
+	var user_per_markets = await get_all_user_for_multiple_markets(rpc_url, contract_address, abi, num_markets_res)
+
+	var bets_by_user = {};
+	bets_by_user[user] = {};
+
+	for (var market_id in user_per_markets){
+		var user_list = user_per_markets[market_id];
+		if (user_list.includes(user)){
+			var bets = await get_all_bets_per_bucket_per_user(rpc_url, contract_address, abi, market_id, [user]);
+
+			//Check if bets is null
+			if (bets == null){
+				continue;
+			}
+			//If user not in bets_by_user, add it
+			if (!(user in bets_by_user)){
+				bets_by_user[user][market_id]= bets[user];
+			} else{
+				bets_by_user[user][market_id] = bets[user];
+			}
+
+		}
+	}
+
+	return bets_by_user;
+  }
+
+
+
 /* // Define the contract variables
 const rpc_url = 'https://goerli.gateway.tenderly.co/3Ugz1n4IRjoidr766XDDxX';
 var contract_address = '0x34E2fE6bd61024995A4C18Ea8F0084e8d7652e19';
