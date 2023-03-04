@@ -34,7 +34,6 @@ function TabPanel(props) {
 }
 
 export default function ColorTabs(props) {
-  console.log(props.options)
   const [value, setValue] = React.useState(0);
   const classes = props.useStyles();
   const { data: signer, isError, isLoading } = useSigner();
@@ -92,7 +91,7 @@ export default function ColorTabs(props) {
             <TableRow>
               <TableCell>Close Market</TableCell>
               <TableCell align="right">
-                <Button   disabled={props.userAddress === props.creatorAddress ? false : true}
+                <Button disabled={props.userAddress === props.creatorAddress ? false : true}
  variant="contained" color="error" onClick={handleCloseMarket}>
                   Close Market 
                 </Button>

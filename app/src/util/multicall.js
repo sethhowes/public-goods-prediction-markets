@@ -7,7 +7,7 @@ const MANTLE_NETWORK_MULTICALL_CONTRACT_ADDRESS = '0x';
 const SCROLL_NETWORK_MULTICALL_CONTRACT_ADDRESS = '0x';
 
 //Returns multicall object
-async function get_multi_call_provider(rpc_url) {
+export async function get_multi_call_provider(rpc_url){
    //Set provider to Tenderly :)
    const web3 = new Web3(rpc_url);
  
@@ -438,23 +438,128 @@ export async function get_quote(rpc_url, contract_address, abi, prediction_id, p
     results_dict[key] = res['returnValues'];
   }
 
-  // Requested variables
-  var req_variables = {};
-  req_variables['quote'] = results_dict['getCurrentQuote'][0];
+  //Calculate return
+  var quote = parseInt(results_dict['getCurrentQuote'][0].hex,16) / 100000;
+  var expected_return = 1/quote - 1;
 
+  // Requested variables
+  var req_variables = [];
+  req_variables.push(quote);
+  req_variables.push(expected_return);
+//   var req_variables = {};
+//   req_variables['quote'] = results_dict['getCurrentQuote'][0];
+//   req_variables['quote'] = parseInt(req_variables['quote'].hex,16);
+//   req_variables['expected_return'] = req_variables['quote'] / 1000000000000000000;
   return req_variables;
 }
+
+// Is claimable
+export async function is_claimable(rpc_url, contract_address, abi, prediction_id, user) {
+	// Get multicall object
+	var multicall = await get_multi_call_provider(rpc_url);
+	// Define the calls
+	const contractCallContext = [
+		{
+			reference: 'contract',
+			contractAddress: contract_address,
+			abi: abi,
+			calls: [
+			  { reference: 'isClaimable', methodName: 'isClaimable', methodParameters: [prediction_id, user] },
+			]
+	  },
+	];
+  
+	// Execute all calls in a single multicall
+	const results = await multicall.call(contractCallContext);
+	
+	// Unpack all individual results
+	var all_res = results.results.contract.callsReturnContext;
+	var result = all_res[0]['returnValues'][0];
+	
+	return result;
+  }
+  
+// Is claimable via pool
+export async function is_claimable_pool(rpc_url, contract_address, abi, prediction_id, user) {
+	// Get multicall object
+	var multicall = await get_multi_call_provider(rpc_url);
+	// Define the calls
+	const contractCallContext = [
+		{
+			reference: 'contract',
+			contractAddress: contract_address,
+			abi: abi,
+			calls: [
+			  { reference: 'isClaimableViaPool', methodName: 'isClaimableViaPool', methodParameters: [prediction_id, user] },
+			]
+	  },
+	];
+  
+	// Execute all calls in a single multicall
+	const results = await multicall.call(contractCallContext);
+	
+	// Unpack all individual results
+	var all_res = results.results.contract.callsReturnContext;
+	var result = all_res[0]['returnValues'][0];
+	
+	return result;
+  }
+  
+// Get claimable amount
+export async function get_claimable_amount(rpc_url, contract_address, abi, prediction_id, user) {
+	// Get multicall object
+	var multicall = await get_multi_call_provider(rpc_url);
+	// Define the calls
+	const contractCallContext = [
+		{
+			reference: 'contract',
+			contractAddress: contract_address,
+			abi: abi,
+			calls: [
+			  { reference: 'getClaimableAmount', methodName: 'getClaimableAmount', methodParameters: [prediction_id, user] },
+			]
+	  },
+	];
+  
+	// Execute all calls in a single multicall
+	const results = await multicall.call(contractCallContext);
+	
+	// Unpack all individual results
+	var all_res = results.results.contract.callsReturnContext;
+	var result = all_res[0]['returnValues'][0];
+	return parseInt(result.hex,16);
+  }
+  
+ // Get time passed
+export async function time_passed(rpc_url, contract_address, abi, prediction_id) {
+	// Get multicall object
+	var multicall = await get_multi_call_provider(rpc_url);
+	// Define the calls
+	const contractCallContext = [
+		{
+			reference: 'contract',
+			contractAddress: contract_address,
+			abi: abi,
+			calls: [
+			  { reference: 'timePassed', methodName: 'timePassed', methodParameters: [prediction_id] },
+			]
+	  },
+	];
+  
+	// Execute all calls in a single multicall
+	const results = await multicall.call(contractCallContext);
+	
+	// Unpack all individual results
+	var all_res = results.results.contract.callsReturnContext;
+	var result = all_res[0]['returnValues'][0];
+	
+	return result;
+  }
+  
 // Define the contract variables
 const rpc_url = 'https://goerli.gateway.tenderly.co/3Ugz1n4IRjoidr766XDDxX';
-var contract_address = '0xC9c037719B0E6aAB162c2dC932ff0ff2E72dc051';
+var contract_address = '0x34E2fE6bd61024995A4C18Ea8F0084e8d7652e19';
 var abi = [
-	{
-		"inputs": [],
-		"name": "acceptOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
 	{
 		"inputs": [],
 		"stateMutability": "nonpayable",
@@ -470,7 +575,7 @@ var abi = [
 				"type": "address"
 			},
 			{
-				"indexed": false,
+				"indexed": true,
 				"internalType": "uint256",
 				"name": "predictionId",
 				"type": "uint256"
@@ -485,6 +590,18 @@ var abi = [
 				"indexed": false,
 				"internalType": "uint256",
 				"name": "betAmount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "timeStamp",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "bucketIndex",
 				"type": "uint256"
 			}
 		],
@@ -529,6 +646,142 @@ var abi = [
 		],
 		"name": "ChainlinkRequested",
 		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferRequested",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferred",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "scaledBet",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "betAmount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "timeStamp",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "bucketIndex",
+				"type": "uint256"
+			}
+		],
+		"name": "Pooling",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "acceptOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "betAmounts",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "betTimestamps",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
 	},
 	{
 		"inputs": [
@@ -581,7 +834,7 @@ var abi = [
 		],
 		"name": "closeMarket",
 		"outputs": [],
-		"stateMutability": "nonpayable",
+		"stateMutability": "payable",
 		"type": "function"
 	},
 	{
@@ -689,42 +942,28 @@ var abi = [
 		"type": "function"
 	},
 	{
-		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "from",
-				"type": "address"
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
 			},
 			{
-				"indexed": true,
 				"internalType": "address",
-				"name": "to",
+				"name": "user",
 				"type": "address"
 			}
 		],
-		"name": "OwnershipTransferRequested",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
+		"name": "getBettingAmounts",
+		"outputs": [
 			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "from",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
+				"internalType": "uint256[2]",
+				"name": "",
+				"type": "uint256[2]"
 			}
 		],
-		"name": "OwnershipTransferred",
-		"type": "event"
+		"stateMutability": "view",
+		"type": "function"
 	},
 	{
 		"inputs": [
@@ -734,53 +973,20 @@ var abi = [
 				"type": "uint256"
 			},
 			{
-				"internalType": "uint256",
-				"name": "bucketIndex",
-				"type": "uint256"
-			}
-		],
-		"name": "placeBet",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "apiEndpoint",
-				"type": "string"
-			}
-		],
-		"name": "requestOutcomeData",
-		"outputs": [
-			{
-				"internalType": "bytes32",
-				"name": "requestId",
-				"type": "bytes32"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
 				"internalType": "address",
-				"name": "to",
+				"name": "user",
 				"type": "address"
 			}
 		],
-		"name": "transferOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "updateLivePredictionIds",
-		"outputs": [],
-		"stateMutability": "nonpayable",
+		"name": "getClaimableAmount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -888,6 +1094,32 @@ var abi = [
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "getPoolingContract",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getTimeStamp",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "uint256",
@@ -907,6 +1139,73 @@ var abi = [
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			}
+		],
+		"name": "getTotalCommittedAmount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "isClaimable",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "isClaimableViaPool",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "isWhitelisted",
 		"outputs": [
@@ -920,6 +1219,43 @@ var abi = [
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "onlyClaimableViaPool",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_outcome",
+				"type": "uint256"
+			}
+		],
+		"name": "overrideOutcome",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "owner",
 		"outputs": [
@@ -930,6 +1266,42 @@ var abi = [
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "bucketIndex",
+				"type": "uint256"
+			}
+		],
+		"name": "placeBet",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "bucketIndex",
+				"type": "uint256"
+			}
+		],
+		"name": "placeBetViaPool",
+		"outputs": [],
+		"stateMutability": "payable",
 		"type": "function"
 	},
 	{
@@ -997,6 +1369,25 @@ var abi = [
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "apiEndpoint",
+				"type": "string"
+			}
+		],
+		"name": "requestOutcomeData",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "requestId",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "retrieveChainId",
 		"outputs": [
@@ -1004,6 +1395,38 @@ var abi = [
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "poolingContract",
+				"type": "address"
+			}
+		],
+		"name": "setPoolingContract",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			}
+		],
+		"name": "timePassed",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
@@ -1025,6 +1448,26 @@ var abi = [
 	{
 		"inputs": [
 			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "updateLivePredictionIds",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "uint256",
 				"name": "id",
 				"type": "uint256"
@@ -1036,6 +1479,44 @@ var abi = [
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			}
+		],
+		"name": "viewBetAmounts",
+		"outputs": [
+			{
+				"internalType": "uint256[]",
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			}
+		],
+		"name": "viewBetTimestamps",
+		"outputs": [
+			{
+				"internalType": "uint256[]",
+				"name": "",
+				"type": "uint256[]"
 			}
 		],
 		"stateMutability": "view",
@@ -1186,7 +1667,7 @@ var abi = [
 		"type": "function"
 	}
 ];
-var prediction_id = 0;
+var prediction_id = 1;
 
 var prediction_market_details = await get_prediction_market_details(rpc_url, contract_address, abi, prediction_id);
 console.log(prediction_market_details)
@@ -1213,3 +1694,288 @@ console.log(user_list);
 // Get all user bets for a prediction market
 var all_bets_per_bucket_per_user = await get_all_bets_per_bucket_per_user(rpc_url, contract_address, abi, prediction_id, user_list);
 console.log(all_bets_per_bucket_per_user);
+
+// is claimable
+var user = "0xf2B719136656BF21c2B2a255F586afa34102b71d";
+var is_claimable_result = await is_claimable(rpc_url, contract_address, abi, prediction_id, user);
+console.log(is_claimable_result);
+
+// is claimable via pool
+var is_claimable_pool_result = await is_claimable_pool(rpc_url, contract_address, abi, prediction_id, user);
+console.log(is_claimable_pool_result);
+
+// Get claimable amount
+var claimable_amount = await get_claimable_amount(rpc_url, contract_address, abi, prediction_id, user);
+console.log(claimable_amount);
+
+// Check is time expired
+var is_time_passed = await time_passed(rpc_url, contract_address, abi, prediction_id);
+console.log(is_time_passed);
+
+// POOLING CONTRACT
+var pooling_contract_address = '0xD60C2c1Be205e6Cb4083c9E4A5735e84C901C8C9';
+var pooling_user = "0xdD9CECb2Ad144A32CbEB2dF7aEd229750C4e77Fc";
+var pooling_abi = [
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferRequested",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferred",
+		"type": "event"
+	},
+	{
+		"stateMutability": "payable",
+		"type": "fallback"
+	},
+	{
+		"inputs": [],
+		"name": "acceptOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "betAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "bucketIndex",
+				"type": "uint256"
+			}
+		],
+		"name": "checkUserBet",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			}
+		],
+		"name": "claimReward",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "betAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "bucketIndex",
+				"type": "uint256"
+			}
+		],
+		"name": "copyBet",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "getClaimableAmount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getCopyFees",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getPredictContract",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "isClaimable",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_copyFee",
+				"type": "uint256"
+			}
+		],
+		"name": "setCopyFees",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "predictContract",
+				"type": "address"
+			}
+		],
+		"name": "setPredictContract",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "withdrawFunds",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"stateMutability": "payable",
+		"type": "receive"
+	}
+];
+var is_claimable_result_pooling = await is_claimable(rpc_url, pooling_contract_address, pooling_abi, prediction_id, pooling_user);
+console.log(is_claimable_result_pooling);
+
+// Get claimable amount
+var claimable_amount_pooling = await get_claimable_amount(rpc_url, pooling_contract_address, pooling_abi, prediction_id, pooling_user);
+console.log(claimable_amount_pooling);

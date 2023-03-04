@@ -308,8 +308,6 @@ console.log(allPredictionMarkets)
         <TabPanel sx={{ p: 0, mt: 5, mb: 10 }} value='all'>
                                   
                       <DataGrid 
-
-  
                       columns={columns}
                       rows={rows}
                       onRowClick={(row) => {
@@ -321,6 +319,8 @@ console.log(allPredictionMarkets)
                 sx={{ p: 0, mb: 4, '& .MuiButton-root': { color: 'secondary.main' } }}
                 getRowId={(row) => web3.utils.toHex(row.prediction_id)}
                 />
+
+                
 
 
        </TabPanel>

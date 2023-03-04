@@ -125,13 +125,13 @@ function DashboardPage(props) {
           web3.utils.hexToNumber(bucket.hex)
         )
       );
-      const betAmounts = await getHistoricalBetAmounts(0);
+      /* const betAmounts = await getHistoricalBetAmounts(0);
       const betTimestamps = await getHistoricalBetTimestamps(0);
 
       const amounts = parseHistoricalBets(betAmounts);
       const timestamps = parseHistoricalBets(betTimestamps);
-
-      console.log(amounts);
+ */
+      // console.log(amounts);
 
     }
 
@@ -422,6 +422,7 @@ function DashboardPage(props) {
                 <CardContent sx={{ padding: 3 }}>
                   <Box>
                     <ColorTabs
+                     options={options}
                       userAddress={address}
                       creatorAddress={predictionMarketDetails?.creator_address}
                       useStyles={useStyles}

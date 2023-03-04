@@ -2,9 +2,7 @@ import React from "react";
 import { useRouter } from "next/router";
 import Meta from "components/Meta";
 import { useState } from "react";
-import DashboardSection2 from "components/DashboardSection2";
-import Navbar2 from "components/Navbar2";
-import Footer from "components/Footer";
+
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -12,42 +10,94 @@ import Section from "components/Section";
 import SectionHeader from "components/SectionHeader";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
-import Chart from "components/Chart"
-import { PureComponent } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import PredictionData from "components/predictionData";
-import PredictionMeta from "components/predictionMeta"
-import { makeStyles } from "@mui/styles";
-import { DataGrid, GridToolbarContainer, GridToolbar } from "@mui/x-data-grid";
-import { useDemoData } from "@mui/x-data-grid-generator";
-import { Typography, Chip } from "@mui/material";
-import Tab from '@mui/material/Tab'
-import TabList from '@mui/lab/TabList'
-import TabPanel from '@mui/lab/TabPanel'
-import TabContext from '@mui/lab/TabContext'
-import Avatar from '@mui/material/Avatar'
-import { requireAuth } from "util/auth";
 
-const useStyles = makeStyles((theme) => ({
-  priceChip: {
-    backgroundColor: '#4caf50', 
-    color: '#fff', 
-  },
-  gradientText: {
-    backgroundClip: "text",
-    backgroundImage:
-      "linear-gradient(85.9deg, #1EBEA5 -14.21%, #00B5C4 18.25%, #00A8E6 52.49%, #0096FD 81.67%, #157AFB 111.44%)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-  },
-  toolbarContainer: {
-    "& .MuiButton-root": {
-      color: theme.palette.secondary.main,
-    },
-  },
-}));
+import { makeStyles } from "@mui/styles";
+import { Typography, Chip } from "@mui/material";
+import Web3 from 'web3';
+
+import Collapse from "@mui/material/Collapse";
+import IconButton from "@mui/material/IconButton";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+
+function Row(props) {
+  const { row } = props;
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <React.Fragment>
+      <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
+        <TableCell>
+          <IconButton
+            aria-label="expand row"
+            size="small"
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        </TableCell>
+        <TableCell component="th" scope="row">
+          {row.Address}
+        </TableCell>
+        <TableCell align="left">{row.Trades}</TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <Box sx={{ margin: 1 }}>
+              <Typography variant="h6" gutterBottom component="div">
+                Prediction History
+              </Typography>
+              <Table size="small" aria-label="purchases">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Date</TableCell>
+                    <TableCell>Market</TableCell>
+                    <TableCell align="right">Prediction</TableCell>
+                    <TableCell align="right">Copy</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {row.history.map((historyRow) => (
+                    <TableRow key={historyRow.date}>
+                      <TableCell component="th" scope="row">
+                        {historyRow.date}
+                      </TableCell>
+                      <TableCell>{historyRow.customerId}</TableCell>
+                      <TableCell align="right">{historyRow.amount}</TableCell>
+
+                      <TableCell align="right">{historyRow.amount3}</TableCell>
+
+                      <TableCell align="right">
+                        {" "}
+                        <a href="https://example.com">
+                          <span role="img" aria-label="rocket ship">
+                            🚀
+                          </span>
+                        </a>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
+          </Collapse>
+        </TableCell>
+      </TableRow>
+    </React.Fragment>
+  );
+}
 
   function DashboardPage(props) {
+    const web3 = new Web3();
+
     const router = useRouter();
 
     const handleRowClick = () => {
@@ -62,54 +112,18 @@ const useStyles = makeStyles((theme) => ({
   const handleChange = (event, newValue) => {
     setValue(newValue)
   }
-  const RenderTabAvatar = ({ category }) => (
-    <Avatar
-      variant='rounded'
-      sx={{
-        width: 100,
-        height: 92,
-        backgroundColor: 'transparent',
-        border: theme =>
-          value === category ? `2px solid ${theme.palette.primary.main}` : `2px dashed ${theme.palette.divider}`
-      }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
-        <img
-          width={34}
-          height={34}
-          alt={`tabs-${category}`}
-          src={`/images/${category}.svg`}
-        />
-        <Typography className={classes.gradientText} variant='body2' sx={{ mt: 2, fontWeight: 600, textTransform: 'capitalize' }}>
-          {category}
-        </Typography>
-      </Box>
-    </Avatar>
-  )
-   const getFilteredRows = () => {
-    if (searchText === "") {
-      return rows;
-    } else {
-      return rows.filter((row) => {
-        return Object.values(row)
-          .join(" ")
-          .toLowerCase()
-          .includes(searchText.toLowerCase());
-      });
-    }
-  };
+ 
+  
   const rows = [
-    { id: 1, prediction: "What will be the global average temperature in 2042?", category: "climate", consensus: 25, price: 0.98, predictors: 22 },
-    { id: 2, prediction: "What will the inflation rate be in 2027?", category: "finance", consensus: "4%", price: 0.20, predictors: 22 },
-    { id: 3, prediction: "What decade will we achieve AGI?", category: "risks", consensus: "2040s", price: 0.68, predictors: 22 },
+    { id: 1, address : "0x..." }
     ];
   const classes = useStyles();
   const columns = [
     {
       flex: 0.4,
       minWidth: 100,
-      field: 'prediction',
-      headerName: 'Prediction',
+      field: 'address',
+      headerName: 'Address',
       renderCell: ({ row }) =>  <Typography sx={{ fontWeight: 'bold'}} className={classes.gradientText} variant='body2'>{row.prediction}</Typography>
     },
     {
@@ -187,7 +201,6 @@ const useStyles = makeStyles((theme) => ({
 
               <Box sx={{ textAlign: "center" }}>
 
-
               </Box>
             </Grid>
            </Grid>
@@ -223,109 +236,8 @@ const useStyles = makeStyles((theme) => ({
 
                 <div style={{ width: "100%" }}>
  
-<TabContext value={value}>
-        <TabList
-          variant='scrollable'
-          scrollButtons='auto'
-          onChange={handleChange}
-          aria-label='top referral sources tabs'
-          sx={{
-            mb: 0,
-            px: 5,
-            '& .MuiTab-root:not(:last-child)': { mr: 4 },
-            '& .MuiTabs-indicator': { display: 'none' }
-          }}
-        >
-          
-        
-        </TabList>
-        <TabPanel sx={{ p: 0, mt: 5, mb: 10 }} value='all'>
-                                  
-                     
-
-       </TabPanel>
-       <TabPanel sx={{ p: 0, mt: 5, mb: 10 }} value='climate'>
-                                  
-                                  <DataGrid 
-                                  columns={columns}
-                                  rows={rows}
-                                  initialState={{
-                                    filter: {
-                                      filterModel: {
-                                        items: [
-                                          {
-                                            columnField: 'category',
-                                            value: "Climate",
-                                            operatorValue: 'contains',
-                                          },
-                                        ],
-                                      },
-                                    },
-                                  }}
-                            components={{ Toolbar: GridToolbar }} 
-                            autoHeight // enable auto-height to ensure all rows are visible
-                            sx={{ p: 0, mb: 4, '& .MuiButton-root': { color: 'secondary.main' } }}
-                            />
-            
-            
-                   </TabPanel>
-                   <TabPanel sx={{ p: 0, mt: 5, mb: 10 }} value='risks'>
-                                  
-                                  <DataGrid 
-                                  columns={columns}
-                                  rows={rows}
-                                  initialState={{
-                                    filter: {
-                                      filterModel: {
-                                        items: [
-                                          {
-                                            columnField: 'category',
-                                            value: "Risks",
-                                            operatorValue: 'contains',
-                                          },
-                                        ],
-                                      },
-                                    },
-                                  }}
-                            components={{ Toolbar: GridToolbar }} 
-                            autoHeight // enable auto-height to ensure all rows are visible
-                            sx={{ p: 0, mb: 4, '& .MuiButton-root': { color: 'secondary.main' } }}
-                            />
-            
-            
-                   </TabPanel>
-                   <TabPanel sx={{ p: 0, mt: 5, mb: 10 }} value='finance'>
-                                  
-                                  <DataGrid 
-                                  columns={columns}
-                                  rows={rows}
-                                  initialState={{
-                                    filter: {
-                                      filterModel: {
-                                        items: [
-                                          {
-                                            columnField: 'category',
-                                            value: "Finance",
-                                            operatorValue: 'contains',
-                                          },
-                                        ],
-                                      },
-                                    },
-                                  }}
-                            components={{ Toolbar: GridToolbar }} 
-                            autoHeight // enable auto-height to ensure all rows are visible
-                            sx={{ p: 0, mb: 4, '& .MuiButton-root': { color: 'secondary.main' } }}
-                            />
-            
-            
-                   </TabPanel>
-
-
-
-
-       
-</TabContext>
-    </div>
+             
+                  </div>
          </Box>
               </CardContent>
             </Card>

@@ -45,8 +45,7 @@ const VotingComponent = (props) => {
     fetchData();
     console.log('quote', quote)
     
-    console.log('quote',  web3.utils.toNumber(quote?.hex))
-   console.log('quote',  web3.utils.toNumber(quote))
+
 
 
 
@@ -146,14 +145,14 @@ bucket_index = selectedOption
           marginTop: "20px",
         }}
       >
-{showPayoff && quote && <div>Subtotal:{quote.toString()} </div>}
+{showPayoff && quote && <div>Odds:{quote[0]} </div>}
       </div>
-      {showPayoff && (
+      {showPayoff && quote && quote.length >= 2 && (
         <div
           style={{ fontWeight: "bold", textAlign: "center", marginTop: "20px" }}
           className={classes.gradientText}
-        >
-          Expected Payoff: ${(stake * 1 - subtotal).toFixed(2)}
+        >      
+ Expected Payoff: {quote[1]}    
         </div>
       )}
     </div>
