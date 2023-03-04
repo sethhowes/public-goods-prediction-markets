@@ -322,6 +322,9 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     }
     // Timestamp mapping
     mapping(uint => uint[]) public betTimestamps;
+
+    // Bucket mapping
+    mapping(uint => uint[]) public betBuckets;
     
     function viewBetTimestamps(uint predictionId) public view returns (uint[] memory) {
         return betTimestamps[predictionId];
@@ -358,6 +361,13 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         betAmounts[predictionId].push(msg.value);
         // Add bet timestamp to array
         betTimestamps[predictionId].push(block.timestamp);
+        // Add bet bucket to array
+        betBuckets[predictionId].push(bucketIndex);
+    }
+
+    // Get bet bucket array
+    function getBetBucketIndex(uint predictionId) public view returns(uint[] memory) {
+        return betBuckets[predictionId];
     }
 
     // Place a bet via pool
