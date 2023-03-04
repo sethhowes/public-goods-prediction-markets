@@ -4,6 +4,7 @@ export const scroll = {
   id: 534353,
   name: 'Scroll Alpha Testnet',
   network: 'scroll',
+  iconUrl: "https://scroll.io/favicon.ico",
   nativeCurrency: {
     decimals: 18,
     name: 'Ether',
@@ -22,6 +23,7 @@ export const mantle = {
     id: 5001,
     name: 'Mantle',
     network: 'Mantle Testnet',
+    iconUrl: "https://pbs.twimg.com/profile_images/1597775748580134914/bLhE1aY1_400x400.jpg",
     nativeCurrency: {
       decimals: 18,
       name: 'BitDAO',
