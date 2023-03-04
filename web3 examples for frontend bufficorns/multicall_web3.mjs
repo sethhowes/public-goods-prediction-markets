@@ -342,6 +342,7 @@ async function get_all_user_per_market(rpc_url, contract_address, abi, predictio
 
 }
 
+
 // Returns all bets per bucket per user
 async function get_all_bets_per_bucket_per_user(rpc_url, contract_address, abi, prediction_id, user_list) {
     // Get multicall object
@@ -385,9 +386,13 @@ async function get_all_bets_per_bucket_per_user(rpc_url, contract_address, abi, 
       },
     ];
   
-    // Execute all calls in a single multicall
-    var results = await multicall.call(contractCallContext);
-    
+	try{
+		// Execute all calls in a single multicall
+		var results = await multicall.call(contractCallContext);
+	} catch{
+		return null;
+	}
+
     // Unpack all individual results
     var all_res = results.results.contract.callsReturnContext;
     var results_dict = {};
@@ -554,6 +559,148 @@ async function time_passed(rpc_url, contract_address, abi, prediction_id) {
 	var result = all_res[0]['returnValues'][0];
 	
 	return result;
+  }
+
+ // Get num markets
+ async function num_markets(rpc_url, contract_address, abi) {
+	// Get multicall object
+	var multicall = await get_multi_call_provider(rpc_url);
+	// Define the calls
+	const contractCallContext = [
+		{
+			reference: 'contract',
+			contractAddress: contract_address,
+			abi: abi,
+			calls: [
+			  { reference: 'totalPredictions', methodName: 'totalPredictions'},
+			]
+	  },
+	];
+  
+	// Execute all calls in a single multicall
+	const results = await multicall.call(contractCallContext);
+	
+	// Unpack all individual results
+	var all_res = results.results.contract.callsReturnContext;
+	var result = all_res[0]['returnValues'][0];
+	
+	return parseInt(result.hex,16);
+  }
+  
+
+//Get all user that bet for multiple market
+async function get_all_user_for_multiple_markets(rpc_url, contract_address, abi, num_markets){
+    // Get multicall object
+    var multicall = await get_multi_call_provider(rpc_url);
+    
+    // Define the first call
+	var calls_list = [];
+	for (var i = 0; i < num_markets; i++) {
+		calls_list.push({ reference: 'userPerMarketLength', methodName: 'userPerMarketLength', methodParameters: [i] });
+	}
+    var contractCallContext = [
+        {
+            reference: 'contract',
+            contractAddress: contract_address,
+            abi: abi,
+            calls: calls_list
+      },
+    ];
+  
+    // Execute all calls in a single multicall
+    var results = await multicall.call(contractCallContext);
+    
+	//Unpack
+	var index_per_market = {}
+	var counter = 0;
+	for (var return_data of results.results.contract.callsReturnContext){
+		var result = return_data['returnValues'][0];
+		index_per_market[counter] = parseInt(result.hex,16);
+		counter++;
+	}
+
+    // Unpack all markets
+    var call_list = []
+
+	//Prepare second request
+    for (var i = 0; i < num_markets; i++) {
+		var index_counter = index_per_market[i];
+
+		for (var j = 0; j < index_counter; j++) {
+			//Prepare second request
+			call_list.push(
+			{ reference: 'getMarketUser_' + i.toString() + '_' + j.toString(), methodName: 'getMarketUser', methodParameters: [i, j] }
+			)
+		}
+	}
+
+    // Define the second call
+    contractCallContext = [
+        {
+            reference: 'contract',
+            contractAddress: contract_address,
+            abi: abi,
+            calls: call_list
+        },
+    ];
+    
+    // Execute all calls in a single multicall
+    var results = await multicall.call(contractCallContext);
+
+    var req_list = {};
+    try{
+        // Unpack all individual results
+        var all_res = results.results.contract.callsReturnContext;
+        for (const res of all_res) {
+			var pred_id = res['reference'].split('_')[1];
+            
+			//Check if key exists in req_list
+			if (pred_id in req_list){
+				var temp_array = req_list[pred_id];
+				temp_array.push(res['returnValues'][0]);
+				req_list[pred_id] =temp_array.flat();
+			} else {
+				req_list[pred_id] = res['returnValues'];
+
+			}
+        }
+        return req_list;
+    }catch{
+        return req_list;
+    }
+
+}
+
+// Get time passed
+async function get_bets_by_user(rpc_url, contract_address, abi, user) {	
+	// Get all markets
+	var num_markets_res = await num_markets(rpc_url, contract_address, abi);
+	
+	var user_per_markets = await get_all_user_for_multiple_markets(rpc_url, contract_address, abi, num_markets_res)
+
+	var bets_by_user = {};
+	bets_by_user[user] = {};
+
+	for (var market_id in user_per_markets){
+		var user_list = user_per_markets[market_id];
+		if (user_list.includes(user)){
+			var bets = await get_all_bets_per_bucket_per_user(rpc_url, contract_address, abi, market_id, [user]);
+
+			//Check if bets is null
+			if (bets == null){
+				continue;
+			}
+			//If user not in bets_by_user, add it
+			if (!(user in bets_by_user)){
+				bets_by_user[user][market_id]= bets[user];
+			} else{
+				bets_by_user[user][market_id] = bets[user];
+			}
+
+		}
+	}
+
+	return bets_by_user;
   }
   
 // Define the contract variables
@@ -1669,313 +1816,318 @@ var abi = [
 ];
 var prediction_id = 1;
 
-var prediction_market_details = await get_prediction_market_details(rpc_url, contract_address, abi, prediction_id);
-console.log(prediction_market_details)
+// var prediction_market_details = await get_prediction_market_details(rpc_url, contract_address, abi, prediction_id);
+// console.log(prediction_market_details)
 
-// Current quote
-const proposed_bet = 1e3.toString();
-const bucket_index = 0;
+// // Current quote
+// const proposed_bet = 1e3.toString();
+// const bucket_index = 0;
 
-var current_quote = await get_quote(rpc_url, contract_address, abi, prediction_id, proposed_bet, bucket_index);
-console.log(current_quote);
+// var current_quote = await get_quote(rpc_url, contract_address, abi, prediction_id, proposed_bet, bucket_index);
+// console.log(current_quote);
 
-// Get all prediction markets
-var all_prediction_markets = await get_all_markets(rpc_url, contract_address, abi);
-console.log(all_prediction_markets);
+// // Get all prediction markets
+// var all_prediction_markets = await get_all_markets(rpc_url, contract_address, abi);
+// console.log(all_prediction_markets);
 
-// Get all live prediction markets
-var all_live_prediction_markets = await get_all_live_markets(rpc_url, contract_address, abi);
-console.log(all_live_prediction_markets);
+// // Get all live prediction markets
+// var all_live_prediction_markets = await get_all_live_markets(rpc_url, contract_address, abi);
+// console.log(all_live_prediction_markets);
 
-// Get all users for a prediction market
-var user_list = await get_all_user_per_market(rpc_url, contract_address, abi, prediction_id);
-console.log(user_list);
+// // Get all users for a prediction market
+// var user_list = await get_all_user_per_market(rpc_url, contract_address, abi, prediction_id);
+// console.log(user_list);
 
-// Get all user bets for a prediction market
-var all_bets_per_bucket_per_user = await get_all_bets_per_bucket_per_user(rpc_url, contract_address, abi, prediction_id, user_list);
-console.log(all_bets_per_bucket_per_user);
+// // Get all user bets for a prediction market
+// var all_bets_per_bucket_per_user = await get_all_bets_per_bucket_per_user(rpc_url, contract_address, abi, prediction_id, user_list);
+// console.log(all_bets_per_bucket_per_user);
 
-// is claimable
+// // is claimable
+// var user = "0xf2B719136656BF21c2B2a255F586afa34102b71d";
+// var is_claimable_result = await is_claimable(rpc_url, contract_address, abi, prediction_id, user);
+// console.log(is_claimable_result);
+
+// // is claimable via pool
+// var is_claimable_pool_result = await is_claimable_pool(rpc_url, contract_address, abi, prediction_id, user);
+// console.log(is_claimable_pool_result);
+
+// // Get claimable amount
+// var claimable_amount = await get_claimable_amount(rpc_url, contract_address, abi, prediction_id, user);
+// console.log(claimable_amount);
+
+// // Check is time expired
+// var is_time_passed = await time_passed(rpc_url, contract_address, abi, prediction_id);
+// console.log(is_time_passed);
+
+// Get bets by user
 var user = "0xf2B719136656BF21c2B2a255F586afa34102b71d";
-var is_claimable_result = await is_claimable(rpc_url, contract_address, abi, prediction_id, user);
-console.log(is_claimable_result);
+var get_user_bets = await get_bets_by_user(rpc_url, contract_address, abi, user);
+console.log(get_user_bets);
 
-// is claimable via pool
-var is_claimable_pool_result = await is_claimable_pool(rpc_url, contract_address, abi, prediction_id, user);
-console.log(is_claimable_pool_result);
+// // POOLING CONTRACT
+// var pooling_contract_address = '0xD60C2c1Be205e6Cb4083c9E4A5735e84C901C8C9';
+// var pooling_user = "0xdD9CECb2Ad144A32CbEB2dF7aEd229750C4e77Fc";
+// var pooling_abi = [
+// 	{
+// 		"inputs": [],
+// 		"stateMutability": "nonpayable",
+// 		"type": "constructor"
+// 	},
+// 	{
+// 		"anonymous": false,
+// 		"inputs": [
+// 			{
+// 				"indexed": true,
+// 				"internalType": "address",
+// 				"name": "from",
+// 				"type": "address"
+// 			},
+// 			{
+// 				"indexed": true,
+// 				"internalType": "address",
+// 				"name": "to",
+// 				"type": "address"
+// 			}
+// 		],
+// 		"name": "OwnershipTransferRequested",
+// 		"type": "event"
+// 	},
+// 	{
+// 		"anonymous": false,
+// 		"inputs": [
+// 			{
+// 				"indexed": true,
+// 				"internalType": "address",
+// 				"name": "from",
+// 				"type": "address"
+// 			},
+// 			{
+// 				"indexed": true,
+// 				"internalType": "address",
+// 				"name": "to",
+// 				"type": "address"
+// 			}
+// 		],
+// 		"name": "OwnershipTransferred",
+// 		"type": "event"
+// 	},
+// 	{
+// 		"stateMutability": "payable",
+// 		"type": "fallback"
+// 	},
+// 	{
+// 		"inputs": [],
+// 		"name": "acceptOwnership",
+// 		"outputs": [],
+// 		"stateMutability": "nonpayable",
+// 		"type": "function"
+// 	},
+// 	{
+// 		"inputs": [
+// 			{
+// 				"internalType": "address",
+// 				"name": "betAddress",
+// 				"type": "address"
+// 			},
+// 			{
+// 				"internalType": "uint256",
+// 				"name": "predictionId",
+// 				"type": "uint256"
+// 			},
+// 			{
+// 				"internalType": "uint256",
+// 				"name": "bucketIndex",
+// 				"type": "uint256"
+// 			}
+// 		],
+// 		"name": "checkUserBet",
+// 		"outputs": [
+// 			{
+// 				"internalType": "uint256",
+// 				"name": "",
+// 				"type": "uint256"
+// 			}
+// 		],
+// 		"stateMutability": "view",
+// 		"type": "function"
+// 	},
+// 	{
+// 		"inputs": [
+// 			{
+// 				"internalType": "uint256",
+// 				"name": "predictionId",
+// 				"type": "uint256"
+// 			}
+// 		],
+// 		"name": "claimReward",
+// 		"outputs": [],
+// 		"stateMutability": "payable",
+// 		"type": "function"
+// 	},
+// 	{
+// 		"inputs": [
+// 			{
+// 				"internalType": "address",
+// 				"name": "betAddress",
+// 				"type": "address"
+// 			},
+// 			{
+// 				"internalType": "uint256",
+// 				"name": "predictionId",
+// 				"type": "uint256"
+// 			},
+// 			{
+// 				"internalType": "uint256",
+// 				"name": "bucketIndex",
+// 				"type": "uint256"
+// 			}
+// 		],
+// 		"name": "copyBet",
+// 		"outputs": [],
+// 		"stateMutability": "payable",
+// 		"type": "function"
+// 	},
+// 	{
+// 		"inputs": [
+// 			{
+// 				"internalType": "uint256",
+// 				"name": "predictionId",
+// 				"type": "uint256"
+// 			},
+// 			{
+// 				"internalType": "address",
+// 				"name": "user",
+// 				"type": "address"
+// 			}
+// 		],
+// 		"name": "getClaimableAmount",
+// 		"outputs": [
+// 			{
+// 				"internalType": "uint256",
+// 				"name": "",
+// 				"type": "uint256"
+// 			}
+// 		],
+// 		"stateMutability": "view",
+// 		"type": "function"
+// 	},
+// 	{
+// 		"inputs": [],
+// 		"name": "getCopyFees",
+// 		"outputs": [
+// 			{
+// 				"internalType": "uint256",
+// 				"name": "",
+// 				"type": "uint256"
+// 			}
+// 		],
+// 		"stateMutability": "view",
+// 		"type": "function"
+// 	},
+// 	{
+// 		"inputs": [],
+// 		"name": "getPredictContract",
+// 		"outputs": [
+// 			{
+// 				"internalType": "address",
+// 				"name": "",
+// 				"type": "address"
+// 			}
+// 		],
+// 		"stateMutability": "view",
+// 		"type": "function"
+// 	},
+// 	{
+// 		"inputs": [
+// 			{
+// 				"internalType": "uint256",
+// 				"name": "predictionId",
+// 				"type": "uint256"
+// 			},
+// 			{
+// 				"internalType": "address",
+// 				"name": "user",
+// 				"type": "address"
+// 			}
+// 		],
+// 		"name": "isClaimable",
+// 		"outputs": [
+// 			{
+// 				"internalType": "bool",
+// 				"name": "",
+// 				"type": "bool"
+// 			}
+// 		],
+// 		"stateMutability": "view",
+// 		"type": "function"
+// 	},
+// 	{
+// 		"inputs": [],
+// 		"name": "owner",
+// 		"outputs": [
+// 			{
+// 				"internalType": "address",
+// 				"name": "",
+// 				"type": "address"
+// 			}
+// 		],
+// 		"stateMutability": "view",
+// 		"type": "function"
+// 	},
+// 	{
+// 		"inputs": [
+// 			{
+// 				"internalType": "uint256",
+// 				"name": "_copyFee",
+// 				"type": "uint256"
+// 			}
+// 		],
+// 		"name": "setCopyFees",
+// 		"outputs": [],
+// 		"stateMutability": "nonpayable",
+// 		"type": "function"
+// 	},
+// 	{
+// 		"inputs": [
+// 			{
+// 				"internalType": "address",
+// 				"name": "predictContract",
+// 				"type": "address"
+// 			}
+// 		],
+// 		"name": "setPredictContract",
+// 		"outputs": [],
+// 		"stateMutability": "nonpayable",
+// 		"type": "function"
+// 	},
+// 	{
+// 		"inputs": [
+// 			{
+// 				"internalType": "address",
+// 				"name": "to",
+// 				"type": "address"
+// 			}
+// 		],
+// 		"name": "transferOwnership",
+// 		"outputs": [],
+// 		"stateMutability": "nonpayable",
+// 		"type": "function"
+// 	},
+// 	{
+// 		"inputs": [],
+// 		"name": "withdrawFunds",
+// 		"outputs": [],
+// 		"stateMutability": "payable",
+// 		"type": "function"
+// 	},
+// 	{
+// 		"stateMutability": "payable",
+// 		"type": "receive"
+// 	}
+// ];
+// var is_claimable_result_pooling = await is_claimable(rpc_url, pooling_contract_address, pooling_abi, prediction_id, pooling_user);
+// console.log(is_claimable_result_pooling);
 
-// Get claimable amount
-var claimable_amount = await get_claimable_amount(rpc_url, contract_address, abi, prediction_id, user);
-console.log(claimable_amount);
-
-// Check is time expired
-var is_time_passed = await time_passed(rpc_url, contract_address, abi, prediction_id);
-console.log(is_time_passed);
-
-// POOLING CONTRACT
-var pooling_contract_address = '0xD60C2c1Be205e6Cb4083c9E4A5735e84C901C8C9';
-var pooling_user = "0xdD9CECb2Ad144A32CbEB2dF7aEd229750C4e77Fc";
-var pooling_abi = [
-	{
-		"inputs": [],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "from",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			}
-		],
-		"name": "OwnershipTransferRequested",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "from",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			}
-		],
-		"name": "OwnershipTransferred",
-		"type": "event"
-	},
-	{
-		"stateMutability": "payable",
-		"type": "fallback"
-	},
-	{
-		"inputs": [],
-		"name": "acceptOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "betAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "predictionId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "bucketIndex",
-				"type": "uint256"
-			}
-		],
-		"name": "checkUserBet",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "predictionId",
-				"type": "uint256"
-			}
-		],
-		"name": "claimReward",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "betAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "predictionId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "bucketIndex",
-				"type": "uint256"
-			}
-		],
-		"name": "copyBet",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "predictionId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
-			}
-		],
-		"name": "getClaimableAmount",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getCopyFees",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getPredictContract",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "predictionId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
-			}
-		],
-		"name": "isClaimable",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "owner",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_copyFee",
-				"type": "uint256"
-			}
-		],
-		"name": "setCopyFees",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "predictContract",
-				"type": "address"
-			}
-		],
-		"name": "setPredictContract",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			}
-		],
-		"name": "transferOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "withdrawFunds",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"stateMutability": "payable",
-		"type": "receive"
-	}
-];
-var is_claimable_result_pooling = await is_claimable(rpc_url, pooling_contract_address, pooling_abi, prediction_id, pooling_user);
-console.log(is_claimable_result_pooling);
-
-// Get claimable amount
-var claimable_amount_pooling = await get_claimable_amount(rpc_url, pooling_contract_address, pooling_abi, prediction_id, pooling_user);
-console.log(claimable_amount_pooling);
+// // Get claimable amount
+// var claimable_amount_pooling = await get_claimable_amount(rpc_url, pooling_contract_address, pooling_abi, prediction_id, pooling_user);
+// console.log(claimable_amount_pooling);
