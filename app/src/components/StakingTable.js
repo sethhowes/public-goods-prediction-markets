@@ -17,7 +17,7 @@ import { useSigner } from 'wagmi';
 import { stakingContract } from "util/stakingContract";
 
 function Row(props) {
-    const { row, betList } = props;
+    const { row, betList } = props
     const [open, setOpen] = React.useState(false);
 
     const { data: signer, isError, isLoading } = useSigner();
@@ -26,7 +26,6 @@ function Row(props) {
       const contractWithSigner = stakingContract.connect(signer);
       const tx = await contractWithSigner.copyBet("0xf2B719136656BF21c2B2a255F586afa34102b71d", 0, 1, {value: 20}); // address, predictionId, bucketIndex, value
     })
-  
     return (
       <React.Fragment>
         <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
@@ -45,40 +44,39 @@ function Row(props) {
           <TableCell align="left">{row.Trades}</TableCell>
         </TableRow>
         <TableRow>
-          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-            <Collapse in={open} timeout="auto" unmountOnExit>
-              <Box sx={{ margin: 1 }}>
-                <Typography variant="h6" gutterBottom component="div">
-                  Prediction History
-                </Typography>
-                <Table size="small" aria-label="purchases">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Market</TableCell>
-                      <TableCell align="right">Prediction</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {betList[row.Address]?.map(([market, prediction]) => (
-                      <TableRow key={market}>
-                        <TableCell>{market}</TableCell>
-                        <TableCell align="right">{prediction}</TableCell>
-                        <TableCell align="right">
-                        {" "}
-                        <a onClick={handleCopy}>
-                          <span role="img" aria-label="rocket ship">
-                            🚀
-                          </span>
-                        </a>
-                      </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Box>
-            </Collapse>
-          </TableCell>
-        </TableRow>
+  <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+    <Collapse in={open} timeout="auto" unmountOnExit>
+      <Box sx={{ margin: 1 }}>
+        <Typography variant="h6" gutterBottom component="div">
+          Prediction History
+        </Typography>
+        <Table size="small" aria-label="purchases">
+          <TableHead>
+            <TableRow>
+              <TableCell>Market</TableCell>
+              <TableCell align="right">Prediction</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+              <TableRow >
+                <TableCell>Market</TableCell>
+                <TableCell align="right">Prediction</TableCell>
+                <TableCell align="right">
+                  {" "}
+                  <a onClick={handleCopy}>
+                    <span role="img" aria-label="rocket ship">
+                      🚀
+                    </span>
+                  </a>
+                </TableCell>
+              </TableRow>
+       
+          </TableBody>
+        </Table>
+      </Box>
+    </Collapse>
+  </TableCell>
+</TableRow>
       </React.Fragment>
     );
   }
