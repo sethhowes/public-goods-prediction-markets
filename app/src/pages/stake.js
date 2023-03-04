@@ -44,19 +44,33 @@ const useStyles = makeStyles((theme) => ({
   function DashboardPage(props) {
 
     const [markets, setMarkets] = useState([]);
+    const [userList, setUserList] = useState([]);
+
 console.log(markets.length);
 
 
-/* const processMarkets = async () => {
-  for (let i = 0; i < markets.length; i++) {
-    const market = markets[i];
-    const user_list = await get_all_user_per_market(rpc_url, contract_address, abi, market.prediction_id);
+useEffect(() => {
+  const processMarkets = async () => {
+    const allUserList = [];
+    for (let i = 0; i < markets.length; i++) {
+      const market = markets[i];
+      const userList = await get_all_user_per_market(rpc_url, contract_address, abi, market.prediction_id);
+      userList.forEach((userAddress) => {
+        if (!allUserList.includes(userAddress)) {
+          allUserList.push(userAddress);
+        }
+      });
+    }
+    setUserList(allUserList);
+  };
 
-  }
-};
-processMarkets(); */
- 
+  processMarkets().then((allUserList) => {
+    console.log(allUserList);
+  });
+}, [markets]);
 
+
+console.log('users', userList)
 
     useEffect(() => {
       async function fetchData() {
@@ -86,9 +100,10 @@ processMarkets(); */
   }
  
   
-  const rows = [
-    { id: 1, address : "0x..." }
-    ];
+  const rows = userList.map((address, index) => {
+    return { id: index + 1, address };
+  });
+  
   const classes = useStyles();
   const columns = [
     {
@@ -207,7 +222,7 @@ processMarkets(); */
                 <Typography  sx={{ fontWeight: "bold"}} mb={5} className={classes.gradientText} variant="h5" align="left">Follow the Cognoscenti</Typography>
 
                 <div style={{ width: "100%" }}>
-                <StakingTable />
+                <StakingTable userList = {userList} />
              
                   </div>
          </Box>

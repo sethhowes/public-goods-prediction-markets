@@ -83,13 +83,13 @@ function Row(props) {
   );
 }
 
-export default function StakingTable() {
+export default function StakingTable(props) {
     const [search, setSearch] = React.useState("");
-
-  const rows = [
+ const userList = props.userList
+   const rows = userList.map((user) => (
     {
       id: 1,
-      Address: "Ox1",
+      Address: user,
       Trades: 17,
       history: [
         {
@@ -103,26 +103,12 @@ export default function StakingTable() {
           amount: "20 on 6c"
         }
       ]
-    },
-    {
-      id: 2,
-      Address: "Ox2",
-      Trades: 12,
-      history: [
-        {
-          date: "2020-02-01",
-          customerId: "Anonymous",
-          amount: 2
-        },
-        {
-          date: "2020-02-02",
-          customerId: "11091700",
-          amount: 1
-        }
-      ]
     }
+    ));
     // add more rows with a history property as needed
-  ];
+ 
+
+
   return (
     <TableContainer component={Paper}>
         <TextField
@@ -144,7 +130,7 @@ export default function StakingTable() {
   {rows
     .filter(
       (row) =>
-        row.Address.toLowerCase().includes(search.toLowerCase()) ||
+        row.Address?.toLowerCase().includes(search.toLowerCase()) ||
         row.Trades.toString().includes(search.toLowerCase())
     )
     .map((row) => (

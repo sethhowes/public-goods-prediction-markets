@@ -27,6 +27,7 @@ import convertUnixTime from "util/convertUnixTime";
 import { ethers } from "ethers";
 import { distributeFunds } from "../util/distributeFunds";
 import getHistoricalBets from "util/getHistoricalBets";
+import { useAccount } from "wagmi";
 
 const useStyles = makeStyles((theme) => ({
   gradientText: {
@@ -40,6 +41,7 @@ const useStyles = makeStyles((theme) => ({
 function DashboardPage(props) {
   // Hook for getting signer object
   const { data: signer, isError, isLoading } = useSigner();
+  const { address, isConnecting, isDisconnected } = useAccount();
 
   const [formAlert, setFormAlert] = useState(null);
   const auth = useAuth();
@@ -91,7 +93,8 @@ function DashboardPage(props) {
       predictionEndDate,
       predictionCategory,
       predictionApiEndpoint,
-      user: auth.user.uid,
+      address
+
     });
     distributeFunds();
     // Converts date state object to UNIX time
