@@ -45,7 +45,7 @@ if (typeof window !== 'undefined') {
 
     const [resultsUsersBets, setResultsUsersBets] = useState([])
     const options = props.options
-    const optionKeys = Object.keys(options);
+    const optionKeys = options ? Object.keys(options) : [];
 
     console.log('options', options)  
   useEffect(() => {
