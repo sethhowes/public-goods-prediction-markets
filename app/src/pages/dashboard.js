@@ -198,7 +198,7 @@ function DashboardPage(props) {
 
   useEffect(() => {
     if (itemData != undefined) {
-      let results = itemData[0].averaged;
+      let results = itemData[prediction_id].averaged;
       setGraphData(results);
     }
   }, [itemData]);
