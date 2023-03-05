@@ -3,8 +3,8 @@ import {  Multicall} from 'ethereum-multicall';
 import Web3 from 'web3';
 
 // Define network addresses for multicall for mantle and scroll networks
-const MANTLE_NETWORK_MULTICALL_CONTRACT_ADDRESS = '0x';
-const SCROLL_NETWORK_MULTICALL_CONTRACT_ADDRESS = '0x';
+const MANTLE_NETWORK_MULTICALL_CONTRACT_ADDRESS = '0x410e601895F17857e8ddCBc2eFd6B4aa0FDB3c60';
+const SCROLL_NETWORK_MULTICALL_CONTRACT_ADDRESS ="0x410e601895F17857e8ddCBc2eFd6B4aa0FDB3c60";
 
 //Returns multicall object
 async function get_multi_call_provider(rpc_url){
