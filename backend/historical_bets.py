@@ -5,13 +5,13 @@ import numpy as np
 import os
 from web3.auto import w3
 
-os.chdir(r'./backend')
+# os.chdir(r'./backend')
 #Import own functions
 from firebase_handling import get_last_checked_block, save_bucket_tvl_timeseries, get_bucket_tvl_timeseries, update_last_checked_block
-from config import RPC_DICT, ABI, CONTRACT_DEPLOYMENT_BLOCK, CONTRACT_ADDRESS, EVENT_SIGNATURE_HASH
+from config import RPC_DICT, ABI, EVENT_SIGNATURE_HASH, CONTRACT_CHAIN_DICT, CONTRACT_DEPLOYMENT_DICT
 
 #Get latest betting events from contract
-def get_new_events(chain_name, contract_address, event_signature_hash = EVENT_SIGNATURE_HASH, block_increment = 2000, contract_deployment_block = CONTRACT_DEPLOYMENT_BLOCK, web3 = w3):
+def get_new_events(chain_name, contract_address, event_signature_hash = EVENT_SIGNATURE_HASH, block_increment = 2000, contract_deployment_block_dict = CONTRACT_DEPLOYMENT_DICT, web3 = w3):
 	"""
     Get latest betting events from contract
     @params:
@@ -25,6 +25,8 @@ def get_new_events(chain_name, contract_address, event_signature_hash = EVENT_SI
 	#Get start up from firebase
 	start_block = get_last_checked_block(chain_name)
 
+	#Get deployment block
+	contract_deployment_block = contract_deployment_block_dict[chain_name]
 	start_block = max(start_block,contract_deployment_block)
 
 	new_bets = []
@@ -40,7 +42,7 @@ def get_new_events(chain_name, contract_address, event_signature_hash = EVENT_SI
 			"address": web3.toChecksumAddress(contract_address),
 			"topics": [event_signature_hash],
 			"fromBlock": start_block,
-			"endBlock": end_block,
+			"toBlock": end_block,
 			})
 		
 		#Retrieve logs
@@ -106,7 +108,7 @@ def format_timeseries_dict(bet_timeseries):
 	return bet_timeseries
 
 #Updates betting timeseries
-def update_betting_timeseries(chain_name, rpc_dict = RPC_DICT, contract_address = CONTRACT_ADDRESS, abi = ABI):
+def update_betting_timeseries(chain_name, contract_address, rpc_dict = RPC_DICT, abi = ABI):
 	"""
     Updates betting timeseries
     @params:

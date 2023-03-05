@@ -5,7 +5,7 @@ from firebase_admin import credentials, firestore
 
 import os
 os.getcwd()
-os.chdir('./backend')
+# os.chdir('./backend')
 from config import FIREBASE_PARAMS
 
 #Initialize firebase db connection

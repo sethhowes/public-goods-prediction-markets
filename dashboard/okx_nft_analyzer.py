@@ -212,7 +212,9 @@ def analyse_NFT_maketplace (filename):
     # Load the dataset for NFT DATA
     nft_data = pd.read_csv(filename, low_memory=False)
     nft_data = nft_data.drop_duplicates(subset=nft_data.columns.difference(['usdPrice', 'Unnamed: 0']))
-
+    len(nft_data)
+    import time
+    time.sleep(10000)
     # Defining relevant DF fields for NFT analysis
     analysis_columns = [
         'from',
@@ -230,7 +232,7 @@ def analyse_NFT_maketplace (filename):
     ]
 
     filtered_nft_data = nft_data[analysis_columns].loc[nft_data['count'] == 1].drop(columns=['count']).drop_duplicates()
-
+    len(filtered_nft_data)
     # Define a list of people having at least one tx
     sellers = list(filtered_nft_data['from'].unique())
     buyers = list(filtered_nft_data['to'].unique())
