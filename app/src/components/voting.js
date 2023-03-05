@@ -9,10 +9,10 @@ import { get_quote } from "util/multicall.js";
 import Web3 from "web3";
 import { ethers } from "ethers";
 import { parseQuoteResult } from "util/parseQuoteResult";
-import { useNetwork } from 'wagmi'
+import { useNetwork } from "wagmi";
 
 const VotingComponent = (props) => {
-  const { chain, chains } = useNetwork()
+  const { chain, chains } = useNetwork();
   // Get contract with signer to make bet
   const { data: signer, isError, isLoading } = useSigner();
   const contractWithSigner = contract.connect(signer);
@@ -37,7 +37,7 @@ const VotingComponent = (props) => {
   const price = getPrice(selectedOption);
   const [showPayoff, setShowPayoff] = useState(); //
   const [quote, setQuote] = useState();
-  async function fetchData() {
+  async function fetchData(updatedStake) {
     let result = await get_quote(
       props.rpc_url,
       props.contract_address,
@@ -46,7 +46,9 @@ const VotingComponent = (props) => {
       proposed_bet,
       bucket_index
     );
-    result = parseQuoteResult(result, stake);
+    const formattedUpdatedStake = updatedStake ? updatedStake : stake;
+    console.log("satek", formattedUpdatedStake);
+    result = parseQuoteResult(result, formattedUpdatedStake);
     setQuote(result);
   }
   const handleOptionSelect = (index) => {
@@ -62,10 +64,13 @@ const VotingComponent = (props) => {
   bucket_index = selectedOption;
 
   const showValue = selectedOption + 1;
+
   const handleQuantityChange = (event) => {
     const ethStake = Number(event.target.value);
     const weiStake = ethers.utils.parseEther(ethStake.toString());
     setStake(weiStake);
+    setShowPayoff(true);
+    fetchData(weiStake);
   };
 
   const handlePrediction = async () => {
@@ -109,7 +114,8 @@ const VotingComponent = (props) => {
               fontWeight: "bold", // Add this line
             }}
           >
-            {option} 
+            {option}{" "}
+            {props.predictionMarketUnit ? props.predictionMarketUnit : ""}
           </button>
         ))}
       </div>

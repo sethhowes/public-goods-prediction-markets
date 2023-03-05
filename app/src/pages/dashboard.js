@@ -1,6 +1,5 @@
 import React, { useEffect, useState, PureComponent } from "react";
-import { useNetwork } from 'wagmi'
-
+import { useNetwork } from "wagmi";
 
 import Meta from "components/Meta";
 import Grid from "@mui/material/Grid";
@@ -11,7 +10,7 @@ import SectionHeader from "components/SectionHeader";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import { useAccount } from "wagmi";
-import {useGraph } from "util/db"
+import { useGraph } from "util/db";
 import {
   ComposedChart,
   Area,
@@ -46,7 +45,6 @@ import { abi, contract_address, rpc_url } from "util/contract.js";
 import { convertToDecimal } from "util/convertToDecimal";
 import { sumBuckets } from "util/sumBuckets";
 
-
 import Web3 from "web3";
 
 const useStyles = makeStyles((theme) => ({
@@ -60,7 +58,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function DashboardPage(props) {
-  const { chain, chains } = useNetwork()
+  const { chain, chains } = useNetwork();
 
   // url parsing
   const web3 = new Web3();
@@ -137,7 +135,6 @@ function DashboardPage(props) {
       const timestamps = parseHistoricalBets(betTimestamps);
  */
       // console.log(amounts);
-
     }
 
     fetchData();
@@ -164,7 +161,7 @@ function DashboardPage(props) {
 
   const predictionTitle = predictionMarketDetails?.prediction_title;
   const predictionBucket = predictionMarketDetails?.prediction_bucket;
-  const [graphData, setGraphData] = useState()
+  const [graphData, setGraphData] = useState();
 
   const options = predictionBucket?.map((bucket) => {
     if (
@@ -198,8 +195,7 @@ function DashboardPage(props) {
   //graph data
   const COLORS = ["#0088FE", "#00C49F"];
 
- 
-  const { data: itemData, status: itemStatus } = useGraph('goerli');
+  const { data: itemData, status: itemStatus } = useGraph("goerli");
 
   useEffect(() => {
     if (itemData != undefined) {
@@ -207,17 +203,15 @@ function DashboardPage(props) {
       setGraphData(results);
     }
   }, [itemData]);
-  
-  console.log(graphData)
- let data = []
-  if (graphData){
-  data = Object.keys(graphData).map((timestamp) => ({
-    name: new Date(Number(timestamp) * 1000),
-    temperature: graphData[timestamp],
-  }));
-  console.log('data', data)
-}
-  
+
+  let data = [];
+  if (graphData) {
+    data = Object.keys(graphData).map((timestamp) => ({
+      name: new Date(Number(timestamp) * 1000),
+      temperature: graphData[timestamp],
+    }));
+  }
+
   return (
     <>
       <Meta title="Dashboard" />
@@ -351,9 +345,11 @@ function DashboardPage(props) {
                         sx={{ fontWeight: "bold", marginLeft: 2 }}
                         className={classes.gradientText}
                       >
-                        {
-                          sumBuckets(predictionMarketDetails?.committed_amount_bucket, predictionMarketDetails?.committed_amount_bucket.length)
-                        }{" "}
+                        {sumBuckets(
+                          predictionMarketDetails?.committed_amount_bucket,
+                          predictionMarketDetails?.committed_amount_bucket
+                            .length
+                        )}{" "}
                         {chain?.nativeCurrency.symbol}
                       </Typography>
                     </Box>
@@ -407,6 +403,7 @@ function DashboardPage(props) {
                         useStyles={useStyles}
                         options={options}
                         predictionBucketPrices={predictionBucketPrices}
+                        predictionMarketUnit={predictionMarketDetails?.unit}
                       />
                     </Box>
                   </CardContent>
@@ -418,7 +415,7 @@ function DashboardPage(props) {
                 <CardContent sx={{ padding: 3 }}>
                   <Box>
                     <ColorTabs
-                     options={options}
+                      options={options}
                       userAddress={address}
                       creatorAddress={predictionMarketDetails?.creator_address}
                       useStyles={useStyles}
