@@ -30,6 +30,7 @@ import {get_all_markets} from 'util/multicall.js'
 import Web3 from 'web3';
 const { toDateTime } = require('web3-utils');
 import {rpc_url, contract_address, abi} from 'util/contract.js'
+import { useNetwork } from 'wagmi'
 
 // Define the contract variables
 
@@ -71,6 +72,7 @@ useEffect(() => {
     const result = await get_all_markets(rpc_url, contract_address, abi);
     setAllPredictionMarkets(result);
     setRows(result);  
+    console.log("BRO", result)
 
   } 
   
@@ -78,10 +80,6 @@ useEffect(() => {
 }, []);
  
 //setPredictionID(parts[parts.length - 1]);
-
-
-//
-console.log(allPredictionMarkets)
 
     const router = useRouter();
 
@@ -96,6 +94,9 @@ console.log(allPredictionMarkets)
   const handleChange = (event, newValue) => {
     setValue(newValue)
   }
+
+  const { chain, chains } = useNetwork()
+
   const RenderTabAvatar = ({ category }) => (
     <Avatar
       variant='rounded'
@@ -141,7 +142,7 @@ console.log(allPredictionMarkets)
       minWidth: 100,
       field: 'prediction',
       headerName: 'Prediction',
-      renderCell: ({ row }) =>  <Typography sx={{ fontWeight: 'bold'}} className={classes.gradientText} variant='body2'>{row.prediction_title}</Typography>
+      renderCell: ({ row }) =>  <Typography sx={{ fontWeight: 'bold', cursor: "pointer"}} className={classes.gradientText} variant='body2'>{row.prediction_title}</Typography>
     },
     {
       flex: 0.2,
@@ -156,7 +157,7 @@ console.log(allPredictionMarkets)
       field: 'consensus',
       headerName: 'Consensus',
       renderCell: ({ row }) => (
-        <Chip label={`${web3.utils.toNumber(row.current_prediction.hex)}`} className={classes.priceChip} />
+        <Chip label={`${web3.utils.toNumber(row.current_prediction.hex)} ${row.unit}`} className={classes.priceChip} />
       )    },
     {
       flex: 0.1,
@@ -165,7 +166,7 @@ console.log(allPredictionMarkets)
       headerName: 'Reward',
       renderCell: ({ row }) => (
         <Chip
-          label={`${web3.utils.toNumber(row.reward_amount.hex)}`}
+          label={`${web3.utils.toNumber(row.reward_amount.hex) / 1e18} ${chain?.nativeCurrency.symbol}`}
           color="secondary"
           size="small"
           sx={{ fontWeight: "bold" }}

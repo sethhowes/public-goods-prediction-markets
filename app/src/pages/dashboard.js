@@ -274,9 +274,9 @@ function DashboardPage(props) {
                         height={400}
                         data={data}
                         margin={{
-                          top: 15,
+                          top: 30,
                           right: 30,
-                          left: 20,
+                          left: 30,
                           bottom: 5,
                         }}
                       >
@@ -313,7 +313,7 @@ function DashboardPage(props) {
                         />
                         <Line
                           type="monotone"
-                          dataKey="Temperature"
+                          dataKey="Units"
                           activeDot={{ r: 8 }}
                           stroke="#00B5C4"
                           strokeWidth={3}
