@@ -78,6 +78,8 @@ contract predictPooling is ConfirmedOwner {
         return userBet;
     }
 
+    event Pooling(address indexed _user, uint predictionId, address betAddress, uint betAmount, uint timeStamp, uint bucketIndex);
+
     //Copy address in betting
     function copyBet(address betAddress, uint predictionId, uint bucketIndex) public payable{
         //Check msg.value
@@ -90,6 +92,7 @@ contract predictPooling is ConfirmedOwner {
         //Place bet via pooling
         ISciPredict(predictContractInstance).placeBetViaPool{value: msg.value}(predictionId, bucketIndex);
 
+        emit Pooling(msg.sender, predictionId, betAddress, msg.value, block.timestamp, bucketIndex);
     }
 
     //Check if claimable
