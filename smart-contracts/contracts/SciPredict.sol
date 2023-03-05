@@ -69,6 +69,12 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     bytes32 jobId_scroll = "c1c5e92880894eb6b27d3cae19670aa3";
     uint256 fee_scroll = (1 * LINK_DIVISIBILITY) / 10;
 
+    //Sepolia
+    address chainLinkToken_sepolia = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;
+    address chainLinkOracle_sepolia = 	0x649a2C205BE7A3d5e99206CEEFF30c794f0E31EC;
+    bytes32 jobId_sepolia = "c1c5e92880894eb6b27d3cae19670aa3";
+    uint256 fee_sepolia = (1 * LINK_DIVISIBILITY) / 10;
+
     constructor() ConfirmedOwner(msg.sender) {
         uint256 chainId = retrieveChainId();
         //Mainnet
@@ -95,6 +101,12 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
             setChainlinkOracle(chainLinkOracle_scroll);
             jobId = jobId_scroll;
             fee = fee_scroll;
+        //Sepolia
+        } else if (chainId == 11155111){
+            setChainlinkToken(chainLinkToken_sepolia);
+            setChainlinkOracle(chainLinkOracle_sepolia);
+            jobId = jobId_sepolia;
+            fee = fee_sepolia;
         }
     }
 
