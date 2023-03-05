@@ -38,3 +38,9 @@ def get_timeseries():
     res = update_betting_timeseries(chain_name=chain_name,contract_address=contract_address)
     
     return res
+
+#Run Flask app
+if __name__ == '__main__':
+    #Server settings
+    app.run()
+

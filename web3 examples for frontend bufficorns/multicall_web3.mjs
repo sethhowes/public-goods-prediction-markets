@@ -5,7 +5,7 @@ import Web3 from 'web3';
 // Define network addresses for multicall for mantle and scroll networks
 const MANTLE_NETWORK_MULTICALL_CONTRACT_ADDRESS = '0x410e601895F17857e8ddCBc2eFd6B4aa0FDB3c60';
 const SCROLL_NETWORK_MULTICALL_CONTRACT_ADDRESS ="0x410e601895F17857e8ddCBc2eFd6B4aa0FDB3c60";
-
+const BASE_NETWORK_MULTICALL_CONTRACT_ADDRESS = "0xaD6DFa3f49c186680b4474A39a969976f2De678a";
 //Returns multicall object
 async function get_multi_call_provider(rpc_url){
    //Set provider to Tenderly :)
@@ -29,7 +29,14 @@ async function get_multi_call_provider(rpc_url){
        tryAggregate: true,
        multicallCustomContractAddress: SCROLL_NETWORK_MULTICALL_CONTRACT_ADDRESS,
      });
-   } else{
+	 // Base network
+   } else if (chain_id == 84531){
+	var multicall = new Multicall({
+		web3Instance: web3,
+		tryAggregate: true,
+		multicallCustomContractAddress: BASE_NETWORK_MULTICALL_CONTRACT_ADDRESS,
+	  });
+   }else{
      // Create a new Multicall instance
      var multicall = new Multicall({
        web3Instance: web3,
