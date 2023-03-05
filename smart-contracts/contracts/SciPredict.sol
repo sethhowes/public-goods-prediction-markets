@@ -68,7 +68,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         uint[] predictionBucket; // buckets for prediction
         uint rewardAmount; // reward amount - to be transferred from
         address rewardToken; // reward token address - if null address then native ETH is issued
-        string incentiveCurve; // expontential, linear, or none
+        string[] permissionedTags; // expontential, linear, or none
         bool permissioned;  // permission flag 
         uint deadline; // timestamp to end market in seconds since the epoch
         string[3] category_ApiEndpoint_PictureUrl; // tags for market at [0] and api endpoint at [1]
@@ -91,6 +91,19 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     mapping(uint => mapping(address => mapping(uint => uint))) betsMadePerBucket;
     mapping(uint => mapping(address => mapping(uint => uint))) betsMadePerBucketValue;
     mapping(address => bool) poolingTracker;
+
+    //Map credentials such as "climate" to addresses
+    mapping(string => address[]) credentialAddresses;
+
+    // White list addresses
+    function addAddresstoCredentials(string memory credential_category, address user) public onlyOwner{
+        credentialAddresses[credential_category].push(user);
+    }
+
+    //Get whitlisted addresses
+    function getCredentialAddresses(string memory credential_category) public view returns(address[] memory){
+        return credentialAddresses[credential_category];
+    }
 
     //Returns if reward is claimbale via pooling contract only
     function onlyClaimableViaPool(address user) public view returns(bool){
@@ -166,7 +179,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         uint[] memory predictionBucket, // buckets for prediction
         uint rewardAmount, // reward amount - to be transferred from
         address rewardToken, // reward token address - if null address then native ETH is issued
-        string memory incentiveCurve, // expontential, linear, or none
+        string[] memory permissionedTags, // expontential, linear, or none
         bool permissioned,  // permission flag 
         uint deadline, // timestamp to end market in seconds since the epoch
         string memory category, // tags for market
@@ -208,7 +221,7 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
             predictionBucket, // buckets for prediction
             rewardAmount, // reward amount - to be transferred from
             rewardToken, // reward token address - if null address then native ETH is issued
-            incentiveCurve, // expontential, linear, or none
+            permissionedTags, // expontential, linear, or none
             permissioned,  // permission flag 
             deadline, // timestamp to end market in seconds since the epoch
             [category, apiEndpoint, picture_url], // tags for market
@@ -253,9 +266,53 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         return livePredictions;
     }
 
-    // Whitelist check - TODO IMPLEMENT CREDENTIALS CURRENTLY DUMMY
-    function isWhitelisted() public view returns(bool) {
-        return msg.sender == msg.sender;
+    // Credential check
+    function credentialsCheck(uint predictionId) public view returns(bool) {
+        string[] memory credTags = predictionMarkets[predictionId].permissionedTags;
+
+        for (uint i=0; i < credTags.length; i++) {
+            string memory credTag = credTags[i];
+            address[] memory credList = getCredentialAddresses(credTag);
+
+            for (uint j=0; j < credList.length; j++) {
+                address tempAddress  = credList[j];
+                if (msg.sender == tempAddress){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    // Credential check with user input
+    function credentialsCheckUserView(uint predictionId, address user) public view returns(bool) {
+        string[] memory credTags = predictionMarkets[predictionId].permissionedTags;
+
+        for (uint i=0; i < credTags.length; i++) {
+            string memory credTag = credTags[i];
+            address[] memory credList = getCredentialAddresses(credTag);
+
+            for (uint j=0; j < credList.length; j++) {
+                address tempAddress  = credList[j];
+                if (user == tempAddress){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    // Credential check with user input
+    function credentialsCheckViaCategory(string memory category, address user) public view returns(bool) {
+            address[] memory credList = getCredentialAddresses(category);
+
+            for (uint j=0; j < credList.length; j++) {
+                address tempAddress  = credList[j];
+                if (user == tempAddress){
+                    return true;
+                }
+            }
+        return false;
     }
     	
     // Bet mapping
@@ -276,8 +333,12 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
 
     // Place a bet for a whitelisted user
     function placeBet(uint predictionId, uint bucketIndex) public payable {
-        // Whitelist check
-        require(isWhitelisted(), "User not whitelisted");
+        // Credential check
+        bool permissioned = predictionMarkets[predictionId].permissioned;
+
+        if (permissioned){
+            require(credentialsCheck(predictionId), "User has not the correct credentials");
+        }
 
         // Deadline check
         require(block.timestamp < predictionMarkets[predictionId].deadline, "The prediction has ended");
