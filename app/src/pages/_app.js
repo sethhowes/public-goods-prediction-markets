@@ -13,7 +13,6 @@ import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 
 
-
 const { chains, provider } = configureChains(
   [goerli, mainnet, sepolia, polygon, scroll, mantle],
   [alchemyProvider({ apiKey: process.env.ALCHEMY_ID }), publicProvider()]
@@ -30,7 +29,19 @@ const wagmiClient = createClient({
   provider,
 });
 
+
+
 function MyApp({ Component, serverEmotionCache, pageProps }) {
+  React.useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://public.cypherd.io/js/onboardingsdk.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    }
+  }, []);
  
   return (
     <WagmiConfig client={wagmiClient}>
