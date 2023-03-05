@@ -14,8 +14,8 @@ import { useEffect } from "react";
 import { makeStyles } from "@mui/styles";
 import { Typography, Chip } from "@mui/material";
 import Web3 from 'web3';
-import {rpc_url, contract_address, abi} from 'util/contract.js'
-
+import { abi, contract, contract_address, rpc_url, polygon_rpc_url, polygon_contract_address} from 'util/contract.js'
+import { useNetwork } from 'wagmi'
 import {get_all_markets} from 'util/multicall.js'
 import {get_all_user_per_market, get_all_bets_per_bucket_per_user} from 'util/multicall.js'
 
@@ -43,10 +43,26 @@ const useStyles = makeStyles((theme) => ({
 
   function DashboardPage(props) {
 
+    
+    const { chain, chains } = useNetwork();
+    const [rpc_address, setrpc_address] = useState(rpc_url)
+    const [contractAddress, setcontractAddress] = useState(contract_address)
+    useEffect(() => {
+      
+      if (chain?.name === "Goerli") {
+        setrpc_address(rpc_url)
+        setcontractAddress(contract_address)
+        console.log('Ethereum')
+      } else{
+        setrpc_address(polygon_rpc_url)
+        setcontractAddress(polygon_contract_address)
+    
+          console.log('Polygon')
+        }
+      },[chain?.name])
     const [markets, setMarkets] = useState([]);
     const [userList, setUserList] = useState([]);
     const [resultsUsersBets, setResultsUsersBets] = useState([]);
-console.log(markets.length);
 
 
 useEffect(() => {
@@ -54,7 +70,7 @@ useEffect(() => {
     const allUserList = [];
     for (let i = 0; i < markets.length; i++) {
       const market = markets[i];
-      const userList = await get_all_user_per_market(rpc_url, contract_address, abi, market.prediction_id);
+      const userList = await get_all_user_per_market(rpc_address, contractAddress, abi, market.prediction_id);
       userList.forEach((userAddress) => {
         if (!allUserList.includes(userAddress)) {
           allUserList.push(userAddress);
@@ -71,11 +87,12 @@ useEffect(() => {
 
 
 useEffect(() => {
+  
   async function fetchBets() {
     let results = [];
     for (let i = 0; i < markets.length; i++) {
       const market = markets[i];
-      const bets = await get_all_bets_per_bucket_per_user(rpc_url, contract_address, abi, market.prediction_id, userList);
+      const bets = await get_all_bets_per_bucket_per_user(rpc_address, contractAddress, abi, market.prediction_id, userList);
       results.push(bets); // add the bets to the results array
     }
     setResultsUsersBets(results);
@@ -84,7 +101,7 @@ useEffect(() => {
   if (markets.length > 0 && userList.length > 0) { // check if either array is empty before executing
     fetchBets();
   }
-}, [markets, userList, rpc_url, contract_address, abi, setResultsUsersBets]);
+}, [markets, userList, rpc_address, contractAddress, abi, setResultsUsersBets]);
 
 let votes = resultsUsersBets
 console.log('votes', resultsUsersBets)
@@ -94,7 +111,7 @@ console.log('users', userList)
     useEffect(() => {
       async function fetchData() {
     
-        const result = await get_all_markets(rpc_url, contract_address, abi);
+        const result = await get_all_markets(rpc_address, contractAddress, abi);
         setMarkets(result);
     
       } 

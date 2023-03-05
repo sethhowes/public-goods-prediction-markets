@@ -37,7 +37,7 @@ import {
   get_all_bets_per_bucket_per_user,
 } from "util/multicall.js";
 import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from "recharts";
-import { abi, contract, contract_address, rpc_url } from "util/contract.js";
+import { abi, contract, contract_address, rpc_url, polygon_rpc_url, polygon_contract_address} from "util/contract.js";
 import { convertToDecimal } from "util/convertToDecimal";
 import { sumBuckets } from "util/sumBuckets";
 
@@ -56,8 +56,23 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function DashboardPage(props) {
-  const { chain, chains } = useNetwork();
+  const [rpc_address, setrpc_address] = useState(rpc_url)
+  const [contractAddress, setcontractAddress] = useState(contract_address)
 
+  const { chain, chains } = useNetwork();
+  
+  useEffect(() => {
+  if (chain?.name === "Goerli") {
+    setrpc_address(rpc_url)
+    setcontractAddress(contract_address)
+    console.log('Ethereum')
+  } else{
+    setrpc_address(polygon_rpc_url)
+    setcontractAddress(polygon_contract_address)
+
+      console.log('Polygon')
+    }
+  },[chain?.name])
   // url parsing
   const web3 = new Web3();
 
@@ -91,14 +106,14 @@ function DashboardPage(props) {
   useEffect(() => {
     async function fetchData() {
       const result = await get_prediction_market_details(
-        rpc_url,
+        rpc_address ,
         contract_address,
         abi,
         prediction_id
       );
 
       let betResults = await get_all_bets_per_bucket_per_user(
-        rpc_url,
+        rpc_address,
         contract_address,
         abi,
         prediction_id,
@@ -405,7 +420,7 @@ function DashboardPage(props) {
                   <CardContent sx={{ padding: 3 }}>
                     <Box>
                       <VotingComponent
-                        rpc_url={rpc_url}
+                        rpc_url={rpc_address}
                         predictionBuckets={predictionBuckets}
                         setPredictionBuckets={setPredictionBuckets}
                         prediction_id={prediction_id}

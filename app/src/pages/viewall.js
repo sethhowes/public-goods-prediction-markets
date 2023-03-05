@@ -30,7 +30,7 @@ import { requireAuth } from "util/auth";
 import {get_all_markets} from 'util/multicall.js'
 import Web3 from 'web3';
 const { toDateTime } = require('web3-utils');
-import {rpc_url, contract_address, abi} from 'util/contract.js'
+import { abi, contract, contract_address, rpc_url, polygon_rpc_url, polygon_contract_address} from 'util/contract.js'
 import { useNetwork } from 'wagmi'
 
 // Define the contract variables
@@ -62,6 +62,22 @@ const useStyles = makeStyles((theme) => ({
 }));
 
   function DashboardPage(props) {
+    const { chain, chains } = useNetwork();
+    const [rpc_address, setrpc_address] = useState(rpc_url)
+    const [contractAddress, setcontractAddress] = useState(contract_address)
+    useEffect(() => {
+      
+      if (chain?.name === "Goerli") {
+        setrpc_address(rpc_url)
+        setcontractAddress(contract_address)
+        console.log('Ethereum')
+      } else{
+        setrpc_address(polygon_rpc_url)
+        setcontractAddress(polygon_contract_address)
+    
+          console.log('Polygon')
+        }
+      },[chain?.name])
 //
 const web3 = new Web3();
 const [rows, setRows] = useState([]);
@@ -70,7 +86,7 @@ const [allPredictionMarkets, setAllPredictionMarkets] = useState(null);
 useEffect(() => {
   async function fetchData() {
 
-    const result = await get_all_markets(rpc_url, contract_address, abi);
+    const result = await get_all_markets(rpc_address, contractAddress, abi);
     setAllPredictionMarkets(result);
     setRows(result);  
     console.log("BRO", result)
@@ -96,7 +112,6 @@ useEffect(() => {
     setValue(newValue)
   }
 
-  const { chain, chains } = useNetwork()
 
   const RenderTabAvatar = ({ category }) => (
     <Avatar

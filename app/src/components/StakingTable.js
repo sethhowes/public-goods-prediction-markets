@@ -95,7 +95,7 @@ function Row(props) {
           Object.keys(bets).map((betId) => (
   <TableRow key={betId}>
     <TableCell>
-      {betId}: {predictionMarketDetails[bets[betId][predictionID]].prediction_title} {/* Need to auto -increment predictionID - will sort */} 
+      {betId}: {predictionMarketDetails[bets[betId][predictionID]]?.prediction_title} {/* Need to auto -increment predictionID - will sort */} 
     </TableCell>
     {Object.values(bets[betId]).slice(1).map((betValue, index) => (
       <TableCell key={index}>{betValue}</TableCell>
@@ -106,8 +106,9 @@ function Row(props) {
         <TableCell align="right">
                 {" "}
                 <a onClick={handleCopy}>
+                Stake
                   <span role="img" aria-label="rocket ship">
-                    🚀
+                     🚀
                   </span>
                 </a>
               </TableCell>

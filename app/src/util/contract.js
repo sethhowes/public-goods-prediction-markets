@@ -1,14 +1,22 @@
 import { ethers } from "ethers";
 
-const contractAddresses = {
+const mainContractAddresses = {
 	goerli: "0x23aFC9d5bf30d0C1b2706459264ff32353f7c379",
-	mantle: "",
-	sepolia: "",
-	scroll: "",
-	polygon: "",
-}
-
+	mantle: "0x51382620e7419552Dd8CC7B047eddef6C5808De8",
+	sepolia: "0x51382620e7419552Dd8CC7B047eddef6C5808De8",
+	scroll: "0x51382620e7419552Dd8CC7B047eddef6C5808De8",
+	polygon: "0x51382620e7419552Dd8CC7B047eddef6C5808De8",
+  };
+  
+  const poolingContractAddresses = {
+	goerli: "0x8F6c2cB89fdD3a056b6D7c03B0EBB37027A4Ca8e",
+	mantle: "0x7492dD70FB2978CA3F3b4003A8FB00Ffd38E0454",
+	sepolia: "0x7492dD70FB2978CA3F3b4003A8FB00Ffd38E0454",
+	scroll: "0x7492dD70FB2978CA3F3b4003A8FB00Ffd38E0454",
+	polygon: "0x7492dD70FB2978CA3F3b4003A8FB00Ffd38E0454",
+  };
 var contract_address = '0x23aFC9d5bf30d0C1b2706459264ff32353f7c379';
+var polygon_contract_address = "0x51382620e7419552Dd8CC7B047eddef6C5808De8"
 
 const contractABI = [
 	{
@@ -1227,7 +1235,12 @@ const provider = new ethers.providers.JsonRpcProvider(
 );
 let abi = contractABI
 const rpc_url = 'https://goerli.gateway.tenderly.co/3Ugz1n4IRjoidr766XDDxX';
+const polygon_rpc_url = 'https://polygon.llamarpc.com';
+
+
+
 const contractAddress = contract_address
+
 const contract = new ethers.Contract(contractAddress, contractABI, provider);
 
 // export function contract(network, provider) {
@@ -1240,4 +1253,4 @@ const contract = new ethers.Contract(contractAddress, contractABI, provider);
 // 	return contract;
 // }
 
-export { abi, contract, contract_address, rpc_url};
+export { abi, contract, contract_address, rpc_url, polygon_rpc_url, polygon_contract_address};

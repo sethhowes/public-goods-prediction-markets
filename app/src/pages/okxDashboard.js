@@ -58,27 +58,36 @@ const useStyles = makeStyles((theme) => ({
       color: theme.palette.secondary.main,
     },
   },
-}));
-
+}))
   function DashboardPage(props) {
+
+    const [pending, setPending] = useState(false);
+    const [resJson, setResJson] = useState(null);
 //
+function fetchData() {
+  fetch(`https://cognoscenticrypto.herokuapp.com/okx_dashboard`, {
+    method: 'GET'
+  })
+  .then(res => res.json())
+  .then(resJson => {
+    setResJson(resJson)
+    setPending(true)
+    console.log(resJson)
+  })
+  .catch(err => {
+    // handle error here
+  })
+}
+fetchData() 
+console.log(resJson)
+
+
+///
 const web3 = new Web3();
 const [rows, setRows] = useState([]);
 
 const [allPredictionMarkets, setAllPredictionMarkets] = useState(null);
-useEffect(() => {
-  async function fetchData() {
 
-    const result = await get_all_markets(rpc_url, contract_address, abi);
-    setAllPredictionMarkets(result);
-    setRows(result);  
-    console.log("BRO", result)
-
-  } 
-  
-  fetchData();
-}, []);
- 
 //setPredictionID(parts[parts.length - 1]);
 
     const router = useRouter();
@@ -151,41 +160,8 @@ useEffect(() => {
       headerName: 'Category',
       renderCell: ({ row }) =>  <Typography variant='body2'>{row.tags}</Typography>
     },
-    {
-      flex: 0.1,
-      minWidth: 100,
-      field: 'consensus',
-      headerName: 'Consensus',
-      renderCell: ({ row }) => (
-        <Chip label={`${web3.utils.toNumber(row.current_prediction.hex)} ${row.unit}`} className={classes.priceChip} />
-      )    },
-    {
-      flex: 0.1,
-      minWidth: 100,
-      field: 'price',
-      headerName: 'Reward',
-      renderCell: ({ row }) => (
-        <Chip
-          label={`${web3.utils.toNumber(row.reward_amount.hex) / 1e18} ${chain?.nativeCurrency.symbol}`}
-          color="secondary"
-          size="small"
-          sx={{ fontWeight: "bold" }}
-        />
-      )    },
-    {
-      flex: 0.2,
-      minWidth: 100,
-      field: 'predictors',
-      headerName: 'Deadline',
-      renderCell: ({ row }) => (
-        <Chip
-        label={`${new Date(web3.utils.toBN(row.deadline.hex) * 1000).toLocaleString()}`}
-        color="secondary"
-          size="small"
-          sx={{ fontWeight: "bold" }}
-        />
-      ) 
-    }
+   
+
   
   ]
   return (
@@ -208,73 +184,18 @@ useEffect(() => {
 
         
         <Grid container={true} spacing={4}>
-        <Grid item={true} xs={12} md={3}>
+        <Grid item={true} xs={12} md={12}>
         <Card>
                   <CardContent sx={{ padding: 3 }}>
                   <Typography sx={{ fontWeight: 'bold'}} className={classes.gradientText} variant='h5'>Dashboard</Typography>
-                  <Typography>Welcome to your information center about your predictions, staking and more.</Typography>
+                  <Typography>Welcome to your OKX dashboard.</Typography>
                   <br/>
                   </CardContent>
           </Card>
           </Grid>
-        <Grid item={true} xs={12} md={3}>
-        <Card>
+       
           
-                        <CardContent sx={{ padding: 3 }}>
-                        <Container>
-             <Grid container={true} justifyContent="center" >
-            <Grid item={true} mt={3} mb={2} xs={12} sm={3}>
-          
-
-              <Box sx={{ textAlign: "center" }}>
-
-                <Typography sx={{ fontWeight: "bold"}} className={classes.gradientText} variant="h4">{rows?.length}</Typography>
-                <Typography  ml={-2} variant="overline">Predictions</Typography>
-              </Box>
-            </Grid>
-           </Grid>
-           </Container>
-              </CardContent>
-          </Card>
-          </Grid>
-          <Grid item={true} xs={12} md={3}>
-                <Card>
-                      <CardContent sx={{ padding: 3 }}>
-                      <Container>
-                    <Grid container={true} justifyContent="center" >
-                    <Grid item={true} mt={3} mb={2} xs={12} sm={3}>
-
-                      <Box sx={{ textAlign: "center" }}>
-
-                        <Typography  sx={{ fontWeight: "bold"}} className={classes.gradientText} variant="h4">0</Typography>
-                        <Typography  ml={0} variant="overline">Votes</Typography>
-
-                      </Box>
-                    </Grid>
-                  </Grid>
-                  </Container>
-                      </CardContent>
-                  </Card>
-          </Grid>
-          <Grid item={true} xs={12} md={3}>
-          <Card>
-                      <CardContent sx={{ padding: 3 }}>
-                      <Container>
-                    <Grid container={true} justifyContent="center" >
-                    <Grid item={true} mt={3} mb={2} xs={12} sm={3}>
-                    
-
-                      <Box sx={{ textAlign: "center" }}>
-
-                        <Typography  sx={{ fontWeight: "bold"}} className={classes.gradientText} variant="h4">0</Typography>
-                        <Typography  ml={0} variant="overline">Staked</Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                  </Container>
-                      </CardContent>
-                  </Card>
-          </Grid>
+         
           
           <Grid item={true} xs={12} md={12}>
           <Card>
@@ -298,10 +219,9 @@ useEffect(() => {
             '& .MuiTabs-indicator': { display: 'none' }
           }}
         >
-           <Tab value='all' sx={{ p: 0 }} label={<RenderTabAvatar category='All' />} />
-          <Tab value='climate' sx={{ p: 0 }} label={<RenderTabAvatar category='Climate' />} />
-          <Tab value='risks' sx={{ p: 0 }} label={<RenderTabAvatar category='Risks' />} />
-          <Tab value='finance' sx={{ p: 0 }} label={<RenderTabAvatar category='Finance' />} />
+           <Tab value='all' sx={{ p: 0 }} label={<RenderTabAvatar category='Dex' />} />
+          <Tab value='climate' sx={{ p: 0 }} label={<RenderTabAvatar category='NFT' />} />
+         
 
           
         
