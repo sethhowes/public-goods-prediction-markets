@@ -13,7 +13,7 @@ interface ISciPredict {
         uint[] predictionBucket; // buckets for prediction
         uint rewardAmount; // reward amount - to be transferred from
         address rewardToken; // reward token address - if null address then native ETH is issued
-        string incentiveCurve; // expontential, linear, or none
+        string[] permissionedTags; //
         bool permissioned;  // permission flag 
         uint deadline; // timestamp to end market in seconds since the epoch
         string[3] category_ApiEndpoint_PictureUrl; // tags for market at [0] and api endpoint at [1]
