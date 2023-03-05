@@ -118,10 +118,17 @@ export default function ColorTabs(props) {
             (<TableRow>
               <TableCell>Close Market</TableCell>
               <TableCell align="right">
-                <Button disabled={props.userAddress === props.creatorAddress ? false : true}
+              <div
+                aria-owns={open ? 'mouse-over-popover' : undefined}
+                aria-haspopup="true"
+                onMouseEnter={handlePopoverOpen}
+                onMouseLeave={handlePopoverClose}
+                >
+                <Button disabled={parseInt(props.deadline?.hex, 16) > Date.now() / 1000 ? true : false}
  variant="contained" color="error" onClick={handleCloseMarket}>
                   Close Market 
                 </Button>
+                </div>
               </TableCell>
             </TableRow>) : (<></>)}
             <TableRow>

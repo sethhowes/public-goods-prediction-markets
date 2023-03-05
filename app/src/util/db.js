@@ -98,12 +98,12 @@ export function useVotesByOwner(owner) {
 }
 
 // Create a new transaction
-export function createVote(data) {
-  return addDoc(collection(db, "votes"), {
-    ...data,
-    createdAt: serverTimestamp(),
-  });
-}
+// export function createVote(data) {
+//   return addDoc(collection(db, "votes"), {
+//     ...data,
+//     createdAt: serverTimestamp(),
+//   });
+// }
 
 // Update a transaction
 export function updateVote(id, data) {

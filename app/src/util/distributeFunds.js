@@ -1,21 +1,20 @@
+import { ethers } from "ethers";
+
 export function distributeFunds(num, bucketNumber) {
-
   // Divide the initial integer into three equal parts
-  const part = Math.floor(num / bucketNumber);
-
-  // Calculate the remaining amount
-  const remainder = num % bucketNumber;
+  let remainder = num;
+  const part = num.div(bucketNumber);
 
   // Create an array to store the integers
   const integers = [];
 
-  for (let i = 0; i < (bucketNumber - 1); i++) {
+  for (let i = 0; i < bucketNumber - 1; i++) {
     integers.push(part);
+    remainder = remainder.sub(part)
   }
-  
+
   // Add the final integer
-  integers.push(part + remainder);
+  integers.push(remainder);
 
   return integers;
-  
 }

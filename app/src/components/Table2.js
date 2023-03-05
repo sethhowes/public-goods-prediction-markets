@@ -94,7 +94,7 @@ if (typeof window !== 'undefined') {
               </TableCell>
               {optionKeys.map((key) => (
   <TableCell align="right" key={key}>
-    {(row[key] / 1e18).toPrecision(3)} {chain.nativeCurrency.symbol}
+    {(row[key])} {chain.nativeCurrency.symbol}
   </TableCell>
 ))}
             </TableRow>

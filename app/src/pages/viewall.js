@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { ethers } from 'ethers';
 import { useRouter } from "next/router";
 import Meta from "components/Meta";
 import DashboardSection2 from "components/DashboardSection2";
@@ -166,7 +167,7 @@ useEffect(() => {
       headerName: 'Reward',
       renderCell: ({ row }) => (
         <Chip
-          label={`${web3.utils.toNumber(row.reward_amount.hex) / 1e18} ${chain?.nativeCurrency.symbol}`}
+          label={`${ethers.utils.formatEther(row.reward_amount.hex)} ${chain?.nativeCurrency.symbol}`}
           color="secondary"
           size="small"
           sx={{ fontWeight: "bold" }}

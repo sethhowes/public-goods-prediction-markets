@@ -1,16 +1,41 @@
 import { ethers } from "ethers";
 
 const contractAddresses = {
-	goerli: "0x34E2fE6bd61024995A4C18Ea8F0084e8d7652e19",
+	goerli: "0x23aFC9d5bf30d0C1b2706459264ff32353f7c379",
 	mantle: "",
 	sepolia: "",
 	scroll: "",
 	polygon: "",
 }
 
-var contract_address = '0x34E2fE6bd61024995A4C18Ea8F0084e8d7652e19';
+var contract_address = '0x23aFC9d5bf30d0C1b2706459264ff32353f7c379';
 
 const contractABI = [
+	{
+		"inputs": [],
+		"name": "acceptOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "credential_category",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "addAddresstoCredentials",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
 	{
 		"inputs": [],
 		"stateMutability": "nonpayable",
@@ -99,170 +124,6 @@ const contractABI = [
 		"type": "event"
 	},
 	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "from",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			}
-		],
-		"name": "OwnershipTransferRequested",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "from",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			}
-		],
-		"name": "OwnershipTransferred",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "_user",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "predictionId",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "scaledBet",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "betAmount",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "timeStamp",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "bucketIndex",
-				"type": "uint256"
-			}
-		],
-		"name": "Pooling",
-		"type": "event"
-	},
-	{
-		"inputs": [],
-		"name": "acceptOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "betAmounts",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "betTimestamps",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_chainLinkToken",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "_chainLinkOracle",
-				"type": "address"
-			},
-			{
-				"internalType": "bytes32",
-				"name": "_jobId",
-				"type": "bytes32"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_fee",
-				"type": "uint256"
-			}
-		],
-		"name": "changeOracleParameters",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"inputs": [
 			{
 				"internalType": "uint256",
@@ -334,9 +195,9 @@ const contractABI = [
 				"type": "address"
 			},
 			{
-				"internalType": "string",
-				"name": "incentiveCurve",
-				"type": "string"
+				"internalType": "string[]",
+				"name": "permissionedTags",
+				"type": "string[]"
 			},
 			{
 				"internalType": "bool",
@@ -377,9 +238,22 @@ const contractABI = [
 	{
 		"inputs": [
 			{
-				"internalType": "bytes32",
-				"name": "_requestId",
-				"type": "bytes32"
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			}
+		],
+		"name": "fullfill_oracle",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
 			},
 			{
 				"internalType": "uint256",
@@ -387,9 +261,330 @@ const contractABI = [
 				"type": "uint256"
 			}
 		],
-		"name": "fulfill",
+		"name": "overrideOutcome",
 		"outputs": [],
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferRequested",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferred",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "bucketIndex",
+				"type": "uint256"
+			}
+		],
+		"name": "placeBet",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "bucketIndex",
+				"type": "uint256"
+			}
+		],
+		"name": "placeBetViaPool",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "scaledBet",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "betAmount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "timeStamp",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "bucketIndex",
+				"type": "uint256"
+			}
+		],
+		"name": "Pooling",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "chainLinkConsumer",
+				"type": "address"
+			}
+		],
+		"name": "setChainLinkFunctionConsumer",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "poolingContract",
+				"type": "address"
+			}
+		],
+		"name": "setPoolingContract",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "updateLivePredictionIds",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "betAmounts",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "betBuckets",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "betTimestamps",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			}
+		],
+		"name": "credentialsCheck",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "credentialsCheckUserView",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "category",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "credentialsCheckViaCategory",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "predictionId",
+				"type": "uint256"
+			}
+		],
+		"name": "getBetBucketIndex",
+		"outputs": [
+			{
+				"internalType": "uint256[]",
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -417,6 +612,19 @@ const contractABI = [
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "getChainLinkFunctionConsumer",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "uint256",
@@ -435,6 +643,25 @@ const contractABI = [
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "credential_category",
+				"type": "string"
+			}
+		],
+		"name": "getCredentialAddresses",
+		"outputs": [
+			{
+				"internalType": "address[]",
+				"name": "",
+				"type": "address[]"
 			}
 		],
 		"stateMutability": "view",
@@ -657,19 +884,6 @@ const contractABI = [
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "isWhitelisted",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
 		"inputs": [
 			{
 				"internalType": "address",
@@ -689,24 +903,6 @@ const contractABI = [
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "predictionId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_outcome",
-				"type": "uint256"
-			}
-		],
-		"name": "overrideOutcome",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"inputs": [],
 		"name": "owner",
 		"outputs": [
@@ -717,42 +913,6 @@ const contractABI = [
 			}
 		],
 		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "predictionId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "bucketIndex",
-				"type": "uint256"
-			}
-		],
-		"name": "placeBet",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "predictionId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "bucketIndex",
-				"type": "uint256"
-			}
-		],
-		"name": "placeBetViaPool",
-		"outputs": [],
-		"stateMutability": "payable",
 		"type": "function"
 	},
 	{
@@ -786,11 +946,6 @@ const contractABI = [
 				"type": "address"
 			},
 			{
-				"internalType": "string",
-				"name": "incentiveCurve",
-				"type": "string"
-			},
-			{
 				"internalType": "bool",
 				"name": "permissioned",
 				"type": "bool"
@@ -820,25 +975,6 @@ const contractABI = [
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "apiEndpoint",
-				"type": "string"
-			}
-		],
-		"name": "requestOutcomeData",
-		"outputs": [
-			{
-				"internalType": "bytes32",
-				"name": "requestId",
-				"type": "bytes32"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"inputs": [],
 		"name": "retrieveChainId",
 		"outputs": [
@@ -849,19 +985,6 @@ const contractABI = [
 			}
 		],
 		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "poolingContract",
-				"type": "address"
-			}
-		],
-		"name": "setPoolingContract",
-		"outputs": [],
-		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -894,26 +1017,6 @@ const contractABI = [
 			}
 		],
 		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			}
-		],
-		"name": "transferOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "updateLivePredictionIds",
-		"outputs": [],
-		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -1011,9 +1114,9 @@ const contractABI = [
 						"type": "address"
 					},
 					{
-						"internalType": "string",
-						"name": "incentiveCurve",
-						"type": "string"
+						"internalType": "string[]",
+						"name": "permissionedTags",
+						"type": "string[]"
 					},
 					{
 						"internalType": "bool",
@@ -1117,7 +1220,7 @@ const contractABI = [
 		"stateMutability": "view",
 		"type": "function"
 	}
-];
+]
 
 const provider = new ethers.providers.JsonRpcProvider(
   "https://goerli.gateway.tenderly.co/3Ugz1n4IRjoidr766XDDxX"

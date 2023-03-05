@@ -12,6 +12,7 @@ import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { ethers } from "ethers";
 
 function predictionMeta(props) {
   const [pending, setPending] = useState(false);
@@ -93,9 +94,9 @@ function predictionMeta(props) {
   <TextField
               type="text"
               color="secondary"
-
               label="Reward Amount"
-              onChange={e => setPredictionRewardAmount(e.target.value)}
+              onChange={(e) => setPredictionRewardAmount(ethers.utils.parseEther(e.target.value))}
+              placeholder="ETH"
               name="value"
               id="value"
               fullWidth={true}

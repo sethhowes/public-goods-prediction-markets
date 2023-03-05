@@ -51,18 +51,15 @@ function DashboardPage(props) {
     useState("Description 1");
   const [predictionUnit, setPredictionUnit] = useState("Unit");
   const [predictionIncrement, setPredictionIncrement] = useState(1);
-  const [predictionBuckets, setPredictionBuckets] = useState([
-    1,
-    2,
-    3
-  ]);
-  const [predictionRewardAmount, setPredictionRewardAmount] = useState(3);
+  const [predictionBuckets, setPredictionBuckets] = useState([1, 2, 3]);
+  const [predictionRewardAmount, setPredictionRewardAmount] = useState();
   const [predictionEndDate, setPredictionEndDate] = useState();
   const [predictionCategory, setPredictionCategory] = useState("");
   const [predictionApiEndpoint, setPredictionApiEndpoint] =
     useState("API Endpoint");
   const [predictionRewardCurve, setPredictionRewardCurve] =
     useState("Reward Curve");
+  const [predictionWhitelisted, setPredictionWhitelisted] = useState([]);
   const [predictionPermissioned, setPredictionPermissioned] = useState(true);
   const [predictionTokenAddress, setPredictionTokenAddress] = useState(0);
   const [predictionOutcome, setPredictionOutcome] = useState("Outcome");
@@ -80,38 +77,40 @@ function DashboardPage(props) {
   const contractWithSigner = contract.connect(signer);
 
   const handleSubmit = async () => {
-    createPrediction({
-      predictionTitle,
-      predictionDescription,
-      predictionUnit,
-      predictionIncrement,
-      predictionBuckets,
-      predictionRewardAmount,
-      predictionTokenAddress,
-      predictionRewardCurve,
-      predictionPermissioned,
-      predictionEndDate,
-      predictionCategory,
-      predictionApiEndpoint,
-      address
+    // createPrediction({
+    //   predictionTitle,
+    //   predictionDescription,
+    //   predictionUnit,
+    //   predictionIncrement,
+    //   predictionBuckets,
+    //   predictionRewardAmount,
+    //   predictionTokenAddress,
+    //   predictionRewardCurve,
+    //   predictionPermissioned,
+    //   predictionEndDate,
+    //   predictionCategory,
+    //   predictionApiEndpoint,
+    //   predictionWhitelisted,
+    //   address
 
-    });
-    distributeFunds();
+    // });
     // Converts date state object to UNIX time
     const unixEndDate = convertUnixTime(predictionEndDate);
 
-  
     // Split reward amount
-    const initialBucketAmounts = distributeFunds(predictionRewardAmount, predictionBuckets.length);
-    
-    //const historicalBets = getHistoricalBets("0xdc6Dc980F7F2491b352517B27D0e6Af9baa42501", 0); // @todo display this data on the front end
+    const initialBucketAmounts = distributeFunds(
+      predictionRewardAmount,
+      predictionBuckets.length
+    );
+    console.log("TEST", initialBucketAmounts)
+
     const tx = await contractWithSigner.createPrediction(
       predictionTitle,
       predictionUnit,
-      predictionBuckets, 
+      predictionBuckets,
       predictionRewardAmount,
       ethers.constants.AddressZero,
-      predictionRewardCurve,
+      predictionWhitelisted,
       predictionPermissioned,
       unixEndDate,
       predictionCategory,
@@ -128,8 +127,6 @@ function DashboardPage(props) {
       message: "Prediction created successfully!",
     });
     router.replace("/viewall");
-
-    
   };
 
   return (
@@ -172,9 +169,14 @@ function DashboardPage(props) {
               <Card>
                 <CardContent sx={{ padding: 3 }}>
                   <Box>
-                  <Typography component={'span'}sx={{ fontWeight: "bold", mb: 4, fontSize: 24}} className={classes.gradientText} align="left">Request Prediction</Typography>
-
-                   
+                    <Typography
+                      component={"span"}
+                      sx={{ fontWeight: "bold", mb: 4, fontSize: 24 }}
+                      className={classes.gradientText}
+                      align="left"
+                    >
+                      Request Prediction
+                    </Typography>
 
                     <PredictionData
                       showNameField={props.showNameField}
@@ -187,6 +189,8 @@ function DashboardPage(props) {
                       setPredictionCategory={setPredictionCategory}
                       setPredictionDescription={setPredictionDescription}
                       setPredictionApiEndpoint={setPredictionApiEndpoint}
+                      setPredictionWhitelisted={setPredictionWhitelisted}
+                      setPredictionPermissioned={setPredictionPermissioned}
                     />
                   </Box>
                 </CardContent>
