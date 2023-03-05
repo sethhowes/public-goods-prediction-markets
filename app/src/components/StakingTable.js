@@ -15,13 +15,15 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import TextField from "@mui/material/TextField"; // import TextField
 import { useSigner } from 'wagmi';
 import { stakingContract } from "util/stakingContract";
-import {get_bets_by_user} from 'util/multicall.js'
+import {get_bets_by_user, get_all_markets} from 'util/multicall.js'
 import {rpc_url, contract_address, abi} from 'util/contract.js'
 
 function Row(props) {
     const { row, betList } = props
+    const [predictionID, setPredictionID] = React.useState(0);
     const [open, setOpen] = React.useState(false);
     const [bets, setBets] = React.useState([]);
+    const [predictionMarketDetails, setPredictionMarketDetails] = React.useState([]);
     const { data: signer, isError, isLoading } = useSigner();
 
     const handleCopy = (async () => {
@@ -39,7 +41,21 @@ function Row(props) {
         }
       }, [open, row.Address]);
     
-    
+      React.useEffect(() => {
+        async function fetchData() {
+          const result = await get_all_markets(
+            rpc_url,
+            contract_address,
+            abi
+          );
+          setPredictionMarketDetails(result);
+
+          }
+          fetchData();
+        }, []);
+
+        console.log(predictionMarketDetails)
+
     return (
       <React.Fragment>
         <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
@@ -75,12 +91,17 @@ function Row(props) {
             </TableRow>
           </TableHead>
           <TableBody>
-          {Object.keys(bets).map((betId) => (
-      <TableRow key={betId}>
-        <TableCell>{betId}</TableCell>
-        <TableCell>{bets[betId][0]}</TableCell>
-        <TableCell>{bets[betId][1]}</TableCell>
-        <TableCell>{bets[betId][2]}</TableCell>
+          {
+          Object.keys(bets).map((betId) => (
+  <TableRow key={betId}>
+    <TableCell>
+      {betId}: {predictionMarketDetails[bets[betId][predictionID]].prediction_title} {/* Need to auto -increment predictionID - will sort */} 
+    </TableCell>
+    {Object.values(bets[betId]).slice(1).map((betValue, index) => (
+      <TableCell key={index}>{betValue}</TableCell>
+    ))
+    
+    }
          
         <TableCell align="right">
                 {" "}
