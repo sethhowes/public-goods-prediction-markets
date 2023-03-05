@@ -6,11 +6,20 @@ import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
 
+
+//ChainLink Consumer interface
+interface IChainLinkConsumer {
+    function getRequestId(uint predictionId) external view returns(bytes32);
+    function getResult(bytes32 reqId) external view returns(bytes[] memory);
+    function getResultViaPredId(uint predictionId) external view returns(bytes[] memory);
+}
+
 //SciPredict contract
 contract SciPredict is ChainlinkClient, ConfirmedOwner {
     //Set general variables
     address nullAddress = 0x0000000000000000000000000000000000000000;
     address poolingContractInstance;
+    address chainLinkFunctionConsumer;
     
     //Set pooling contract address
     function setPoolingContract(address poolingContract) public onlyOwner{
@@ -20,6 +29,16 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     //Get pooling contract address
     function getPoolingContract() public view returns(address){
         return poolingContractInstance;
+    }
+
+    //Set chainlink consumer address
+    function setChainLinkFunctionConsumer(address chainLinkConsumer) public onlyOwner{
+        chainLinkFunctionConsumer = chainLinkConsumer;
+    }
+
+    //Get chainlink consumer address
+    function getChainLinkFunctionConsumer() public view returns(address){
+        return chainLinkFunctionConsumer;
     }
 
     //Get chain id
@@ -37,85 +56,8 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
         _;
     }
     
-    //Chainlink import
-    using Chainlink for Chainlink.Request;
-    bytes32 private jobId;
-    uint256 private fee;
-    uint private oraclePredictionId;
-
-    //TODO UPDATE
-    //Chainlink setting for multiple networks
-    //Mainnet
-    address chainLinkToken_mainnet = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;
-    address chainLinkOracle_mainnet = 0xCC79157eb46F5624204f47AB42b3906cAA40eaB7;
-    bytes32 jobId_mainnet = "c1c5e92880894eb6b27d3cae19670aa3";
-    uint256 fee_mainnet = (1 * LINK_DIVISIBILITY) / 10;
-
-    //Polygon 
-    address chainLinkToken_polygon = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;
-    address chainLinkOracle_polygon = 0xCC79157eb46F5624204f47AB42b3906cAA40eaB7;
-    bytes32 jobId_polygon = "c1c5e92880894eb6b27d3cae19670aa3";
-    uint256 fee_polygon = (1 * LINK_DIVISIBILITY) / 10;
-
-    //Mantle
-    address chainLinkToken_mantle = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;
-    address chainLinkOracle_mantle = 0xCC79157eb46F5624204f47AB42b3906cAA40eaB7;
-    bytes32 jobId_mantle = "c1c5e92880894eb6b27d3cae19670aa3";
-    uint256 fee_mantle = (1 * LINK_DIVISIBILITY) / 10;
-
-    //Scroll
-    address chainLinkToken_scroll = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;
-    address chainLinkOracle_scroll = 0xCC79157eb46F5624204f47AB42b3906cAA40eaB7;
-    bytes32 jobId_scroll = "c1c5e92880894eb6b27d3cae19670aa3";
-    uint256 fee_scroll = (1 * LINK_DIVISIBILITY) / 10;
-
-    //Sepolia
-    address chainLinkToken_sepolia = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;
-    address chainLinkOracle_sepolia = 	0x649a2C205BE7A3d5e99206CEEFF30c794f0E31EC;
-    bytes32 jobId_sepolia = "c1c5e92880894eb6b27d3cae19670aa3";
-    uint256 fee_sepolia = (1 * LINK_DIVISIBILITY) / 10;
 
     constructor() ConfirmedOwner(msg.sender) {
-        uint256 chainId = retrieveChainId();
-        //Mainnet
-        if (chainId == 1){
-            setChainlinkToken(chainLinkToken_mainnet);
-            setChainlinkOracle(chainLinkOracle_mainnet);
-            jobId = jobId_mainnet;
-            fee = fee_mainnet;
-        //Polygon mainnet
-        } else if (chainId == 137){
-            setChainlinkToken(chainLinkToken_polygon);
-            setChainlinkOracle(chainLinkOracle_polygon);
-            jobId = jobId_polygon;
-            fee = fee_polygon;
-        //Mantle testnet
-        } else if (chainId == 5001){
-            setChainlinkToken(chainLinkToken_mantle);
-            setChainlinkOracle(chainLinkOracle_mantle);
-            jobId = jobId_mantle;
-            fee = fee_mantle;
-        //Scroll testnet
-        } else if (chainId == 534353){
-            setChainlinkToken(chainLinkToken_scroll);
-            setChainlinkOracle(chainLinkOracle_scroll);
-            jobId = jobId_scroll;
-            fee = fee_scroll;
-        //Sepolia
-        } else if (chainId == 11155111){
-            setChainlinkToken(chainLinkToken_sepolia);
-            setChainlinkOracle(chainLinkOracle_sepolia);
-            jobId = jobId_sepolia;
-            fee = fee_sepolia;
-        }
-    }
-
-    //Change chainlink oracle parameters - required for newer chains that have no chainlink yet
-    function changeOracleParameters(address _chainLinkToken, address _chainLinkOracle, bytes32 _jobId, uint256 _fee) onlyOwner external {
-        setChainlinkToken(_chainLinkToken);
-        setChainlinkOracle(_chainLinkOracle);
-        jobId = _jobId;
-        fee = _fee; // 0,1 * 10**18 (Varies by network and job)
     }
 
     //Prediction instance struct 
@@ -187,35 +129,24 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     uint predictionCounter = 0;
     uint[] livePredictions;
 
-    function requestOutcomeData(string memory apiEndpoint) public returns (bytes32 requestId) {
-        Chainlink.Request memory req = buildChainlinkRequest(
-            jobId,
-            address(this),
-            this.fulfill.selector
-        );
-
-        req.add(
-            "get",
-            apiEndpoint
-        );
-
-        req.add(
-            "path",
-            "completed" // TODO change path depending upon api endpoint used
-        );
-        
-        return sendChainlinkRequest(req, fee);
+    // Convert bytes uint
+    function bytesToUint(bytes memory b) internal pure returns (uint256){
+            uint256 number;
+            for(uint i=0;i<b.length;i++){
+                number = number + uint(uint8(b[i]))*(2**(8*(b.length-(i+1))));
+            }
+        return number;
     }
-    
-    // Callback function upon fulfillment of request
-    function fulfill (
-        bytes32 _requestId,
-        uint _outcome
-    ) public recordChainlinkFulfillment(_requestId) {
-        predictionMarkets[oraclePredictionId].outcome = _outcome;
+
+    // Full function oracle
+    function fullfill_oracle(uint predictionId) public onlyOwner{
+        bytes[] memory outcome = IChainLinkConsumer(chainLinkFunctionConsumer).getResultViaPredId(predictionId);
+        
+        uint outcome_int = bytesToUint(outcome[0]);
+        predictionMarkets[predictionId].outcome = outcome_int;
         
         //Update outcome bucket
-        setCorrectOutcomeBucket(oraclePredictionId);
+        setCorrectOutcomeBucket(predictionId);
     }
 
     //Override outcome for testing
@@ -587,8 +518,8 @@ contract SciPredict is ChainlinkClient, ConfirmedOwner {
     // Close a market
     function closeMarket(uint predictionId) public payable onlyCreator(predictionId) {
         require(block.timestamp >= predictionMarkets[predictionId].deadline, "Deadline has not yet passed");
-        // Call the API endpoint to record outcome for prediction
-        requestOutcomeData(predictionMarkets[predictionId].category_ApiEndpoint_PictureUrl[1]);
+        // Fullfil oracle
+        fullfill_oracle(predictionId);
         // Remove finished prediction from live predictions
         updateLivePredictionIds();
     }
