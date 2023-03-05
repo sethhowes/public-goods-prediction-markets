@@ -15,6 +15,8 @@ import { useSigner } from "wagmi";
 import { useAccount } from 'wagmi';
 import Popover from '@mui/material/Popover';
 import { DriveEtaTwoTone } from "@mui/icons-material";
+import { useNetwork } from 'wagmi'
+
 
 
 function TabPanel(props) {
@@ -42,6 +44,7 @@ export default function ColorTabs(props) {
   const [value, setValue] = React.useState(0);
   const classes = props.useStyles();
   const { data: signer, isError, isLoading } = useSigner();
+  const { chain, chains } = useNetwork()
 
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -89,15 +92,14 @@ export default function ColorTabs(props) {
           Prediction History
         </Box>
         <Box sx={{ mt: 8 }}>
-          <EnhancedTable options = {props.options} predictionUsers = {props.predictionUsers} />
+          <EnhancedTable options = {props.options} predictionUsers = {props.predictionUsers} unit = {props.unit} />
         </Box>
       </TabPanel>
    
       <TabPanel value={value} index={0}>
         <Box sx={{ fontWeight: "bold", marginBottom: "1rem" }}>
-          Details
+          Current Prediction Details
         </Box>
-
         <Table>
           <TableBody>
           <TableRow>
@@ -109,7 +111,7 @@ export default function ColorTabs(props) {
             <TableRow>
               <TableCell>My Committed Capital</TableCell>
               <TableCell align="right">
-                {committedUserCapital} ETH {/* @todo change this from being hardcoded */}
+                {props.totalCommitted} {chain?.nativeCurrency.symbol}
               </TableCell>
             </TableRow>
             {(props.creatorAddress == address) ?

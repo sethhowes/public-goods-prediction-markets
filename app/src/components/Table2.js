@@ -24,6 +24,7 @@ import { visuallyHidden } from '@mui/utils';
 import { abi, contract_address, rpc_url } from 'util/contract.js'
 import {get_all_user_per_market, get_all_bets_per_bucket_per_user} from 'util/multicall.js'
 import { useEffect, useState } from 'react';
+import { useNetwork } from 'wagmi';
 
 
 let prediction_id = 0
@@ -61,6 +62,8 @@ if (typeof window !== 'undefined') {
   }, [user_list]);
   let votes = resultsUsersBets
 
+  const { chain, chains } = useNetwork()
+
    
   const rows = Object.entries(resultsUsersBets).map(([address, options]) => {
     return {
@@ -76,7 +79,7 @@ if (typeof window !== 'undefined') {
           <TableRow>
             <TableCell>Address</TableCell>
             {options?.map((option, index) => (
-              <TableCell key={index} align="right">{option}</TableCell>
+              <TableCell key={index} align="right">{option} {props.unit}</TableCell>
             ))}
           </TableRow>
         </TableHead>
@@ -91,7 +94,7 @@ if (typeof window !== 'undefined') {
               </TableCell>
               {optionKeys.map((key) => (
   <TableCell align="right" key={key}>
-    {row[key]}
+    {(row[key] / 1e18).toPrecision(3)} {chain.nativeCurrency.symbol}
   </TableCell>
 ))}
             </TableRow>

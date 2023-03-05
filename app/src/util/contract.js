@@ -1,5 +1,15 @@
 import { ethers } from "ethers";
+
+const contractAddresses = {
+	goerli: "0x34E2fE6bd61024995A4C18Ea8F0084e8d7652e19",
+	mantle: "",
+	sepolia: "",
+	scroll: "",
+	polygon: "",
+}
+
 var contract_address = '0x34E2fE6bd61024995A4C18Ea8F0084e8d7652e19';
+
 const contractABI = [
 	{
 		"inputs": [],
@@ -1116,5 +1126,15 @@ let abi = contractABI
 const rpc_url = 'https://goerli.gateway.tenderly.co/3Ugz1n4IRjoidr766XDDxX';
 const contractAddress = contract_address
 const contract = new ethers.Contract(contractAddress, contractABI, provider);
+
+// export function contract(network, provider) {
+// 	 const contract = new ethers.Contract(
+// 		contractAddresses[network],
+// 		contractABI,
+// 		provider,
+// 	);
+
+// 	return contract;
+// }
 
 export { abi, contract, contract_address, rpc_url};

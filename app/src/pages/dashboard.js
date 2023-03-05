@@ -33,19 +33,17 @@ import PeopleIcon from "@mui/icons-material/People";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import { makeStyles } from "@mui/styles";
 import {
-  getHistoricalBetAmounts,
-  getHistoricalBetTimestamps,
-} from "util/getHistoricalBets";
-import {
   get_prediction_market_details,
-  get_all_user_per_market,
+  get_all_bets_per_bucket_per_user,
 } from "util/multicall.js";
 import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from "recharts";
-import { abi, contract_address, rpc_url } from "util/contract.js";
+import { abi, contract, contract_address, rpc_url } from "util/contract.js";
 import { convertToDecimal } from "util/convertToDecimal";
 import { sumBuckets } from "util/sumBuckets";
 
 import Web3 from "web3";
+import { parseUserBets } from "util/parseUserBets";
+
 
 const useStyles = makeStyles((theme) => ({
   gradientText: {
@@ -85,6 +83,7 @@ function DashboardPage(props) {
   const [predictionBuckets, setPredictionBuckets] = useState(null);
   const [trueBucket, setTrueBucket] = useState(500);
   const [falseBucket, setFalseBucket] = useState(500);
+  const [userBets, setUserBets] = useState(0);
   const pieData = [
     { name: "True", value: trueBucket },
     { name: "False", value: falseBucket },
@@ -97,6 +96,19 @@ function DashboardPage(props) {
         abi,
         prediction_id
       );
+
+      let betResults = await get_all_bets_per_bucket_per_user(
+        rpc_url,
+        contract_address,
+        abi,
+        prediction_id,
+        [address]
+        );
+        console.log("test", betResults[address])
+        betResults = parseUserBets(betResults[address]);
+        betResults = (betResults / 1e18).toPrecision(3);
+        setUserBets(betResults);
+
       const decimalResults = convertToDecimal(result);
       setTrueBucket(decimalResults[0]);
       setFalseBucket(decimalResults[1]);
@@ -421,6 +433,8 @@ function DashboardPage(props) {
                       creatorAddress={predictionMarketDetails?.creator_address}
                       useStyles={useStyles}
                       deadline={predictionMarketDetails?.deadline}
+                      totalCommitted={userBets}
+                      unit={predictionMarketDetails?.unit}
                     />
                   </Box>
                 </CardContent>
