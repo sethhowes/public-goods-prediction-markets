@@ -219,11 +219,10 @@ function DashboardPage(props) {
   let data = [];
   if (graphData) {
     data = Object.keys(graphData).map((timestamp) => ({
-      name: new Date(Number(timestamp) * 1000),
+      name: new Date(Number(timestamp) * 1000).toDateString(),
       temperature: graphData[timestamp],
     }));
   }
-  console.log(predictionMarketDetails)
 
   return (
     <>
@@ -309,10 +308,9 @@ function DashboardPage(props) {
                         </defs>
                         <CartesianGrid strokeDasharray="3" />
                         <XAxis dataKey="name" />
-                        <YAxis />
+                        <YAxis domain={[1,4]}/>
                         <Tooltip />
                         <Legend legendType="line" />
-                        //{" "}
                         <Area
                           tooltipType="none"
                           legendType="none"
@@ -325,7 +323,7 @@ function DashboardPage(props) {
                         />
                         <Line
                           type="monotone"
-                          dataKey="Units"
+                          dataKey={predictionMarketDetails?.unit}
                           activeDot={{ r: 8 }}
                           stroke="#00B5C4"
                           strokeWidth={3}
