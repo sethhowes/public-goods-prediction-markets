@@ -211,6 +211,7 @@ function DashboardPage(props) {
       temperature: graphData[timestamp],
     }));
   }
+  console.log(predictionMarketDetails)
 
   return (
     <>
@@ -419,6 +420,7 @@ function DashboardPage(props) {
                       userAddress={address}
                       creatorAddress={predictionMarketDetails?.creator_address}
                       useStyles={useStyles}
+                      deadline={predictionMarketDetails?.deadline}
                     />
                   </Box>
                 </CardContent>

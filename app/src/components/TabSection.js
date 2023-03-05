@@ -12,11 +12,13 @@ import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import { contract } from "../util/contract";
 import { useSigner } from "wagmi";
-import { useAccount } from 'wagmi'
+import { useAccount } from 'wagmi';
+import Popover from '@mui/material/Popover';
+import { DriveEtaTwoTone } from "@mui/icons-material";
+
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
-  const { data: signer, isError, isLoading } = useSigner();
 
   return (
     <div
@@ -36,11 +38,23 @@ function TabPanel(props) {
 }
 
 export default function ColorTabs(props) {
-
   const { address, isConnecting, isDisconnected } = useAccount();
   const [value, setValue] = React.useState(0);
   const classes = props.useStyles();
   const { data: signer, isError, isLoading } = useSigner();
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const handlePopoverOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+
 
   const handleCloseMarket = async () => {
     const contractWithSigner = contract.connect(signer);
@@ -66,8 +80,8 @@ export default function ColorTabs(props) {
         indicatorColor="secondary"
         aria-label="secondary tabs example"
       >
-        <Tab label="Details" />
-        <Tab label="History" />
+        <Tab label="Overview" />
+        <Tab label="Previous bets" />
         
       </Tabs>
       <TabPanel value={value} index={1}>
@@ -111,10 +125,43 @@ export default function ColorTabs(props) {
             <TableRow>
               <TableCell>Claim Funds</TableCell>
               <TableCell align="right">
+                <div
+                aria-owns={open ? 'mouse-over-popover' : undefined}
+                aria-haspopup="true"
+                onMouseEnter={handlePopoverOpen}
+                onMouseLeave={handlePopoverClose}
+                >
                 <Button
- variant="contained" color="error" onClick={handleClaimFunds}>
+                disabled={parseInt(props.deadline?.hex, 16) > Date.now() / 1000 ? true : false}
+                variant="contained"
+                color="error"
+                onClick={handleClaimFunds}>
                   Claim Funds 
                 </Button>
+                </div>
+                {(parseInt(props.deadline?.hex, 16) > Date.now() / 1000) ?
+                (<Popover
+        id="mouse-over-popover"
+        sx={{
+          pointerEvents: 'none',
+        }}
+        open={open}
+        anchorEl={anchorEl}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        onClose={handlePopoverClose}
+        disableRestoreFocus
+      >
+
+        <Typography sx={{ p: 1 }}>The prediction deadline has not passed.</Typography>
+      </Popover>) : <></>
+}
               </TableCell>
             </TableRow>
           </TableBody>
