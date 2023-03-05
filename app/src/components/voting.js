@@ -38,6 +38,11 @@ const VotingComponent = (props) => {
   const [showPayoff, setShowPayoff] = useState(); //
   const [quote, setQuote] = useState();
   async function fetchData(updatedStake) {
+    const formattedUpdatedStake = updatedStake ? updatedStake : stake;
+    let proposed_bet = (1e3).toString();
+    proposed_bet = formattedUpdatedStake.toString();
+    let bucket_index = 0;
+    bucket_index = selectedOption;
     let result = await get_quote(
       props.rpc_url,
       props.contract_address,
@@ -46,10 +51,9 @@ const VotingComponent = (props) => {
       proposed_bet,
       bucket_index
     );
-    const formattedUpdatedStake = updatedStake ? updatedStake : stake;
-    console.log("satek", formattedUpdatedStake);
-    result = parseQuoteResult(result, formattedUpdatedStake);
-    setQuote(result);
+    console.log("satek", proposed_bet, bucket_index);
+    const quoteResult = parseQuoteResult(result, formattedUpdatedStake);
+    setQuote(quoteResult);
   }
   const handleOptionSelect = (index) => {
     setSelectedOption(index);
@@ -58,10 +62,6 @@ const VotingComponent = (props) => {
   };
 
   // Current quote
-  let proposed_bet = (1e3).toString();
-  proposed_bet = stake.toString();
-  let bucket_index = 0;
-  bucket_index = selectedOption;
 
   const showValue = selectedOption + 1;
 
@@ -74,16 +74,16 @@ const VotingComponent = (props) => {
   };
 
   const handlePrediction = async () => {
-    handleFormAlert({
-      type: "success",
-      message: `Prediction created successfully`,
-    });
-
     const tx = await contractWithSigner.placeBet(
       props.prediction_id,
       bucket_index,
       { value: stake }
-    ); // UPDATE PARAMETERS WITH PREDICTION ID, BUCKET INDEX @todo
+    );
+
+    handleFormAlert({
+      type: "success",
+      message: `Prediction created successfully`,
+    });
 
     createVote({ selectedOption, stake, user: auth.user.uid });
     // Your code to make prediction here...
