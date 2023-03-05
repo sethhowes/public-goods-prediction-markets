@@ -79,7 +79,7 @@ async function get_prediction_market_details(rpc_url, contract_address, abi, pre
   req_variables['prediction_bucket'] = results_dict['predictionMarkets'][2];
   req_variables['reward_amount'] = results_dict['predictionMarkets'][3];
   req_variables['reward_token'] = results_dict['predictionMarkets'][4];
-  req_variables['incentive_curve'] = results_dict['predictionMarkets'][5];
+  req_variables['permissioned_tags'] = results_dict['predictionMarkets'][5];
   req_variables['permissioned'] = results_dict['predictionMarkets'][6];
   req_variables['deadline'] = results_dict['predictionMarkets'][7];
   req_variables['tags'] = results_dict['predictionMarkets'][8][0];
@@ -168,7 +168,7 @@ async function get_all_markets(rpc_url, contract_address, abi) {
         req_variables['prediction_bucket'] = res_dict[2];
         req_variables['reward_amount'] = res_dict[3];
         req_variables['reward_token'] = res_dict[4];
-        req_variables['incentive_curve'] = res_dict[5];
+        req_variables['permissioned_tags'] = res_dict[5];
         req_variables['permissioned'] = res_dict[6];
         req_variables['deadline'] = res_dict[7];
         req_variables['tags'] = res_dict[8][0];
@@ -260,7 +260,7 @@ async function get_all_live_markets(rpc_url, contract_address, abi) {
         req_variables['prediction_bucket'] = res_dict[2];
         req_variables['reward_amount'] = res_dict[3];
         req_variables['reward_token'] = res_dict[4];
-        req_variables['incentive_curve'] = res_dict[5];
+        req_variables['permissioned_tags'] = res_dict[5];
         req_variables['permissioned'] = res_dict[6];
         req_variables['deadline'] = res_dict[7];
         req_variables['tags'] = res_dict[8][0];
@@ -739,7 +739,7 @@ async function get_bets_by_all_users(rpc_url, contract_address, abi) {
   
 // Define the contract variables
 const rpc_url = 'https://goerli.gateway.tenderly.co/3Ugz1n4IRjoidr766XDDxX';
-var contract_address = '0x34E2fE6bd61024995A4C18Ea8F0084e8d7652e19';
+var contract_address = '0x23aFC9d5bf30d0C1b2706459264ff32353f7c379';
 var abi = [
 	{
 		"inputs": [],
@@ -1951,7 +1951,7 @@ var abi = [
 		"type": "function"
 	}
 ];
-var prediction_id = 1;
+var prediction_id = 0;
 
 // var prediction_market_details = await get_prediction_market_details(rpc_url, contract_address, abi, prediction_id);
 // console.log(prediction_market_details)
