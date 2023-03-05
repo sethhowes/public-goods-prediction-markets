@@ -51,7 +51,6 @@ const VotingComponent = (props) => {
       proposed_bet,
       bucket_index
     );
-    console.log("satek", proposed_bet, bucket_index);
     const quoteResult = parseQuoteResult(result, formattedUpdatedStake);
     setQuote(quoteResult);
   }
@@ -76,7 +75,7 @@ const VotingComponent = (props) => {
   const handlePrediction = async () => {
     const tx = await contractWithSigner.placeBet(
       props.prediction_id,
-      bucket_index,
+      selectedOption ? selectedOption : 0,
       { value: stake }
     );
 
