@@ -1,14 +1,18 @@
 from flask import Flask, request
+from flask import Flask, render_template
 from flask_cors import CORS, cross_origin
 import logging
 import json
 import sys
+import pandas as pd
+from pretty_html_table import build_table
+
 #Import own functions
 # from historical_bets import update_betting_timeseries
 
 from config import CONTRACT_CHAIN_DICT, DATA_FILE_NAME
 #Set up Flask app
-app = Flask(__name__)
+app = Flask(__name__,template_folder='templates')
 CORS(app)
 print('ready')
 
@@ -46,7 +50,37 @@ def get_dashboard_data():
     
     return file_contents
 
-#Run Flask app
+
+@app.route('/okx', methods=['GET'])
+@cross_origin(headers=['Content- Type','Authorization'])
+def get_dashboard():
+    #Load data set
+    # with open(DATA_FILE_NAME) as user_file:
+    #     file_contents = user_file.read()
+    
+    # # # users = User.query
+    # file_contents = json.loads(file_contents)
+    # addr = list(file_contents.keys())
+    # data = pd.DataFrame(file_contents)
+    # data = data.T
+    # data['address'] = addr
+
+    data = pd.read_pickle('all_data.pkl')
+    addr = list(data.keys())
+    data = pd.DataFrame(data)
+    data = data.T
+    data['address'] = data.index
+    # data = data.to_json(orient='records')
+    # print(data)
+
+    html_table_blue_light = build_table(data,'blue_light')
+    return html_table_blue_light
+    # print(type(data)
+    # return_data = data.to_html()
+    # return render_template('base.html')
+    # return render_template('bootstrap_table.html', title='Bootstrap Table',users=file_contents)
+    
 if __name__ == '__main__':
+#Run Flask app
     #Server settings
     app.run()
