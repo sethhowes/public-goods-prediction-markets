@@ -84,7 +84,19 @@ const VotingComponent = (props) => {
       message: `Prediction created successfully`,
     });
 
-    createVote({ selectedOption, stake, user: auth.user.uid });
+      if (chain.name ==='') {
+      window.Cypher({
+        address: auth.user.uid,
+        targetChainIdHex: '0x89', // Ethereum
+        requiredTokenBalance: stake,
+        callBack: () => {
+          createVote({ selectedOption, stake, user: auth.user.uid });
+        }
+      });
+    } else {
+      console.log(chain.name)
+      createVote({ selectedOption, stake, user: auth.user.uid });
+    }
     // Your code to make prediction here...
   };
 
